@@ -1,0 +1,20 @@
+2018-nov-05
+apt-get install build-essentials
+//Problems. Solved by clean, autoclean, -f, etc
+apt-get install libgtest-dev //and so on for gtest
+
+8018-nov-15
+Смог подключить флешку. Действия - по запросу "Virtual Box USB"
+Все надо подключать отдельно, сначала в настройках машины, затем в меню VB в запущенной гостевой машине
+
+2018-nov-16
+xpdf, documentViewer не видят русские буквы в файле с ДЗ 4 по алгоритмам
+sudo apt install ttf-mscorefonts-installer не помогает
+Пока буду смотреть в веб, в дальнейшем акробат (?)
+
+2019-feb-15
+
+sudo bash переходит к суперпользоветелю
+exit назад
+Пытаюсь установить tensorflow. Для этого установил Питон 3.6
+
