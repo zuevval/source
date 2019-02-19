@@ -1,0 +1,23 @@
+OpenServer
+ClipGrab
+DAEMON tools lite
+DS Soidworks
+Git
+Git LFS
+Matlab R2016B (R2017B unstable)
+MikTeX (maybe TexStudio better)
+Mysql Connector Python
+Paint Net
+Python 3.5, 3.6.4, 3.7
+SmartGit
+SublimeText 3
+SW2017SP4
+Ultimaker Cura 3.6
+VirtualBox
+WebStorm 2018.1.2
+
+Arduino
+FAR
+Visual Studio 2017
+Notepad++
+Total Commander

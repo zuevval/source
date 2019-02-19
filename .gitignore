@@ -1,8 +1,29 @@
+#---MS OFFICE---
+*.docx
+*.doc
+*.xslx
+*.xsl
+*.pptx
+*.ppt
+
+#---Media---
+*.wav
+*.mp3
+*.avi
+
+
 #---Pictures---
 *.bmp
 *.jpg
 *.jpeg
 *.png
+
+#---archives---
+*.zip
+*.gzip
+*.gz
+*.rar
+*.tar
 
 
 #---TeX---
