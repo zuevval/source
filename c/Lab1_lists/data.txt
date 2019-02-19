@@ -1,0 +1,17 @@
+1.09.02 Kapitsa 16
+1.09.02 Landau -1
+1.09.02 Ioffe 9
+1.09.02 Alferov 6
+2.09.02 Landau 9
+2.09.02 Kapitsa 8
+2.09.02 Alferov 6
+2.09.02 Veselago 8 
+3.09.02 Ioffe 7
+3.09.02 Zeldovich 5
+3.09.02 Kurchatov 10
+4.09.02 Landau 8
+4.09.02 Ioffe 9
+5.09.02 Landau 9
+5.09.02 Alferov 8
+5.09.02 Tamm 12
+5.09.02 Ioffe 7

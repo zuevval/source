@@ -1,0 +1,9 @@
+4 7 3
+3 8 4 5
+1 2 2 2
+------
+format:
+<number of elements (u)> <occupancy (b)> <min value of items in backpack (k)>
+<spaces>
+<values>
+2 1 2 2 3

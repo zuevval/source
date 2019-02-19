@@ -1,0 +1,150 @@
+%C:\Users\Valery\AppData\Local\MiKTeX\2.9\miktex\log
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{gensymb}
+\usepackage[dvips]{graphicx}
+\graphicspath{{LogoPTHS/}}
+\begin{document}
+\begin{minipage}{0.45\textwidth}
+
+\begin{center}
+\noindent \Large \textbf{DESIGN CONSTRAINTS}
+\end{center}
+\noindent{Primary constraints imposed on the design of a refreshable Braille display include the dimensional constraints of Braille dots and characters, and the operational constraints of a refreshable display. These constraints ensure convenience to users of both existing Braille displays and paper-based Braille and allow a new display to penetrate better among them. There are a few secondary constraints as well which are essential to overcome the challenges imposed by SMA based actuation.}
+
+\begin{center}
+\noindent{DIMENSIONAL CONSTRAINTS}
+\end{center}
+
+\noindent{Figure 2 illustrates the different dimensions for size and spacing of Braille on paper and on a Braille cell. Dimensional requirements of Braille dot and character are derived from various standards practiced internationally. Prescribed sizes and spacings according to different standards are given in $[28]$. It is however, impossible to conform to all standards, with a single choice for each dimension. Therefore, Braille readers have been consulted and acceptable ranges of each dimension have been
+determined.  }
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+A single value for each dimension conforming to the acceptable range has been chosen such that each fulfills most international standards. Table $1$ gives the acceptable ranges and chosen values for each dimension. Profile of a Braille dot has been constructed with a dome shaped top for smooth tactile perception, as recommended in $[29]$, and for its similarity to paper-based Braille.
+
+\begin{center}
+\noindent{Table $1$. RANGE AND VALUE OF VARIOUS DIMENSIONS}
+\end{center}
+
+\begin{tabular}{lcc}
+\hline
+Dmnsn & Range (mm) & Value\\ [5 pt]
+\hline
+a & $2.3-2.6$ & $2.5$\\
+b& $2.3-2.6$ & $2.5$\\
+c& $10-13$ & $12$\\
+d& $6.0-7.0$ & $12$ \\
+e& $1.3-1.6$ & $1.4$\\
+f & $0.7-0.8$ & $0.75$\\
+\hline
+\end{tabular}
+
+\begin{center}
+\noindent{Table $2$. OPERATIONAL CONSTRAINTS}
+
+\begin{tabular}{p{2 cm} p{3 cm}}
+\hline
+Parameter & Value\\ [5 pt]
+\hline
+Resisting force & min. $20$ gf per Braille pin, preferably $30$ gf\\ [3 pt]
+Refresh frequency & min. 5 Hz\\ [3 pt]
+Minimum actuator life & min. $10^6$ cycles\\ [3 pt]
+Operating temperature & $0-40$ C\\
+\end{tabular}
+\end{center}
+\end{minipage}
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+\noindent{OPERATIONAL CONSTRAINTS}
+\end{center}
+\noindent{Operational constraints define the minimum desired performance of a Braille display and are derived primarily through user interaction. Table $2$ enlists critical operational parameters.
+Resisting force is defined as the resistance offered by each perceivable Braille dot to pressure exerted by a reader's finger.
+%проблема - неправильно воспроизводит апостроф
+It is quantified as the amount of force needed to push a Braille dot to a position just above the display surface. Resisting force
+in commercial Braille displays is approximately $12$gf $[30]$, which is lower than the preferred value observed.
+Refresh frequency is defined as the number of actuation cycles that can be completed by a Braille dot in one second. It
+is an important parameter for user convenience as it directly affects reading speed. A lower limit on refresh frequency has
+been determined by observing users. A $40$-character display is expected to refresh within a maximum of one second, while
+individual cells even earlier. Minimum actuator life is defined as the number of cycles
+each actuator must perform without failure. A minimum life of $106$ cycles comes out as equivalent to two to three years of
+undisturbed above average use.}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{center}
+\noindent{SECONDARY CONSTRAINTS}
+\end{center}
+\noindent {A controlled cooling system is imperative to satisfy the operational constraint of actuation frequency. However, all
+cooling systems increase the net electrical power consumed by the display as well as increase the overall device cost. It should
+be noted that actuator packing and display design form an essential part of the cooling system.
+SMA actuator elements are usually heated at actuation to beyond $50\degree$C to as high as $90\degree$C, depending on the alloy
+chosen. The display needs to be such that it prevents accidental user contact with actuator elements. Further, excess heat needs
+to be expelled immediately and its accumulation, especially near display surface and Braille dots, needs to be prevented.
+SMA elements are usually available at low-cost. They are thus only a fraction of the net Bill-of-Material cost. Hence,
+failure of SMA elements due to fatigue or shock need not lead to the discard of a whole Braille display. A modular design of
+the display with individually replaceable cells is necessary. Further, Braille cells need to be designed such that individual
+actuator elements are repairable and replaceable. The use of touch to read Braille leads to continuous
+damage of Braille dots and the display surface because of wear.}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\noindent{ Maintenance, repair and replacement of these components
+should be facilitated. Further, to prevent premature failures and reduce manufacture cost, moving parts should be kept at a minimum.}
+\begin{center}
+\noindent \Large \textbf{SYSTEM DESIGN}
+\end{center}
+\noindent{This section presents the detailed system design of a refreshable Braille display using SMA based actuation. Key
+challenges in SMA based actuation have been targeted with methods discussed above.}
+\begin{center}
+\noindent{ACTUATOR CONFIGURATION}
+\end{center}
+\noindent{A precursor to actuator design is the selection and testing of a suitable shape memory alloy. A variety of SMAs are
+available, varying in alloy composition, heat treatment and conditioning processes employed. Binary and ternary alloys of
+NiTi are usually preferred for thermo-mechanical actuation applications over other SMAs $[31]$. Other popular SMAs are
+CuZn alloys and CuAl alloys. Specifically, NiTiCu, a ternary alloy with $5-10 at\%$ Cu, is suitable for actuation applications
+due to smaller hysteresis in thermo-mechanical cycling $[8]$ and higher fatigue stability $[32]$.}
+\noindent{Flexinol\textregistered NiTi alloy procured from Dynalloy Inc. has been used for the purpose of developing prototypes due to its ready availability.}
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\noindent{The characteristic stress - strain relation of Flexinol\textregistered HT wires was
+%после знака регистрации не ставит пробел
+obtained experimentally using isothermal tensile tests performed on Instron\textregistered MicroTester.
+Flexinol\textregistered HT wires were found to be highly-conditioned to exhibit two way shape memory effect. The obtained relation was verified with experimental isotherms given in $[33]$.}
+
+\noindent{SMA wire is chosen as the actuator element, for its advantages discussed earlier. Figure $3$ gives a schematic of the
+actuator configuration. Different from a regular spring-biased SMA wire actuator, the proposed actuator uses the SMA wire
+element in an inverse-U configuration. With such a configuration, all the terminals are placed on a single plane,
+simplifying electrical connections. Further, it allows the wire to have removable connections to the structure, allowing easy
+assembly and disassembly.}
+
+\noindent{First order calculations were performed to determine the natural length $L_n$ of the SMA wire, stiffness $K_s$ of the bias compression spring and the stress $\sigma_A$ and strain $\varepsilon_A$ in the actuated SMA wire. Following design equations were used:}
+$$K_Sx=2A_w\sigma_M$$
+$$K_S(x+\Delta x)=2A_W \sigma_A$$
+$$L_n(\varepsilon_M-\varepsilon_A)=\Delta x$$
+$$K_s(x+\Delta x) \ge F_R$$
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{thebibliography}{199}
+\bibitem{1}{Strobel, W. A., et al., 2004. "Industry Profile on Visual Impairment".}
+\bibitem{2}{Cryer, H., and Home, S., 2011. "Use of Braille Displays". Research report \#15. RNIB Centre for Accessible Information, Birmingham, UK.}
+\bibitem{3}{Ryles, R., 1996. "The Impact of Braille Reading Skills on Employment, Income, Education and Reading Habits". Journal of Visual Impairment and Blindness, 90(3), May-June, pp. 219-226.}
+\bibitem{4}{Tetzlaff, J. F., 1981. "Electromechanical Braille Cell". United States Patent 4,283,178.}
+\bibitem{5}{Metec AG. "Braille Module". On the WWW. URL http://web.metec-ag.de/braille\%20cells.html.}
+\bibitem{6}{Blazie, D., 2000. "Refreshable Braille Now and in the Years Ahead". The Braille Monitor 43 (1), January.}
+\end{thebibliography}
+%иначе ругается!
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+\begin{thebibliography}{199}
+\bibitem{7}{Vidal-Verd\'u, F., and Hafez M., 2007. "Graphical Tactile Displays for Visually-Impaired People". IEEE Transactions on Neural Systems and Rehabilitation Engineering, 15(1), March, pp. 119-130.}
+\bibitem{8}{Kumar, P. K., and Lagoudas, D. C., 2008. "Introduction to Shape Memory Alloys". In Shape Memory Alloys: Modeling and Engineering Applications, D. C. Lagoudas, ed., Vol. 1. Springer US, Chapter 1, pp. 1-51.}
+\end{thebibliography}
+
+\end{minipage}
+%\center{\includegraphics{gilbert.eps}}
+\end{document}

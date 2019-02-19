@@ -1,0 +1,178 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[subpreambles=true]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{amssymb,amsmath}
+\usepackage{gensymb}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage[document]{ragged2e}
+%\usepackage{longtable}
+%\usepackage{rotating}
+\usepackage{array}
+\usepackage{multirow}
+%\usepackage{subfiles}
+\usepackage{float}
+
+\renewcommand{\bfdefault}{b}
+\newcommand{\ovr}[1]{\overrightarrow{#1}}
+\newcommand{\lk}{\guillemotleft}
+\newcommand{\rk}{\guillemotright}
+
+%\addto\captionsrussian{\def\refname{}}
+
+\begin{document}
+\begin{titlepage}
+\begin{centering}
+
+\textbf{Санкт-Петербургский Политехнический университет Петра Великого}
+\par
+\textbf{Институт прикладной математики и механики}
+\par
+\textbf{Кафедра \lkТеоретическая механика\rk}
+\vspace{10 pt}
+\hrule
+\vfill
+
+\LARGE{Отчёт по лабораторной работе $4$}
+
+\vfill
+
+\Large \textbf {Нахождение замечательных точек на графике многочлена}
+\vfill
+\vfill
+
+\normalsize
+\begin{flushright}
+Выполнил:\hspace{10pt}\par
+Зуев Валерий\par
+студент 1 курса (гр. 13632/2)\par
+Проверил:\hspace{10pt}\par
+Лапин Руслан Леонидович\par
+Аспирант каферды \lkТеоретическая Механика\rk\par
+\end{flushright}
+
+\vfill
+\vfill
+
+Санкт-Петербург
+\par
+2017
+
+\end{centering}
+\end{titlepage}
+
+\setcounter{page}{2}
+\center{\Large \textbf{Отчёт по работе \lkНахождение замечательных точек на графике многочлена\rk} \par}
+\normalfont
+\justify
+\section{Задача:}
+\begin{enumerate}
+\item{Создать матрицу случайных чисел от -10 до 10.}
+\item{Встроенными методами Matlab найти характеристический полином матрицы, найти его корни.}
+\item{Взять производную, найти корни производной (экстремумы функции), построить график производной, отметить корни.}
+\item{Взять вторую производную, с ней проделать то же.}
+\item{Построить график полинома с отмеченными разным цветом и стилем корнями, экстремумами и точками смены выпуклости, добавить к графику легенду.}
+\end{enumerate}
+\section{Решение:}
+Были созданы три файла: в одном хранится матрица $10\times10$, во втором программа, выполняющая построение графика, поиск корней многочлена, первой и второй производной; из третьего можно изменять содержимое первого файла.\par
+\vspace{10pt}
+\hrule
+\vspace{10pt}
+\emph{(считывание таблицы "M" из файла matrix\_for\_polynomial)}\par
+load('matrix\_for\_polynomial.m', '-mat', 'M');\par
+\emph{(построение характеристического полинома в виде вектора коэффициентов)}\par
+p = poly(M);\par
+X=-12.5:0.1:10;\par
+Y=polyval(p,X);\par
+\emph{(Начало построения основного графика)}\par
+figure\par
+hold on\par
+grid minor\par
+plot(X,Y)\par
+k = 1e10;\par
+axis ([-12.5 8 -k +0.5*k])\par
+{\color{green}
+\%defining arrays of roots to show on the plot}\par
+Roots = roots(p);\par
+roots\_quantity = size (Roots);\par
+YRoots = zeros(roots\_quantity(1,1), 1);\par
+{\color{green}
+\%trying to get rid of complex roots}\par
+for i = 1:roots\_quantity(1,1)\par
+\hspace{10pt}if imag(Roots(i,1))==0\par
+\hspace{10pt}\hspace{10pt}pl1 = plot(Roots(i,1), YRoots(i,1), '*r');\par
+\hspace{10pt}end\par
+end\par
+\par
+{\color{green}
+\%same for the derivative of p}\par
+p1=polyder(p);\par
+Roots1 = roots(p1)\par
+roots\_quantity1 = size (Roots1);\par
+YRoots1 = polyval(p, Roots1);\par
+{\color{green}
+\%trying to get rid of complex roots}\par
+for i = 1:roots\_quantity1(1,1)\par
+\hspace{10pt}if imag(Roots1(i,1))==0\par
+\hspace{10pt}\hspace{10pt}pl2 = plot(Roots1(i,1), YRoots1(i,1), 'or');\par
+\hspace{10pt}end\par
+end\par
+\par
+{\color{green}
+\%once again for the second derivative}\par
+p2=polyder(p1);\par
+Roots2 = roots(p2)\par
+roots\_quantity2 = size (Roots2);\par
+YRoots2 = polyval(p, Roots2);\par
+{\color{green}
+\%trying to get rid of complex roots}\par
+for i = 1:roots\_quantity2(1,1)\par
+\hspace{10pt}if imag(Roots2(i,1))==0\par
+\hspace{10pt}\hspace{10pt}pl3 = plot(Roots2(i,1), YRoots2(i,1), 'sg');\par
+\hspace{10pt}end\par
+end\par
+
+legend([pl1, pl2, pl3],'roots', 'exteremal points', 'roots of 2nd derivative');\par
+
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{graph1.jpg}}
+\caption{Вывод программы}
+\label{graph}
+\end{figure}
+
+\input{add}
+
+\hrule
+
+\newpage
+\large \textbf{Программа для изменения коэффициентов матрицы:}\par
+\normalsize
+
+{\color{green}
+\%M = 10.*rand(10,10)-5;\par
+\%save('matrix\_for\_polynomial.m', 'M');\par
+\%to change contents of file matrix\_for\_polynomial,\par
+\%disable comments for first two lines\par}
+load('matrix\_for\_polynomial.m', '-mat', 'M');\par
+p = poly(M)\par
+X=-12.5:0.1:10;\par
+Y=polyval(p,X);\par
+figure\par
+hold on\par
+grid on\par
+plot(X,Y)\par
+{\color{green}
+\%defining arrays of roots to show on the plot}\par
+Roots = roots(p);\par
+roots\_quantity = size (Roots);\par
+YRoots = zeros(roots\_quantity(1,1), 1);\par
+{\color{green}
+\%trying to get rid of complex roots}\par
+for i = 1:roots\_quantity(1,1)\par
+\hspace{10pt} if imag(Roots(i,1))==0\par
+\hspace{10pt}\hspace{10pt} plot(Roots(i,1), YRoots(i,1), '*')\par
+\hspace{10pt} end\par
+end\par
+
+\end{document}

@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title> bounded one-direction lists </title>
+	<script src='list_tru2.js'></script>
+	<script src='list_js.js'></script>
+</head>
+<body>
+</body>
+</html>

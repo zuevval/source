@@ -1,0 +1,327 @@
+\documentclass[zuevDbReport.tex]{subfiles}
+\begin{document}
+\newpage
+\section{Реализация предопределённых запросов на языке SQL}
+\subsection{Статистический запрос полного формата с постфильтрацией}
+По данной сессии выдать список преподавателей, поставивших много двоек и незачётов\\
+\begin{lstlisting}
+SELECT t_surn, t_name, t_name2, COUNT(mark_id), mark_value 
+FROM university.teachers
+JOIN university.disc_to_teachers
+USING (t_no)
+JOIN university.exams
+USING (dtt_instance_id)
+JOIN university.marks
+USING (exm_id)
+WHERE YEAR(exm_date) = <year>
+	AND MONTH(exm_date) BETWEEN <lower_month> 
+		AND <upper_month>
+	AND mark_value = <mark_value>
+GROUP BY teachers.t_no, mark_value
+HAVING COUNT(mark_id) >= <min_count>
+ORDER BY mark_value, COUNT(mark_id) DESC, t_surn
+\end{lstlisting}
+\subsection{Остальные запросы выборки}
+\begin{enumerate}
+\item{}За данный год выдать списки групп, экзаменов (история института)\par
+
+Списки экзаменов:
+\begin{lstlisting}
+SELECT exm_type, YEAR(exm_date), MONTH(exm_date), DAY(exm_date), d_name
+FROM university.exams
+JOIN university.disc_to_teachers
+USING (dtt_instance_id)
+JOIN university.disciplines
+USING (d_id)
+WHERE exm_date BETWEEN '<year>-01-01' AND '<year +1>-01-01'
+ORDER BY exm_date, exm_type
+\end{lstlisting}
+
+Списки групп:
+\begin{lstlisting}
+SELECT gr_id, students.stud_id, stud_surn, stud_name, stud_name2, stud_status
+FROM university.students
+JOIN university.stud_to_grps
+ON university.students.stud_id = university.stud_to_grps.stud_id
+WHERE year_study =<year>
+ORDER BY gr_id, stud_semester DESC, stud_surn, stud_name, stud_name2
+\end{lstlisting}
+
+\item{}По данной сессии выдать список отчисленных студентов
+
+\begin{lstlisting}
+SELECT gr_id, students.stud_id, stud_surn, stud_name, stud_name2, stud_status
+FROM university.students
+JOIN university.stud_to_grps
+ON university.students.stud_id = university.stud_to_grps.stud_id\
+WHERE year_study = <year> AND stud_semester = <semester-1> #0-first session, 1-second
+ORDER BY gr_id, stud_semester DESC, stud_surn, stud_name, stud_name2
+\end{lstlisting}
+
+\end{enumerate}
+\subsection{Запросы добавления и изменения}
+\begin{enumerate}
+
+\item{}В данной группе на данный семестр по данной дисциплине установить лектора\par
+Подготовительный этап для удобства пользователя - выборка информации об уже распределённых лекторах:
+\begin{lstlisting}
+SELECT d_group,  dtt_year, dtt_sem, t_no, exm_type, exams.exm_id, MONTH(exm_date), DAY(exm_date)
+FROM university.exams
+RIGHT JOIN university.disc_to_teachers
+USING (dtt_instance_id)
+JOIN university.disciplines
+USING (d_id)
+ORDER BY exm_date DESC, dtt_year DESC, dtt_sem DESC, d_group;
+\end{lstlisting}
+
+Изменение таблицы связей преподавателей с дисциплинами
+\begin{lstlisting}
+INSERT INTO university.disc_to_teachers (d_group, t_no, d_id, dtt_year, dtt_sem)
+VALUES (<d_group>, <t_no>, <d_id>, <dtt_year>, <dtt_sem>);
+\end{lstlisting}
+
+Добавление экзамена:
+\begin{lstlisting}
+INSERT INTO university.exams (exm_type, exm_date, dtt_instance_id)
+VALUES (<exm_type>, <exm_date>, <dtt_instance_id>);
+\end{lstlisting}
+
+\item{}Для данного студента в данный семестр у данного преподавателя по данной дисциплине сделать запись об экзамене, поставить отметку или зачёт / незачёт. \par
+Предварительный этап - запрос актуальной информации об оценках:
+\begin{lstlisting}
+SELECT
+CONCAT(d_group, " (", gr_spec, ")"),
+d_name,
+CONCAT(marks.exm_id, " (", exm_type, ")"),
+CONCAT(DAY(exm_date), "-", MONTH(exm_date),"-", YEAR(exm_date)),
+CONCAT(t_no, " - ", t_surn, " ", t_name, " ", t_name2),
+CONCAT(students.stud_id, " - ", stud_surn, " ", stud_name, " ",
+if (stud_name2 is null, '', stud_name2)), mark_value
+FROM university.exams
+JOIN university.disc_to_teachers
+USING (dtt_instance_id)
+JOIN university.disciplines
+USING (d_id)
+JOIN university.teachers
+USING (t_no)
+JOIN university.marks
+USING (exm_id)
+JOIN university.uni_groups
+ON university.uni_groups.gr_id = university.disc_to_teachers.d_group
+JOIN university.students
+USING (stud_id)
+ORDER BY exm_date,d_name, gr_spec, marks.stud_id;
+\end{lstlisting}
+
+Запись об экзамене:
+
+\begin{lstlisting}
+INSERT INTO university.marks (mark_value, stud_id, exm_id)\
+VALUES (<mark_value>, <stud_id>, <exm_id>)
+\end{lstlisting}
+
+\begin{lstlisting}
+\end{lstlisting}
+
+\item{}Данному студенту при наличии долга по дисциплинам (одна двойка или незачёт) устанавливать статус <<отчислен>>\par
+
+Предварительный этап - выборка данных о двоечниках:
+\begin{lstlisting}
+SELECT students.*, marks.exm_id, exm_type, CONCAT(DAY(exm_date), "-", MONTH(exm_date),"-", YEAR(exm_date)), mark_value
+FROM university.marks
+JOIN university.students
+ON students.stud_id = marks.stud_id
+JOIN university.exams
+ON marks.exm_id=exams.exm_id
+WHERE mark_value < 3;
+\end{lstlisting}
+
+Отчисление студента по ID:
+\begin{lstlisting}
+UPDATE university.students
+SET stud_status = 'd' WHERE stud_id = <stud_id>
+\end{lstlisting}
+
+\end{enumerate}
+
+\newpage
+\section{Описание конструирования и программирования интерфейсных форм}
+Пользовательский интерфейс - окно с шестью вкладками. На каждой вкладке выводится таблица, соответствующая запросу выборки. На вкладках <<make schedule>>, <<set marks>> можно, помимо того, добавлять новые данные, выбирая значения клеток таблицы в выпадающих меню. На вкладках <<make schedule>> и <<drop students>> можно изменять имеющиеся данные, также используя выпадающие меню.\\
+Программа пользовательского приложения составлена на языке Python 3.7 с использованием графической библиотеки PyQt5.\\
+
+\newpage
+\subsection{История экзаменов}
+\label{exmsHistSubsect}
+Вкладка <<History-exams>> (рис. \ref{histExms}): Данные таблицы - информация об экзаменах в данном году и семестре. Семестр (первый, второй или оба) выбирается в выпадающем списке. Год вводится в строке поиска.
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/histExams.png}}
+\caption{Вкладка <<History-exams>> - списки экзаменов в выбранном году}
+\label{histExms}
+\end{figure}
+
+\newpage
+\subsection{История групп}
+Вкладка <<History-groups>> (рис. \ref{histGrps}): таблица отражает список групп в заданном году. Год вводится в строке поиска.
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/histGroups.png}}
+\caption{Вкладка <<History-groups>> - история групп по годам}
+\label{histGrps}
+\end{figure}
+
+\newpage
+\subsection{Списки отчисленных студентов}
+Вкладка <<Dropped out>> (рис. \ref{drpdd}): в таблице представлены студенты, отчисленные по итогам заданной сессии. Выбор сессии осуществляется так же, как и данные об экзамене (см.  \ref{exmsHistSubsect})
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/droppedOut.png}}
+\caption{Вкладка <<Dropped out>> - списки отчисленных студентов}
+\label{drpdd}
+\end{figure}
+
+\newpage
+\subsection{Списки злобных преподавателей}
+Вкладка <<Evil teachers>>(рис. \ref{evilTch}): в данном году и семестре показаны все преподаватели, поставившие плохие оценки студентам (ранжированные по количеству поставленных плохих оценок). Семестр (первый, второй или оба) а также отметка (2, 3 или 4) выбираются в выпадающих списках слева вверху. Можно выбрать минимальное количество поставленных оценок в текстовом поле; во втором поле указывается год. Запрос выполняется по нажатию экранной кнопки <<Search>>.
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/evilTeachers.png}}
+\caption{Вкладка <<Evil teachers>> - злобные преподаватели}
+\label{evilTch}
+\end{figure}
+
+\newpage
+\subsection{Назначение лекторов и экзаменов}
+Вкладка <<Make schedule>>: показано распределение дисциплин по преподавателям и связанные экзамены. Возможно добавление данных в двух режимах  (рис. \ref{mkSched},  \ref{mkSched2}): ввод новой записи о назначении преподавателю нагрузки  в виде дисциплины в некоем году у некой группы (возможно, без указания информации об экзамене) либо изменение / добавление данных об экзамене (вид отчётности, дата). Переход между режимами осуществляется выбором значения в выпадающием меню - <<match teachers with disciplines>> или <<define exams>>.
+Чтобы изменить данные об одном или нескольких экзаменов, пользователь выделяет курсором соответствующие строки таблицы, после чего переходит в режим <<define exams>>. Введённые изменения сохраняются по нажатию экранной кнопки <<append row>> - <<добавить строку>> / <<confirm changes>> - <<подтвердить изменения>> (в зависимости от выбранного режима).
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/discToTeachers.png}}
+\caption{Вкладка <<Make shedule>>, режим добавления записи}
+\label{mkSched}
+\end{figure}
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/discToTeachers2.png}}
+\caption{Вкладка <<Make shedule>>, режим ввода данных об экзамене}
+\label{mkSched2}
+\end{figure}
+
+\newpage
+\subsection{Сдача сессии}
+Вкладка <<Set marks>>: просмотр и заполнение данных сессии. Чтобы добавить новую строку, нужно в выпадающем меню выбрать существующий экзамен (рис. \ref{marks1}), затем в группе, с которой связан экзамен, выбрать студента (рис. \ref{marks2}), поставить ему оценку (рис. \ref{marks3}) и подтвердить изменения кнопкой <<append row>>. После этого таблица обновится, и запись появится среди других (рис. \ref{marks5}).
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/marks1.png}}
+\caption{Вкладка <<Set marks>>: выбор экзамена}
+\label{marks1}
+\end{figure}
+\begin{figure}[H]
+\center{\includegraphics[width=.95\textwidth]{appPicts/marks2.png}}
+\caption{Вкладка <<Set marks>>: выбор студента}
+\label{marks2}
+\end{figure}
+\vspace{-5 pt}
+\begin{figure}[H]
+\center{\includegraphics[width=.95\textwidth]{appPicts/marks3.png}}
+\caption{Вкладка <<Set marks>>: выбор оценки}
+\label{marks3}
+\end{figure}
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/marks5.png}}
+\caption{Вкладка <<Set marks>>: добавлена новая строка}
+\label{marks5}
+\end{figure}
+
+\newpage
+\subsection{Отчисление студентов}
+Вкладка <<Drop students>> (рис. \ref{dropStuds}): в таблицу выводится список всех студентов, имеющих двойки или незачёты. В графе <<status>> (статус) напротив фамилии студента можно в выпадающем меню изменить его текущее положение: s (studying - учится),  g (graduated - выпущен), d (dropped - исключён), после чего сохранить изменения кнопкой <<Confirm changes>>.
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{appPicts/dropStudents.png}}
+\caption{Вкладка <<Drop students>> - отчисление студентов}
+\label{dropStuds}
+\end{figure}
+
+\newpage
+\subsection {Код программы на примере вкладки <<Set marks>>}
+\label{codeExample}
+Приложение (класс app) содержит окно (класс myapp). Метод \_\_init\_\_ класса myapp выполняется при запуске приложения. Класс myapp наследует объекты - графические элементы: кнопку DefExmPushButton, выпадающие меню с1, с2 и с3, таблицу setMarksTable. Класс Ui\_University введён для отделения основной графической части от логической.\\
+Используются функции обращения к базе данных, импортированные из файла  updateInsertQueries.py
+
+\lstset{language=Python,keywordstyle=\color{blue},tabsize=2,breaklines=true}
+\begin {lstlisting}
+from updateInsertQueries import insertMarkPreview, insertMarkCombo1, insertMarkCombo2, insertMark
+
+class myapp(QtWidgets.QMainWindow, design3.Ui_University):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.DefExmPushButton.clicked.connect(self.defExmPushButtonClicked)
+        n = 7;
+        self.setMarksTable.setColumnCount(n)
+        header1 = ['group', 'discipline', 'exam ID', 'data', 'teacher', 'student', 'mark']
+        data1 = insertMarkPreview ();
+        m = len(data1);
+        self.setMarksTable.setRowCount(m+1)
+        comboBoxData = insertMarkCombo1 ();
+        comboBoxItems = [];
+        for i in range (len(comboBoxData)):
+            comboBoxItems.append(comboBoxData[i][1]);
+        c1= QComboBox()
+        c1.addItems(comboBoxItems);
+        self.setMarksTable.setCellWidget(0, 2, c1);
+        self.setMarksIDs = [-1, -1, -1]; #exm_id, student's id, mark value
+        c1.activated.connect(self.defExmCombo1Chosen)
+        
+        for i in range(n):
+            self.setMarksTable.setHorizontalHeaderLabels(header1)
+            for j in range (m):
+                item1 = data1[j][i];
+                item1 = QTableWidgetItem(item1);
+                self.setMarksTable.setItem(j+1, i, item1);
+\end{lstlisting}
+
+В фукнции \_\_init\_\_ таблица заполняется данными предварительного SELECT- запроса, заданного в функции insertMarkPreview. Создаётся выпадающее меню c1, пункты которого определяются результатами запроса insertMarkCombo1. Метод c1.activated, вызываемый при выборе варианта в меню, связывается с функцией defExmCombo1Chosen, которая записывает результат в первую ячейку массива setMarksIDs и создаёт второе выпадающее меню c2. Аналогичные процессы происходят при создании c2 и c3. Ниже приведён пример функции, вызываемой при выборе варианта в c2:\\
+\begin{lstlisting}
+def defExmCombo2Chosen (self, index):
+        self.setMarksIDs[1] = self.comboBoxData2[index][0];
+        c3 = QComboBox ()
+        c3.addItems(['2', '3', '4', '5'])
+        self.setMarksTable.setCellWidget(0, 6, c3);
+        c3.activated.connect(self.defExmCombo3Chosen)
+\end{lstlisting}
+Ниже приведён код, отвечающий за создание графической части:
+\begin{lstlisting}
+class Ui_University(object):
+  def setupUi(self, University):
+        self.DefExmsTab = QtWidgets.QWidget()
+        self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.DefExmsTab)
+        self.setMarksTable = QtWidgets.QTableWidget(self.DefExmsTab)
+        self.verticalLayout_7.addWidget(self.setMarksTable)
+        self.DefExmPushButton = QtWidgets.QPushButton(self.DefExmsTab)
+        self.verticalLayout_7.addWidget(self.DefExmPushButton)
+        self.TabWidget.addTab(self.DefExmsTab, "")
+\end{lstlisting}
+
+\newpage
+\section{Описание взаимодействия SQL-запроса с параметрами и его интерфейсной формы}
+Для обращения к базе данных была использована библиотека MySQL Connector Python. Приведены примеры оформления функций запросов, использующихся для вывода информации во вкладке <<Set marks>>.
+
+\begin{lstlisting}
+def insertMarkCombo1 ():
+    query_string = "SELECT exm_id,\
+concat(exm_id,' - ', d_name, '; type ', exm_type,\
+'; group ', d_group, '; ', exm_date),\
+d_group\
+FROM university.exams\
+JOIN university.disc_to_teachers\
+USING (dtt_instance_id)\
+JOIN university.disciplines\
+USING (d_id)\
+ORDER BY exm_id;"
+    query_rows_list = dbQuery(query_string)
+    return query_rows_list;
+
+def insertMark(mark_value, stud_id, exm_id):
+    query_string = 'INSERT INTO university.marks (mark_value, stud_id, exm_id)\
+VALUES ({}, {}, {})'.format(mark_value, stud_id, exm_id)
+    return dbQuery(query_string)
+\end{lstlisting}
+Функция insertMarkCombo1 возвращает данные об учителях, которые используются как варианты выбора в выпадающем меню c1 (см. \ref{codeExample}). Функция insertMark по заданной оценке, номеру зачётной книжки студента и идентификационному номеру экзамена создаёт запись о полученной студентом отметке.
+Функция dbQuery приведена в приложении (\ref{qCode})\\
+Весь исходный код проекта доступен по ссылке \href{https://github.com/zuevval/university\_db}{github.com/zuevval/university\_db}
+
+\end{document}

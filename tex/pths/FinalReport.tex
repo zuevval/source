@@ -1,0 +1,62 @@
+\NeedsTeXFormat{LaTeX2e}
+\documentclass[a4paper,12pt]{article}
+%\textwidth=16cm
+%\oddsidemargin=0cm
+%\topmargin=-2cm
+%\textheight=23cm
+\renewcommand{\bfdefault}{b}
+\newcommand{\ovr}[1]{\overrightarrow{#1}}
+\newcommand{\lk}{\guillemotleft}
+\newcommand{\rk}{\guillemotright}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{amssymb,amsmath}
+\usepackage{gensymb}
+\usepackage{color}
+\usepackage{graphicx}
+\usepackage{subfiles}
+
+\addto\captionsrussian{\def\refname{}}
+
+\begin{document}
+
+\subfile{Parts/Titlepage}
+\setcounter{page}{2}
+\subfile{Parts/Intro}
+
+\section {Методика исследований}
+\subfile{Parts/PhotolumTest}
+\subfile{Parts/Hall}
+
+
+\section {\textbf{Результаты и выводы}}
+\begin{tabular}{| p{.25\textwidth} | p{.25\textwidth} | p{.25\textwidth} | p{.25\textwidth} |}
+\hline
+Номер структуры&Параметр&Расчётное значение&Реальное значение \color{red} С погрешностями?\color{black}\\
+\hline
+&&&\\
+\hline
+\end{tabular}
+\newpage
+
+\section{Использованная литература}
+\vspace{-25 pt}
+\begin{thebibliography}{99}
+\bibitem{barrier}{Левинштейн, М. Е. Барьеры (От кристалла до интегральной схемы) / М. Е. Левинштейн, Г. С. Симин. - М.: Наука, 1987. - 320 с. - (Б-чка \lkКвант\rk, Вып. 65.)}
+\bibitem{hall}{Гладышев А. Г. Исследование электрофизических свойств полупроводниковых слоев (n- и p- тип) и структур с двумерным электронным газом методом Холла и вихретоковым методом: методические указания по исследовательской работе / А. Г. Гладышев. - СПб.: СПбАУ НОЦ нанотехнологий РАН, 2010. - 40 с.}
+\bibitem{0}{Денисов Д. В. Эпитаксиальный синтез базовых полупроводниковых материалов: методические указания по исследовательской работе / Д. В. Денисов. - СПб.: СПбАУ НОЦ нанотехнологий РАН, 2010. - 21 с.}
+\bibitem{soros2}{Агекян В. Ф. Фотолюминесценция полупроводниковых кристаллов / В. Ф. Агекян // Соросовский образовательный журнал. - 2000. №10. - С. 101-107.}
+\bibitem{soros1}{Беляевский В. И. Физические основы полупроводниковой нанотехнологии / В. И. Беляевский // Соросовский образовательный журнал. - 1998. №10. - С. 92-98.}
+\end{thebibliography}
+\newpage
+\section{Благодарности}
+Авторы работы благодарят:\\
+\begin{itemize}
+\item{} Научного руководителя \bfseriesКсению Юрьевну Шубину\normalfont\
+за своевременную поддержу, заботу и подробные объяснения;
+\item{} Преподавателя по практике \bfseriesНиколая Михайловича Химина\normalfont\ 
+за организационную работу и помощь в подготовке отчёта;
+\item{} Сотрудника лаборатории наноэлектроники НОЦ СПбАУ РАН \bfseriesМаксима Сергеевича ...\normalfont\ за популярно изложенные основы эпитаксиальной технологии и навигацию в запутанном мире сложных научных материяй.
+\end{itemize}
+\end{document}

@@ -1,0 +1,99 @@
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	background: #76b852;
+	font-family: "Roboto", sans-serif;
+}
+.container {
+	min-height: 100%;
+	display: flex;
+}
+.nav {
+	color: white;
+	margin: 0;
+	width: 20%;
+	min-width: 300px;
+	padding-top: 20px;
+	padding-right: 0;
+	background: #43A047;
+}
+ul {
+	list-style: none;
+	text-align: left;
+	color: white;
+	font-size: 16px;
+}
+li {
+	text-align: center;
+	margin-bottom: 10px;
+	/*margin-left: 60px;*/
+}
+.profile_text{
+	font-size: 24px;	
+}
+.byOKStop {
+	padding-top: 300px;
+	font-size: 12px;
+}
+.nav A {
+	color: white; /* Цвет ссылок */
+}
+A:visited {
+	color: white; /* Цвет посещенных ссылок */
+}
+A:active {
+	color: white; /* Цвет активных ссылок */
+}
+.nav a:hover,.nav a:focus {
+	color: #188400;
+}
+
+
+.main {
+	width: 80%;
+	min-height: 750px;/*
+	min-width: 600px;*/
+	background-color: white;
+}
+.main p {
+	padding-top: 30px;
+	font-size: 16px;
+	text-align: center;
+}
+.table {
+	min-width: 700px;
+	width: auto;
+	margin: auto;
+	margin-top: 50px;
+	border-collapse: collapse;
+}
+th, td {
+	text-align: center;
+	border: 1.5px solid black;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+}
+.buttons {
+	/*position: relative;*/
+	text-align: center;
+}
+.buttons button {
+	margin-top: 15px;
+	text-align: center;
+	font-family: "Roboto", sans-serif;
+	text-transform: uppercase;
+	outline: 0;
+	background: #4CAF50;
+	width: 30%;
+	border: 0;
+	padding: 15px;
+	color: #FFFFFF;
+	font-size: 14px;
+	-webkit-transition: all 0.3 ease;
+	transition: all 0.3 ease;
+	cursor: pointer;
+}
+.buttons button:hover,.form button:active,.form button:focus {
+	background: #43A047;
+}

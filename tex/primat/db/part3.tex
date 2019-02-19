@@ -1,0 +1,115 @@
+\documentclass[zuevDbReport.tex]{subfiles}
+\begin{document}
+\newpage
+\section{Выводы по значениям времени исполнения запросов}
+\begin{table}[H]
+\begin{center}
+\caption{\label{resTab}Зависимость усреднённого времени выполнения запросов (мсек) от размера таблицы}
+%не решена проблема с отступом по вертикали в ячейках. Решение из школьного отчёта по практике не работает (из-за XeLaTeX?)
+\begin{tabular}{| p{.35\textwidth} |p{.2\textwidth}|p{.2\textwidth}|p{.2\textwidth}|}
+\hline
+\textbf{Запрос}&\textbf{T($\mathbf{1000}$ строк)}& \textbf{T($\mathbf{10,000}$ строк)}&\textbf{T($\mathbf{100,000}$ строк)}\\
+\hline
+Поиск по ключевому полю&$0.07547$&$0.07561$&$0.07990$\\
+\hline
+Поиск по не ключевому полю&$0.07570$&$0.07978$&$0.13953$\\
+\hline
+Поиск по маске&$0.07702$&$0.08116$&$0.13593$\\
+\hline
+Добавление записи&$0.17165$&$0.16466$&$0.16726$\\
+\hline
+Добавление группы записей&$0.19083$&$0.19797$&$0.19645$\\
+\hline
+Изменение записи (определение записи по ключевому полю)&$0.19886$&$0.20015$&$0.21307$\\
+\hline
+Изменение записи (определение изменяемой записи не по ключевому полю)&$0.19655$&$0.23831$&$0.22266$\\
+\hline
+Удаление записи (определение удаляемой записи по ключевому полю)&$0.19604$&$0.17950$&$0.18609$\\
+\hline
+Удаление записи (определение удаляемой записи не по ключевому полю)&$0.19705$&$0.19907$&$0.22236$\\
+\hline
+Удаление группы записей&$0.19987$&$0.19896$&$0.21387$\\
+\hline
+Сжатие базы данных после удаления 200 строк&$0.02205$&$0.01844$&$0.01910$\\
+\hline
+Сжатие базы данных после удаления, в результате которого остаётся 200 строк&$0.02245$&$0.02032$&$0.01741$\\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+В табл. \ref{resTab} приведены значения, усреднённые по 100 запросам (за исключением операции оптимизации таблицы). Пример программы расчёта времени приведён в приложении (\ref{QTimeCode})\\
+\newpage
+По полученным данным сделаны два вывода:
+\begin{enumerate}
+\item{}Время поиска по ключевому полю (и изменения записи с таким поиском) медленнее растёт в зависимости от числа записей, чем при использовании поиска по неключевому полю. Объяснение таково: значения ключевого поля в памяти базы упорядочены в виде двоичного дерева, поэтому поиск по дереву в хорошем случае: $T(n) \in O(log(n))$. Поиск по неключевому полю: $T(n) \in O(n)$.
+\item{}В большинстве операций время выполнения растёт с увеличением числа записей в таблице. В некоторых же (удаление записи по ключевому полю, сжатие базы данных) быстрее обрабатываются большие таблицы. Можно предположить, что иногда на полученный результат влияют процессы, параллельно происходящие в системе, поскольку разница во времени выполнения операций мала и может быть чувствительна к условиям. Также при сжатии базы данных, возможно, требуется временное выделение дополнительной памяти; если сжимается большая таблица, по предположению используя <<мусорная>> память, уже выделенная для этой таблицы, и не тратится время на аллокацию.
+\end{enumerate}
+
+\newpage
+\section{Приложения}
+\subsection{Пример кода программы, рассчитывающей усреднённое время запроса}
+\label{QTimeCode}
+Приведён пример расчёта времени запроса выборки элементов с поиском по маске. Используется предварительно написанная функция dbQuery(query\_string), исполняющая заданный запрос.\\
+Функция maskQuery(lastDigits, n) ищет в таблице с заданным числом тысяч строк (1, 10 или 100) преподавателей, чьи фамилии оканчиваются на lastDigits.
+Функция measure(n) в цикле от 0 до 100 запрашивает данные об учителях с разными фамилиями и выводит на экран усреднённое время, вычисленное с помощью time.perf\_counter.\\
+\lstset{language=Python,keywordstyle=\color{blue},tabsize=2,breaklines=true}
+\begin{lstlisting}
+from dbfunctions import dbQuery;
+import time;
+
+def maskQuery(lastDigits, n):
+    query_string = '{}{}{}{}{}'.format("\
+SELECT * \
+FROM teachers",n,"k.teachers \
+WHERE t_surn LIKE '%",lastDigits,"';")
+    query_rows_list = dbQuery(query_string);
+    return query_rows_list;
+
+def measure (n):
+    maskQueryTime = 0;
+    for i in range(100):
+        start = time.perf_counter()
+        maskQuery(i*n, n);
+        stop = time.perf_counter()
+        maskQueryTime += stop - start;
+    print ("not key field select query with mask: time = ")
+    print( maskQueryTime/100);
+\end{lstlisting}
+\subsection{Код программы, исполняющей запрос к базе данных}
+\label{qCode}
+Использована библиотека MySQL Connector Python для соединения с базой данных и библиотека configparser для чтения реквизитов базы данных.\\
+Функция read\_db\_config принимает на вход два необязательных аргрумента - имя конфигурационного файла и тип базы данных (по умолчанию config.ini и mysql соответственно) и возвращает список параметров, содержащихся в файле.
+Функция dbQuery принимает на вход строку (в строке может быть несколько команд) и соединяется с базой данных. Создаётся курсор, выполняется запрос; после этого в цикле из курсора извлекаются и выводятся на экран результаты запроса. Обработка ошибок для краткости опущена.\\
+\begin{lstlisting}
+import mysql.connector
+from mysql.connector import MySQLConnection, Error
+from configparser import ConfigParser
+
+def read_db_config(filename='config.ini', section='mysql'):
+    parser = ConfigParser()
+    parser.read(filename)
+    db = {}
+    if parser.has_section(section):
+        items = parser.items(section)
+        for item in items:
+            db[item[0]] = item[1]
+    return db
+
+def dbQuery(query_string):
+    query_rows = [];
+    try:
+        dbconfig = read_db_config()
+        conn = MySQLConnection(**dbconfig)
+        cursor = conn.cursor(buffered=True)
+        results = cursor.execute(query_string, multi=True)
+        for cur in results:
+            print('cursor:', cur)
+            if cur.with_rows:
+                print('result:', cur.fetchall())
+        conn.commit()
+
+    finally:
+        cursor.close()
+        conn.close()
+\end{lstlisting}
+\end{document}

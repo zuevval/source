@@ -1,0 +1,13 @@
+a | a
+a+b | ab+
+(a) | a
+-a | 0a-
+-(a) | 0a-
+a*b | ab*
+a*b+c | ab*c+
+a+b*c | abc*+
+a*(b-c) | abc-*
+--a | 00a--
+a*(-a) | a0a-*
+a--(a/b)+c | a0ab/--c+
+a-(-a/b)+c | a0a-b/-c+

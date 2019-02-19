@@ -1,0 +1,45 @@
+\NeedsTeXFormat{LaTeX2e}
+\documentclass[a4paper,12pt]{article}
+%\graphicspath{{LogoPTHS/}}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english, russian]{babel}
+\usepackage{amssymb,amsmath}
+\usepackage{graphicx}
+
+\begin{document}
+\newcommand{\bage}[2]{
+\par
+\begin{tabular}{| p{3 cm} | p{6 cm} |}
+\hline
+\vspace{3 pt}
+\begin{flushleft}
+\center{\includegraphics[height=30mm]{LogoPTHS/LogoPTHS.jpg}}
+\end{flushleft}
+&  \vspace{3 pt}
+\begin{center}
+\Large \textbf{ФТШ}
+\end{center}
+\\[2 pt]
+&Академический лицей\\[2 pt]
+&Физико-Техническая Школа\\[3 pt]
+\hline
+\multicolumn{2}{| l |}{\hspace{5 pt} #1}\\
+\multicolumn{2}{| l |}{\hspace{5 pt} #2}\\
+\hline
+\end{tabular}
+\vspace{10 pt}
+\hspace{10 pt}
+}
+
+\bage{Буточников}{Александр}
+\bage{Боер}{Оскар}
+\bage{Глухов}{Семён}
+\bage{Горох}{Антон}
+\bage{Жарков}{Михаил}
+\bage{Зуев}{Валерий}
+\bage{Ладвищенко}{Ирина}
+\bage{Ракицкий}{Михаил}
+\bage{Хворова}{Ирина}
+
+\end{document}

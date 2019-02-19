@@ -1,0 +1,31 @@
+ls 
+	-a - lists all
+	-l - lists names in long format
+		{rights} {number of hard links, including current and parent dir} 
+		{owner's username} {owner's group} {date modified} {name}
+	-t - lists in order last modified
+	-alt - all at once
+pwd - path to working directory
+cp [source] [target] - copy file
+cp [source1] [source2] ... [path/to/dir] - copy to specified directory leaving the same filenames
+	>example: cp brail*.txt ../braille2018
+mv - move
+rm
+	-r - recursive (remove directory and all child files/dirs)
+
+The workflow for Git collaborations typically follows this order:
+
+    Fetch and merge changes from the remote
+    Create a branch to work on a new project feature
+    Develop the feature on your branch and commit your work
+    Fetch and merge from the remote again (in case new commits were made while you were working)
+    Push your branch up to the remote for review
+
+Steps 1 and 4 are a safeguard against merge conflicts, which occur when two branches contain file changes that cannot be merged with the git merge command. Step 5 involves git push, a command you will learn in the next exercise.
+
+echo "# github-move" >> README.md
+git init
+git add README.md
+git commit -m "first commit"
+git remote add origin https://github.com/zuevval/braille.git
+git push -u origin master 

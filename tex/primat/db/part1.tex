@@ -1,0 +1,154 @@
+\documentclass[zuevDbReport.tex]{subfiles}
+\begin{document}
+\section{Описание задачи}
+База данных института.\\
+Перечень специальностей (1 специальность – 1 группа). Полное обучение — 1 год (2 семестра).\\
+Специальность: список дисциплин с указанием продолжительности (в семестрах) и с распределением по семестрам, зачет/экз (некоторые дисциплины могут одновременно находиться в списках дисциплин для разных специальностей). Списки студентов по группам. Списки преподавателей по дисциплинам (одну дисциплину могут преподавать разные преподаватели). Потоковых занятий нет. Нагрузка преподавателей (количество назначенных групп) по возможности должна быть равномерной.\\
+Требуется поддержка:\\
+\begin{itemize}
+\item{}Составления расписания (для каждой группы определить / переопределить преподавателей на семестр)
+\item{}Сдачи сессии
+\item{}Выпуска/отчисления студентов (отчисление – при одной двойке или незачёте)
+\item{}Истории института по годам
+\item{}Запросов: список отчисленных студентов по итогам последней сессии; список злобных преподавателей (ставящих двойки и незачёты)
+\end{itemize}
+
+\newpage
+\section{Перечень предопределённых запросов к БД}
+UPDATE - и INSERT - запросы
+\begin{enumerate}
+\item{}В данной группе на данный семестр по данной дисциплине установить лектора
+\item{}Для данного студента в данный семестр у данного преподавателя по данной дисциплине сделать запись об экзамене, поставить отметку (поддержка сдачи сессии)
+\item{}Данному студенту при наличии долга по дисциплинам (одна двойка или незачёт) устанавливать статус <<отчислен>>
+\end{enumerate}
+SELECT - запросы
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item{}За данный год выдать списки групп, экзаменов (история института)
+\item{}По данной сессии выдать список отчисленных студентов
+\item{}По данной сессии выдать список преподавателей, отсортированный по количеству двоек и незачётов
+\end{enumerate}
+
+\section{Схема реляционной БД}
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{pictures/schema2.png}}
+\caption{ER-диаграмма базы данных}
+\label{erdiagram}
+\end{figure}
+\begin{figure}[H]
+\center{\includegraphics[width=\textwidth]{pictures/uni96.png}}
+\caption{Нормализованная схема РБД}
+\label{erdiagram2}
+\end{figure}
+Описание таблиц:
+\begin{enumerate}
+\item{}students - Студенты
+	\begin{enumerate}
+	\item{}stud\_id -  \textnumero зачётки (primary key)
+	\item{}stud\_surn - Фамилия
+	\item{}stud\_name - Имя
+	\item{}stud\_name2 - Отчество
+	\item{}stud\_status - Статус
+		\begin{enumerate}
+		\item{}s (studying) - Учится
+		\item{}d (dropped) – Отчислен
+		\item{}g (graduated) - Выпущен
+		\end{enumerate}
+	\end{enumerate}
+
+\newpage
+\item{}teachers - учителя
+	\begin{enumerate}
+	\item{}t\_no - \textnumero трудовой книжки (primary key)
+	\item{}t\_surn - Фамилия
+	\item{}t\_name - Имя
+	\item{}t\_name2 - Отчество
+	\end{enumerate}
+
+\item{}uni\_groups - группы (специальности)
+	\begin{enumerate}
+	\item{}gr\_spec - Название специальности
+	\item{}gr\_id - Код специальности (primary key)
+	\end{enumerate}
+
+\item{}disciplines - Дисциплины
+	\begin{enumerate}
+	\item{}d\_id - Идентификационный номер дисциплины (primary key)
+	\item{}d\_name - Название дисциплины
+	\end{enumerate}
+
+\item{}stud\_to\_grps - [студент] учится в [группе]
+	\begin{enumerate}
+	\item{}stg\_instance\_id - уникальный номер отношения <<Студент учится в группе>> (primary key)
+	\item{}stud\_id - \textnumero зачётки (foreign key)
+	\item{}gr\_id - код специальности (foreign key)
+	\item{}stud\_semester - семестр обучения
+		\begin{enumerate}
+		\item{}0 - не учился ни один семестр
+		\item{}1 - учился в первом семестре
+		\item{}2 - учился во втором семестре
+		\item{}3 - учился в обоих семестрах
+		\end{enumerate}
+	\item{}year\_study - год обучения
+	\end{enumerate}
+
+\item{}disc\_to\_teachers - [Преподаватель] ведёт дисциплину
+	\begin{enumerate}
+	\item{}dtt\_instance\_id - уникальный номер отношения <<Преподаватель ведёт дисциплину в группе в неком году и семестре>> (primary key) (auto increment)
+	\item{}t\_no - \textnumero трудовой книжки преподавателя (foreign key)
+	\item{}d\_group - Идентификационный номер группы (foreign key)
+	\item{}dtt\_year - год преподавания
+	\item{}dtt\_sem - семестр преподавания
+	\end{enumerate}
+
+\item{}exams - Экзамены
+	\begin{enumerate}
+	\item{}exm\_id - Идентификационный номер экзамена (primary key) (auto increment)
+	\item{}exm\_type - вид отчётности
+		\begin{enumerate}
+		\item{}e (exam) - экзамен
+		\item{}t (test) - зачёт
+		\item{}r (rated test) - зачёт с оценкой
+		\end{enumerate}
+	\item{}exm\_date - Дата экзамена
+	\item{}dtt\_instance\_id - ID соответствующей связи <<преподаватель-дисциплина>> (foreign key)
+	\end{enumerate}
+
+\item{}marks - Оценки студентов за экзамены
+	\begin{enumerate}
+	\item{}mark\_id - уникальный ID события "сдача экзамена студентом" (primary key) (auto increment)
+	\item{}mark\_value - полученная оценка по пятибалльной шкале (если вид отчётности -  зачёт, то 2 = <<не сдано>>, 3 = <<сдано>>)
+	\item{}stud\_id - ID студента (foreign key)
+	\item{}exm\_id - ID экзамена, за который получена оценка (foreign key)
+	\end{enumerate}
+\end{enumerate}
+
+\newpage
+\section{Программирование естественных (составных) ключей таблиц}
+
+Ключ <<имя + фамилия + отчество>> в таблице студентов:
+\begin{lstlisting}
+ALTER TABLE university.students
+	ADD CONSTRAINT secKey1 UNIQUE (stud_surn, stud_name, stud_name2);
+\end{lstlisting}
+Ключ <<имя + фамилия + отчество>> в таблице преподавателей:
+\begin{lstlisting}
+ALTER TABLE university.teachers
+	ADD CONSTRAINT secKey1 UNIQUE (t_surn, t_name, t_name2);
+\end{lstlisting}
+Ключ <<идентификатор студента + идентификатор экзамена>> в таблице оценок - защита от повторной сдачи студентом того же экзамена:
+\begin{lstlisting}
+ALTER TABLE university.marks
+	ADD CONSTRAINT secKey1 UNIQUE (stud_id, exm_id);
+\end{lstlisting}
+Ключ <<идентификатор дисциплины + идентификатор группы + семестр преподавания + год преподавания>> в таблице связи преподавателей и дисциплин:
+\begin{lstlisting}
+ALTER TABLE university.disc_to_teachers
+	ADD CONSTRAINT secKey1 UNIQUE (d_id, d_group, dtt_sem, dtt_year);
+\end{lstlisting}
+Ключ <<идентификатор студента + идентификатор группы + семестр обучения + год обучения>> в таблице связи учеников с группами:
+\begin{lstlisting}
+ALTER TABLE university.stud_to_grps
+	ADD CONSTRAINT secKey1 UNIQUE (stud_id, gr_id, stud_semester, year_study);
+\end{lstlisting}
+\end{document}

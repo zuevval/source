@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<link rel="shortcut icon" href="/favicon.ico" type="image/vnd.microsoft.icon" />
+
+<head>
+    <meta charset="UTF-8">
+    <title>Готовое расписание</title>
+    <script type="text/javascript" src="javascript/db_calls.js"></script>
+	<script src="javascript/output_page.js"></script>
+	
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap-theme.min.css"> 
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="css/output.css">
+</head>
+
+<body onload="init()">
+	<div class="container">
+		<div class="nav">
+			<ul class="nav nav-pills nav-stacked">
+				<li class="profile_text"><a href="#">Алексей</a></li>
+				<li><a href="#">Расписание</a></li>
+				<li><a href="#">Карта перемещений</a></li>
+				<br>
+				<li><a href="index.php">Задачи на день</a></li>
+				<li class="byOKStop">&copy; 2018 OK Stop</li>
+			</ul>
+		</div>
+
+		<div class="main">
+			<p>Ваше расписание на день:</p>
+			<table class="table" id="schedule">
+				<thead>
+			    	<tr>
+			    		<th scope="col">Имя</th>
+			    		<th scope="col">Время начала</th>
+			    		<th scope="col">Время конца</th>
+			    	</tr>
+				</thead>
+				<tbody id="tbody"></tbody>
+			</table>
+		</div>
+	</div>
+</body>
+
+</html>
