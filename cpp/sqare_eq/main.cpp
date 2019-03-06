@@ -19,18 +19,11 @@ private:
     void solve();
 public:
     friend istream &operator>>(istream &in, my_equation * eq);
-    void print_roots();
+    friend ostream &operator<<(ostream &out, my_equation * eq);
+    void print_roots(ostream &out);
 };
 
-void lin_eq (const double k, const double b, eq_roots * eq_rts) { //kx+b=0
-    if (k == 0) {
-        eq_rts->roots_qty = 0;
-        return;
-    }
-    eq_rts->roots_qty = 1;
-    eq_rts->x1 = -b / k;
-    eq_rts->x2 = eq_rts->x1;
-}
+void lin_eq (const double k, const double b, eq_roots * eq_rts); //kx+b=0
 
 int main(int argc, char* argv[]) {
     ifstream in("input.txt");
@@ -40,7 +33,7 @@ int main(int argc, char* argv[]) {
     }
     my_equation eq1;
     in >> &eq1;
-    eq1.print_roots();
+    cout << &eq1;
     return 0;
 }
 
@@ -81,14 +74,29 @@ void my_equation::solve() {
         this->roots.roots_qty = 2;
 }
 
-void my_equation::print_roots() {
+void lin_eq (const double k, const double b, eq_roots * eq_rts) { //kx+b=0
+    if (k == 0) {
+        eq_rts->roots_qty = 0;
+        return;
+    }
+    eq_rts->roots_qty = 1;
+    eq_rts->x1 = -b / k;
+    eq_rts->x2 = eq_rts->x1;
+}
+
+void my_equation::print_roots(ostream &out) {
     if(this->roots.roots_qty){
-        cout << "x1=";
-        cout << this->roots.x1;
+        out << "x1=";
+        out << this->roots.x1;
         if(this->roots.roots_qty > 1){
-            cout << "\nx2=";
-            cout << this->roots.x2;
+            out << "\nx2=";
+            out << this->roots.x2;
         }
     } else
-        cout << "no roots in real numbers";
+        out << "no roots in real numbers";
+}
+
+ostream &operator<<(ostream &out, my_equation * eq){
+    eq->print_roots(out);
+    return out;
 }
