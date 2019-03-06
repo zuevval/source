@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #define ERR_FLAG (-1)
 
+//next is three
+
 int myMax(int num, ...);
 void readMatrix(const int n, const char * filename, int * A);
 void printMatrix(const int n, const int * M);

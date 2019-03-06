@@ -1,0 +1,178 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<math.h>
+#define Myabs(a) ((a)>0?(a):(-(a)))
+
+void load_data(double * Ab, int n, int m);
+void qrdecompose(double * Ab, int n, int m);
+int ifnotzero(double * Ab, int i, int n, int m);
+void rotate(double * Ab, double cij, double sij, int i, int j, int n, int m);
+void solveTriang(double * Ab, int n, int m, double * x);
+void printMatrix(double * M, int rows, int columns, char *title);
+void checkSolution(double *Ab0, int n, int m, double *x);
+double sumDiff(double *x1, double*x2, int len);
+double norm(double *x, int len);
+
+int main(void) {
+	int n = (int)(NUM_STR[0]-'0');
+	int m = n + 1;
+	double *x;
+	double *xDev;
+	double diffNorm, xNorm;
+	double * Ab;
+	if (NUM_STR[1] != '\0') {
+		n *=10;
+		n += (int)(NUM_STR[1] - '0');
+		m = n + 1;
+	}
+	Ab = (double *)calloc(n*m, sizeof(double));
+	//A_ij <=> Ab[m*i+j]; b_i <=> Ab[m*i+n]; enumeration starts from 0
+	load_data(Ab, n, m);
+	x = (double*)calloc(n, sizeof(double));
+	qrdecompose(Ab, n, m); //rotations
+	solveTriang(Ab, n, m, x);
+	//printMatrix(Ab, n, m, "after rotations");
+	printMatrix(x, n, 1, "roots");
+	load_data(Ab, n, m);
+	//printMatrix(Ab, n, m, "load_data result:");
+	checkSolution(Ab, n, m, x);
+	load_data_dev(Ab, n, m); //load matrix with deviations
+	xDev = (double*)calloc(n, sizeof(double));
+	qrdecompose(Ab, n, m); //rotations
+	solveTriang(Ab, n, m, xDev);
+	diffNorm = sumDiff(x, xDev, n);
+	xNorm = norm(x, n);
+	printf("%lf\n", diffNorm);
+	printf("%lf\n", xNorm);
+	printf("(||delta X||)/(||X||) =%lf\n", diffNorm/xNorm);
+	printf("n=%d\n", n);
+	free(Ab);
+	return 0;
+}
+double norm(double *x, int len) {
+	//1st norm
+	int i;
+	double sum = 0;
+	for (i = 0; i < len; i++)
+		sum += Myabs(x[i]);
+	return sum;
+}
+double sumDiff(double *x1, double*x2, int len) {
+	int i;
+	double sum = 0;
+	for (i = 0; i < len; i++) {
+		sum += Myabs(x1[i] - x2[i]);
+		//printf("x1[i] = %lf, x2[i] = %lf, dif = %lf\n", x1[i], x2[i],Myabs(x1[i] - x2[i]));
+	}
+	return sum;
+}
+void checkSolution(double *Ab, int n, int m, double *x) {
+	double *b1 = (double *)calloc(n, sizeof(double));
+	int i, j;
+	double res = 0; // res=||Ax-b||
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < n; j++)
+			b1[i] += Ab[m*i + j] * x[j];
+	}
+	printMatrix(b1, n, 1, "A*x");
+	for (i = 0; i < n; i++)
+		res += Myabs(b1[i] - Ab[m*i+n]); // res=||Ax-b||
+	printf("||Ax-b|| = %.25lf\n", res);
+}
+void qrdecompose(double * Ab, int n, int m) {
+	int i, j, flag = 1;
+	double cij, sij, sq;
+	for (i = 0; i < n - 1; i++) {
+		flag = ifnotzero(Ab, i, n, m);
+		if (flag == 0) { //if (A_ij == 0, j == i:n)
+			printf("Determinant = 0\n");
+			exit(-1);
+		}
+		for (j = i+1; j < n; j++) {
+			sq = sqrt(pow(Ab[m*i + i], 2) + pow(Ab[m*j + i], 2));
+			cij = Ab[m*i + i] / sq; //cosine
+			sij = Ab[m*j + i] / sq; //sine
+			//printf("c=%f, s=%f, s^2+c^2=%f, i=%d, j=%d\n", cij, sij, cij*cij+sij*sij, i, j);
+			rotate(Ab, cij, sij, i, j, n, m);
+			//printMatrix(Ab, n, m,"after rotation:");
+		}
+	}
+}
+void rotate(double * Ab, double c, double s, int i, int j, int n, int m) {
+	static double * Qt;
+	static short QtInit = 0;
+	double t;
+	int k;
+	if (QtInit == 0) {
+		QtInit = 1;
+		Qt = (double *)calloc(n*n, sizeof(double));
+		for (k = 0; k < n; k++)
+			Qt[n*k + k] = 1;
+	}
+	for (k = i; k < m; k++) {
+		t = Ab[m*i + k] * c + Ab[m*j + k] * s;
+		Ab[m*j + k] = Ab[m*i + k] * (-s) + Ab[m*j + k] * c;
+		Ab[m*i + k] = t;
+		t = Qt[n*i + k] * c + Qt[n*j + k] * s;
+		Qt[n*j + k] = Qt[n*i + k] * (-s) + Qt[n*j + k] * c;
+		Qt[n*i + k] = t;
+	}
+	/*if (i == n - 2 && j == n - 1)
+		printMatrix(Qt, n, n, "Q transposed");*/
+}
+int ifnotzero(double * Ab, int i, int n, int m) {
+	int j;
+	if (Ab[m*i + i] != 0)
+		return 1;
+	else {
+		for (j = i; j < n; j++) {
+			if(Ab[m*j+i]!=0)
+				return 1;
+		}
+	}
+	return 0;
+}
+void solveTriang(double * Ab, int n, int m, double * x) {
+	int i, j;
+	double t;
+	for (i = n - 1; i >= 0; i--) {
+		t = Ab[m*i + n];
+		for (j = n - 1; j > i; j--)
+			t -= x[j] * Ab[m*i + j];
+		t /= Ab[m*i+i];
+		x[i] = t;
+	}
+}
+void load_data(double * Ab, int n, int m) {
+	char * filename = "../../matrices/"NAME_STR NUM_STR NO_STR".txt";
+	FILE * fp;
+	double buf;
+	int i, j;
+	fp = fopen(filename, "r");
+	for (i = 0; i < n; i++) {
+		for (j = 0; j < n-1; j++) {
+			fscanf(fp, "%lf\t", &buf);
+			Ab[(n + 1)*i + j] = buf;
+		}
+		fscanf(fp, "%lf\n", &buf);
+		Ab[(n + 1)*i + j] = buf;
+	}
+	fclose(fp);
+	for (i = 0; i < n; i++) {
+		Ab[m*i+n] = 1;
+	}
+	/*Ab[0 * m + 0] = 1; //sample
+	Ab[0 * m + 1] = 2;
+	Ab[0 * m + 2] = 3;
+	Ab[1 * m + 0] = 4;
+	Ab[1 * m + 1] = 5;
+	Ab[1 * m + 2] = 6;
+	Ab[2 * m + 0] = 7;
+	Ab[2 * m + 1] = 8;
+	Ab[2 * m + 2] = 9;
+	Ab[2 * m + 3] = 10;
+	Ab[0 * m + n] = 11;
+	Ab[1 * m + n] = 12;
+	Ab[2 * m + n] = 13;*/
+}
