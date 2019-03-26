@@ -1,41 +1,56 @@
 #include <iostream>
+#include <fstream>
 #include <algorithm>
-#include <bits/stdc++.h>
+#include <vector>
+#include <climits>
 
 using namespace std;
 enum draughtMove{
     leftMv=-1, centerMv, rightMv
 };
+/*
+const int N = 1000;
+int A[N][N];
+int T[N][N];*/
 
-int process(std::istream *, std::ostream *);
+//int process(std::istream&, std::ostream&);//by ref
+int process(std::istream *, std::ostream *);//by ref
 
 int main() {
     ifstream in;
     in.open("input.txt");
     if(!in){
-        cout << "oops, file not found";
+        cerr << "oops, file not found";
         return 0;
     }
-    int res = process(&in, &cout);
+    int res = process(&in, &cout);//ref
     in.close();
     return res;
 }
 
 
-int process(std::istream * in, std::ostream * out){
-    unsigned int n;
+int process(std::istream * in, std::ostream * out){//ref
+    size_t n;
     *out << "enter n (positive integer):" << endl;
     *in >> n;
-    if(n<=1){
+    if(n <= 1){
         *out << "moves impossible, field too small";
         return 0;
     }
 
-    int A [n][n];
+    vector<vector<int>> A;
+    A.reserve(n);
+    for (auto& col : A)
+        col.reserve(n);
+
+
     *out << "enter matrix values one by one:" << endl;
     for(int i=0; i<n; i++){
         for(int j=0; j<n; j++)
-            *in >> A[i][j];
+        {
+            int tmp; *in >> tmp;
+            A[i].push_back(tmp);
+        }
     }
 
     for(int i=0; i<n; i++){
@@ -44,7 +59,6 @@ int process(std::istream * in, std::ostream * out){
         *out << endl;
     }
 
-    int T[n][n];
     draughtMove P[n-1][n];
 
     /*
@@ -60,10 +74,15 @@ int process(std::istream * in, std::ostream * out){
      *  ...
      * */
 
+    vector<vector<int>> T;
+    T.reserve(n);
+    for (auto& col : T)
+        col.reserve(n);
+
     for(int j = 0; j < n; j++)
-        T[0][j] = A[0][j];
+        T[0].push_back(A[0][j]);
     for(int i=1; i<n; i++){
-        T[i][0] = max(T[i-1][0], T[i-1][1]) + A[i][0];
+        T[i].push_back(max(T[i-1][0], T[i-1][1]) + A[i][0]);
         if(T[i-1][0]>T[i-1][1])
             P[i-1][0] = centerMv;
         else
@@ -107,11 +126,13 @@ int process(std::istream * in, std::ostream * out){
     *out <<"points collected by draught: " << maxCache << endl;
 
     int j = finishIndex;
-    int * path = new int(n - 1);
-    for(int i=n-2; i>=0; i--){
-        path[i] = (int)P[i][j];
+    vector<int> path;
+    path.reserve(n - 1);
+    for(int i=n-2; i>=0; i--){ //push_back
+        path.push_back((int)P[i][j]);
         j+= (int)P[i][j];
     }
+    reverse(path.begin(), path.end()); // O(n) :(
     for(int i=0; i<n-1; i++){
         if(path[i] == centerMv)
             *out << "| "<<endl;
@@ -121,7 +142,6 @@ int process(std::istream * in, std::ostream * out){
             *out << "\\ "<<endl;
     }
     cout << finishIndex << endl;
-
     return 0;
 }
 
