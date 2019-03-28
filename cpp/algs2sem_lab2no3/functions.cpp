@@ -20,6 +20,7 @@ void calcMoves(
      *  4
      *  ...
      * */
+    //TODO: expand names
     for (int j = 0; j < n; j++)
         T[0].push_back(A[0][j]);
     for (int i = 1; i < n; i++) {

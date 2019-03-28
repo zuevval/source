@@ -28,9 +28,12 @@ int process(std::istream& in, std::ostream& out) {
     }
 
     std::vector<std::vector<int>> A;
+    std::vector<int>emptyIntRow;
     A.reserve(n);
-    for (std::vector<int> &col : A)
+    for (std::vector<int> &col : A){
         col.reserve(n);
+        A.push_back(emptyIntRow);
+    }
 
 
     out << "enter matrix values one by one:" << std::endl;
@@ -51,13 +54,18 @@ int process(std::istream& in, std::ostream& out) {
 
     std::vector<std::vector<draughtMove>> P; //P[n-1][n] - path
     P.reserve(n-1);
-    for(std::vector<draughtMove> & p : P)
+    std::vector<draughtMove> emptyMvRow;
+    for(std::vector<draughtMove> & p : P){
         p.reserve(n);
+        P.push_back(emptyMvRow);
+    }
 
     std::vector<std::vector<int>> T; //T[n][n] - sums
     T.reserve(n);
-    for (auto &col : T)
+    for (auto &col : T){
         col.reserve(n);
+        T.push_back(emptyIntRow);
+    }
 
     calcMoves(n, A, T, P);
     printMoves(n, A, P, out);
