@@ -1,0 +1,14 @@
+pavlov
+2 -4 2 1 1 //a b c rootsQty [x1] [x2]: ax^2+bx+c=0
+mechnikov 
+1 -2 1 1 1
+bekhterev
+1 -2 1 1 1
+bekhterev
+1 -5 6 2 2 3
+pavlov
+1 -5 6 2 2 1 //this is wrong
+pavlov
+0 1 -1 1 1
+botkin
+0 0 1 0
