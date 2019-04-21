@@ -8,25 +8,12 @@
 TEST(makeMatrix, simple){
     const int n = 2;
     std::vector<std::vector<int>> A;
-    A.reserve(n);
-    for (auto & row : A)
-        row.reserve(n);
     A.push_back(std::vector<int>{0, 0});
     A.push_back(std::vector<int>{0, 0});
     std::vector<std::vector<draughtMove>> P;
-    P.reserve(n-1);
-    std::vector<draughtMove> tmpMv;
-    for (auto & row : P){
-        row.reserve(n);
-        P.push_back(tmpMv);
-    }
+    P.resize(n-1);
     std::vector<std::vector<int>> T;
-    T.reserve(n);
-    std::vector<int> emptyTrow;
-    for (auto & row : T){
-        row.reserve(n);
-        T.push_back(emptyTrow);
-    }
+    T.resize(n);
     calcMoves(n,A,T,P);
     draughtMove Ptrue [n-1][n] = {{rightMv, leftMv}};
     for (int i=0; i<n-1; i++){

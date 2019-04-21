@@ -3,6 +3,8 @@
 //
 #include"functions.h"
 
+const int leftBufSize = 1; //depends on buffering in calcMove
+
 void calcMoves(
         const int n,
         const std::vector<std::vector<int>> & A,
@@ -21,8 +23,32 @@ void calcMoves(
      *  ...
      * */
     //TODO: expand names
+    //TODO: shorten algorithm (parametrization?)
+    /*TODO:
+     * process is broken. Shift to buferization full
+     * OR roll back to older commit & continue detecting
+     * memory leaks
+    */
+    extern const int leftBufSize;
+    for(int i=0; i<n-1; i++){ //buffering
+        T[i].push_back(INT_MIN);
+        P[i].push_back(centerMv);
+    }
     for (int j = 0; j < n; j++)
         T[0].push_back(A[0][j]);
+    T[0].push_back(INT_MIN);
+    /*for (int i=1; i<n; i++){
+        for(int j=0; j< n + leftBufSize; j++){
+            if (T[i + mvBack][j] > std::max(T[i + mvBack][j + leftMv], T[i + mvBack][j + rightMv])){
+                P[i + mvBack].push_back(centerMv); //P[i - 1][j]
+                T[i].push_back(T[i + mvBack][j])
+            }
+            else if (T[i + mvBack][j + rightMv] > std::max(T[i + mvBack][j + leftMv], T[i + mvBack][j]))
+                P[i + mvBack].push_back(rightMv); //P[i - 1][j]
+            else
+                P[i + mvBack].push_back(leftMv); //P[i - 1][j]
+        }
+    }*/
     for (int i = 1; i < n; i++) {
         T[i].push_back(std::max(T[i + mvBack][0], T[i + mvBack][0 + rightMv]) + A[i][0]);
         if (T[i + mvBack][0] > T[i + mvBack][0 + rightMv])
@@ -30,7 +56,7 @@ void calcMoves(
         else
             P[i + mvBack].push_back(rightMv); //P[i-1][0]
         for (int j = 1; j < n - 1; j++) {
-            T[i][j] = std::max(T[i + mvBack][j + leftMv], std::max(T[i + mvBack][j], T[i + mvBack][j + rightMv])) + A[i][j];
+            T[i][j] = std::max(T[i + mvBack][j + leftMv], std::max(T[i + mvBack][j], T[i + mvBack][j + rightMv])) + A[i][j-leftBufSize];
             if (T[i + mvBack][j] > std::max(T[i + mvBack][j + leftMv], T[i + mvBack][j + rightMv]))
                 P[i + mvBack].push_back(centerMv); //P[i - 1][j]
             else if (T[i + mvBack][j + rightMv] > std::max(T[i + mvBack][j + leftMv], T[i + mvBack][j]))
@@ -50,11 +76,12 @@ void printMoves(const int n,
                 const std::vector<std::vector<int>> & A,
                 std::vector<std::vector<draughtMove>> & P,
                 std::ostream & out){
+    extern const int leftBufSize;
     for (int i = 0; i < n - 1; i++) {
-        for(int j=0; j<n; j++)
-            out << A[i][j] << " ";
+        for(int j=0+leftBufSize; j<n+leftBufSize; j++)
+            out << A[i][j-leftBufSize] << " ";
         out << std::endl;
-        for (int j = 0; j < n; j++) {
+        for (int j = 0+leftBufSize; j < n+leftBufSize; j++) {
             if (P[i][j] == centerMv)
                 out << "| ";
             else if (P[i][j] == rightMv)
@@ -75,8 +102,8 @@ void printMaxProfitPath(const int n,
                         std::vector<std::vector<draughtMove>> & P,
                         std::ostream & out){
     int maxCache = INT_MIN;
-    int finishIndex = 0;
-    for (int j = 0; j < n; j++) {
+    int finishIndex = 0+leftBufSize;
+    for (int j = 0+leftBufSize; j < n+leftBufSize; j++) {
         if (T[n - 1][j] > maxCache) {
             finishIndex = j;
             maxCache = T[n - 1][j];
@@ -100,5 +127,5 @@ void printMaxProfitPath(const int n,
         else
             out << "\\ " << std::endl;
     }
-    out << finishIndex << "(" << A[n-1][finishIndex] << ")" << std::endl;
+    out << finishIndex-leftBufSize << "(" << A[n-1][finishIndex-leftBufSize] << ")" << std::endl;
 }

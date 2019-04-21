@@ -28,13 +28,7 @@ int process(std::istream& in, std::ostream& out) {
     }
 
     std::vector<std::vector<int>> A;
-    std::vector<int>emptyIntRow;
-    A.reserve(n);
-    for (std::vector<int> &col : A){
-        col.reserve(n);
-        A.push_back(emptyIntRow);
-    }
-
+    A.resize(n);
 
     out << "enter matrix values one by one:" << std::endl;
     for (int i = 0; i < n; i++) {
@@ -53,24 +47,12 @@ int process(std::istream& in, std::ostream& out) {
     out << std::endl;
 
     std::vector<std::vector<draughtMove>> P; //P[n-1][n] - path
-    P.reserve(n-1);
-    std::vector<draughtMove> emptyMvRow;
-    for(std::vector<draughtMove> & p : P){
-        p.reserve(n);
-        P.push_back(emptyMvRow);
-    }
-
+    P.resize(n-1);
     std::vector<std::vector<int>> T; //T[n][n] - sums
-    T.reserve(n);
-    for (auto &col : T){
-        col.reserve(n);
-        T.push_back(emptyIntRow);
-    }
-
+    T.resize(n);
     calcMoves(n, A, T, P);
     printMoves(n, A, P, out);
     printMaxProfitPath(n, A, T, P, out);
-
     return 0;
 }
 
