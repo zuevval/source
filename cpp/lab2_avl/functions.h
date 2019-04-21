@@ -6,6 +6,7 @@
 #define LAB2_AVL_FUNCTIONS_H
 
 #define NODES_MAX (1000)
+#define MyMax(a,b) ((a)>(b)?(a):(b))
 
 struct node {
     int key;
@@ -15,7 +16,7 @@ struct node {
 };
 typedef struct node node;
 
-void zig(node * y,  node * parent);
-void zag(node * x, node * parent);
+void push(node ** root, int key);
+void freeAll(node * root); //TODO: implement using stack
 
 #endif //LAB2_AVL_FUNCTIONS_H
