@@ -31,7 +31,9 @@
 *.aux
 *.synctex.gz
 *.pdf
-
+*.bcf
+*.run.xml
+*.toc
 
 #---C--- 
 
