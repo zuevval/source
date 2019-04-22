@@ -30,6 +30,17 @@ void printPlus(node * t){
 }
 
 int main(void){
+    node * r = NULL;
+    push(&r, 0);
+    push(&r, -1);
+    push(&r, 4);
+    push(&r, 5);
+    push(&r, 1);
+    printPlus(r);
+    push(&r, 2);
+    printPlus(r);
+    freeAll(r);
+    /*
     node ** r = malloc(sizeof(node *));
     *r = NULL;
     push(r, 0);
@@ -43,16 +54,21 @@ int main(void){
     printPlus(r[0]);
     push(r, -3);
     printPlus(r[0]);
-    pop(r, -3);
-    pop(r, -6);
-    pop(r, -4);
-    pop(r, 2);
-    printPlus(r[0]);
-    pop(r, 1);
     pop(r, 0);
     printPlus(r[0]);
+    pop(r, -4);
+    printPlus(r[0]);
+    push(r, -7);
+    push(r, -8);
+    push(r, -9);
+    push(r, -10);
+    push(r, -11);
+    push(r, -12);
+    push(r, -13);
+    push(r, -14);
+    printPlus(r[0]);
     freeAll(*r);
-    free(r);
+    free(r);*/
     return 0;
 }
 
