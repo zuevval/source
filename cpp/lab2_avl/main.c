@@ -48,8 +48,8 @@ int main(void){
     pop(r, -4);
     pop(r, 2);
     printPlus(r[0]);
-    pop(r, 0);
     pop(r, 1);
+    pop(r, 0);
     printPlus(r[0]);
     freeAll(*r);
     free(r);

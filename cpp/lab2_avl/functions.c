@@ -114,32 +114,27 @@ void repair(node ** queue, int qSize){
     }
 }
 
-void push(node ** tree, int key){
+void addNode (node ** tree, node * a){
     node ** queue = (node **)malloc(sizeof(node*)*NODES_MAX);
-    int qSize = find(*tree, key, queue);
-    node * a;
+    int qSize = find(*tree, a->key, queue);
     if(!qSize){ //empty tree
         free(queue);
         init(tree);
-        push(tree, key);
+        addNode(tree, a);
         return;
     }
-    if(queue[qSize - 1]->key == key){
+    if(queue[qSize - 1]->key == a->key){
         free(queue);
+        free(a);
         return; //already in the tree
     }
-    a = (node *)malloc(sizeof(node));
-    a->l = NULL;
-    a->r = NULL;
-    a->depth = 1;
-    a->key = key;
 
     //append 'a' as a child of queue[qSize - 1]
-    if(key > queue[qSize - 1]->key){
+    if(a->key > queue[qSize - 1]->key){
         assert(queue[qSize - 1]->r == NULL);
         queue[qSize-1]->r = a;
     }
-    if(key < queue[qSize - 1]->key){
+    if(a->key < queue[qSize - 1]->key){
         assert(queue[qSize - 1]->l == NULL);
         queue[qSize-1]->l = a;
     }
@@ -147,9 +142,20 @@ void push(node ** tree, int key){
     free(queue);
 }
 
+void push(node ** tree, int key){
+    node * a = (node *)malloc(sizeof(node));
+    a->l = NULL;
+    a->r = NULL;
+    a->depth = 1;
+    a->key = key;
+    addNode(tree, a);
+}
+
 void pop(node ** tree, int key){
     int i, dif;
     node * aParent;
+    node * bigSon;
+    node * smallSon;
     node ** queue = (node **)malloc(sizeof(node *)*NODES_MAX);
     int qSize = find(*tree, key, queue);
     node * a = queue[--qSize];
@@ -158,11 +164,33 @@ void pop(node ** tree, int key){
         return; //element is not in the tree
     }
     aParent = queue[qSize - 1];
-    if(aParent->l == a) aParent->l = NULL;
-    if(aParent->r == a) aParent->r = NULL;
-    repair(queue, qSize);
-    free(queue);
+    if(a->r == NULL || (a->l != NULL && a->r->depth > a->l->depth)){
+        bigSon = a->r;
+        smallSon = a->l;
+    } else {
+        bigSon = a->l;
+        smallSon = a->r;
+    }
+    if (aParent->l == a) aParent->l = bigSon;
+    else aParent->r = bigSon;
     free(a);
+    repair(queue, qSize);
+
+    if(smallSon != NULL) {
+        node ** stack = (node **)malloc(NODES_MAX*sizeof(node *));
+        int stSize = 0;
+        stack[stSize++] = smallSon;
+        while(stSize){
+            a = stack[--stSize];
+            if(a->l != NULL)stack[stSize++] = a->l;
+            if(a->r != NULL)stack[stSize++] = a->r;
+            a->l = NULL;
+            a->r = NULL;
+            addNode(tree, a);
+        }
+        free(stack);
+    }
+    free(queue);
 }
 
 void freeAll(node * root){
