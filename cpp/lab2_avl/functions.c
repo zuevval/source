@@ -85,7 +85,7 @@ int find(node * root, const int key, node ** queue){
     if(root != NULL) queue[qSize++] = root;
     while(qSize){
         a = queue[qSize - 1];
-        if(key == a->key) return ++qSize;
+        if(key == a->key) return qSize;
         if(key > a->key && a->r != NULL) queue[qSize++] = a->r;
         else if(key < a->key && a->l != NULL) queue[qSize++] = a->l;
         else return qSize;
@@ -102,17 +102,32 @@ void init(node ** tree){
     *tree = a;
 }
 
-void push(node ** tree, int key){
+void repair(node ** queue, int qSize){
+    //update depth of every element in the queue.
+    //If (dif = queue[i]->r->depth - queue[i]->l->depth) < -1 or > 1, re-balance
     int i, dif;
+    for(i = qSize - 1; i > 0; i--){
+        dif = calcDif(queue[i]);
+        assert(Myabs(dif) < 3);
+        if(dif > 1) smartZag(queue[i], queue[i-1]);
+        if(dif < -1) smartZig(queue[i], queue[i-1]);
+    }
+}
+
+void push(node ** tree, int key){
     node ** queue = (node **)malloc(sizeof(node*)*NODES_MAX);
     int qSize = find(*tree, key, queue);
     node * a;
     if(!qSize){ //empty tree
+        free(queue);
         init(tree);
         push(tree, key);
         return;
     }
-    if(queue[qSize - 1]->key == key) return; //already in the tree
+    if(queue[qSize - 1]->key == key){
+        free(queue);
+        return; //already in the tree
+    }
     a = (node *)malloc(sizeof(node));
     a->l = NULL;
     a->r = NULL;
@@ -128,13 +143,40 @@ void push(node ** tree, int key){
         assert(queue[qSize - 1]->l == NULL);
         queue[qSize-1]->l = a;
     }
-    //update depth of every element in the queue.
-    //If (dif = queue[i]->r->depth - queue[i]->l->depth) < -1 or > 1, re-balance
-    for(i = qSize - 1; i > 0; i--){
-        dif = calcDif(queue[i]);
-        assert(Myabs(dif) < 3);
-        if(dif > 1) smartZag(queue[i], queue[i-1]);
-        if(dif < -1) smartZig(queue[i], queue[i-1]);
-    }
+    repair(queue, qSize);
     free(queue);
+}
+
+void pop(node ** tree, int key){
+    int i, dif;
+    node * aParent;
+    node ** queue = (node **)malloc(sizeof(node *)*NODES_MAX);
+    int qSize = find(*tree, key, queue);
+    node * a = queue[--qSize];
+    if(a->key != key){
+        free(queue);
+        return; //element is not in the tree
+    }
+    aParent = queue[qSize - 1];
+    if(aParent->l == a) aParent->l = NULL;
+    if(aParent->r == a) aParent->r = NULL;
+    repair(queue, qSize);
+    free(queue);
+    free(a);
+}
+
+void freeAll(node * root){
+    node * a;
+    node ** stack = (node **)malloc(NODES_MAX*sizeof(node *));
+    int stSize = 0;
+    if(root != NULL) stack[stSize++] = root;
+    while(stSize){
+        a = stack[--stSize];
+        if(a->l != NULL)stack[stSize++] = a->l;
+        if(a->r != NULL)stack[stSize++] = a->r;
+        a->l = NULL;
+        a->r = NULL;
+        free(a);
+    }
+    free(stack);
 }

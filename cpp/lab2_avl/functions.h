@@ -18,6 +18,7 @@ struct node {
 typedef struct node node;
 
 void push(node ** root, int key);
-void freeAll(node * root); //TODO: implement using stack
+void pop(node ** tree, int key);
+void freeAll(node * root);
 
 #endif //LAB2_AVL_FUNCTIONS_H

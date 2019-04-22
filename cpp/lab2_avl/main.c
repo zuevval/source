@@ -24,7 +24,7 @@ void print1 (node *t, int depth, int ifLeftSon){
 }
 
 void printPlus(node * t){
-    if(t != NULL)
+    if(t != NULL && t->l != NULL)
         print1(t->l, 0, 0);
     printf("______________\n\n");
 }
@@ -43,6 +43,16 @@ int main(void){
     printPlus(r[0]);
     push(r, -3);
     printPlus(r[0]);
+    pop(r, -3);
+    pop(r, -6);
+    pop(r, -4);
+    pop(r, 2);
+    printPlus(r[0]);
+    pop(r, 0);
+    pop(r, 1);
+    printPlus(r[0]);
+    freeAll(*r);
+    free(r);
     return 0;
 }
 
