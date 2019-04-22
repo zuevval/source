@@ -25,7 +25,8 @@ void print1 (node *t, int depth, int ifLeftSon){
 
 void printPlus(node * t){
     if(t != NULL)
-        print1(t, 0, 0);
+        print1(t->l, 0, 0);
+    printf("______________\n\n");
 }
 
 int main(void){
@@ -34,10 +35,13 @@ int main(void){
     push(r, 0);
     push(r, 2);
     printPlus(r[0]);
-    //push(r, 3);
     push(r, 1);
     printPlus(r[0]);
-    push(r, -5);
+    push(r, -6);
+    printPlus(r[0]);
+    push(r, -4);
+    printPlus(r[0]);
+    push(r, -3);
     printPlus(r[0]);
     return 0;
 }
