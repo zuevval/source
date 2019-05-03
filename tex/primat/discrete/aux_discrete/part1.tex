@@ -1,0 +1,67 @@
+\documentclass[zuev-report.tex]{subfiles}
+\begin{document}
+\section{Постановка задачи}
+Требуется реализовать программы, вычисляющие значения распространённых в комбинаторике функций:\\
+\begin{enumerate}
+	\item Число перестановок $P(n)=n!$
+	\item Число размещений с повторениями $U(m,n)=m^n$
+	\item Число размещений без повторений $A(m,n)=\frac{m!}{(m−n)!}$
+	\item Число сочетаний $C(m,n)=\frac{m!}{n!(m−n)!}$
+	\item Число сочетаний с повторениями $V(m,n)=C(m+n−1,n)=\frac{(m+n−1)!}{n!(m−1)!}$
+	\item Числа Фибоначчи 
+	$$Fib(n)=Fib(n-1)+Fib(n-2)$$
+	$$Fib(2)=Fib(1)=1$$
+\end{enumerate}
+Программа должна давать правильный ответ для любых входных данных из области определения, если исходные данные и результат по модулю не превосходят $2^{8}-1$ (для большинства компиляторов языка C++ - максимальное целое число без знака). В случае, когда результат по модулю превышает максимальное целое число, следует дать ответ UINT\_MAX (индикатор переполнения, который заведомо не является правильным ответом для каких-либо входных данных).
+\section{Описание алгоритмов}
+\def \txtIn {\textbf{Исходные данные алгоритма:}\\}
+\def \txtOut {\textbf{Выходные данные алгоритма:}\\}
+\def \txtTxt {\textbf{Текст программы:}}
+\subsection{Число перестановок}
+\txtIn
+\txtOut
+\txtTxt
+\label{permutations}
+\lstinputlisting{code/permutations.c}
+\subsection{Число размещений с повторениями}
+\txtIn
+\txtOut
+\txtTxt
+\label{perm_with_repet}
+\lstinputlisting{code/umn.c}
+\subsection{Число размещений без повторений}
+\txtIn
+\txtOut
+\txtTxt
+\label{perm_no_repet}
+\lstinputlisting{code/amn.c}
+\subsection{Число сочетаний}
+\txtIn
+$n$ - беззнаковое целое от 0 до UINT\_MAX-1\\
+$m$ - беззнаковое целое от 0 до UINT\_MAX-1\\
+\txtOut
+$C(m,n)=\frac{(m)!}{n!(m−n)!}$ - беззнаковое целое или UINT\_MAX в случае переполнения\\
+\txtTxt
+\label{binomial}
+\lstinputlisting{code/cmn.c}
+\subsection{Число сочетаний с повторениями}
+\txtIn
+$n$ - беззнаковое целое от 0 до UINT\_MAX-1\\
+$m$ - беззнаковое целое от 0 до UINT\_MAX-1\\
+\txtOut
+$V(m,n)=C(m+n−1,n)=\frac{(m+n−1)!}{n!(m−1)!}$ - беззнаковое целое или UINT\_MAX в случае переполнения\\
+\txtTxt
+\label{vmn}
+\lstinputlisting{code/vmn.c}
+\subsection{Числа Фибоначчи}
+\txtIn
+$n$ - беззнаковое целое от 1 до \\ %TODO: upper bound
+\txtOut
+$Fib(n)=Fib(n-1)+Fib(n-2)$ - беззнаковое целое или UINT\_MAX в случае переполнения\\
+\txtTxt
+\label{vmn}
+\lstinputlisting{code/fib.c}
+\section{Описание тестирования}
+\section{Результаты тестирования}
+\section{Выводы}
+\end{document}

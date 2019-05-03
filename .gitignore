@@ -29,6 +29,7 @@
 #---TeX---
 *.log
 *.aux
+*.synctex
 *.synctex.gz
 *.pdf
 *.bcf
