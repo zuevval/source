@@ -142,6 +142,20 @@ TEST(pop, notLeaf){
     freeAll(r);
 }
 
+TEST(stress, stress){
+    node * r = NULL;
+    for(int i=0; i<= 1000; i++){
+        push(&r, i);
+    }
+    for(int i=999; i>0; i--){
+        pop(&r, i);
+    }
+    node * s = r->l;
+    EXPECT_EQ(s->key, 0);
+    EXPECT_EQ(s->r->key, 1000);
+    freeAll(r);
+}
+
 int main(int argc, char **argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

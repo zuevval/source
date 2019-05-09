@@ -22,7 +22,7 @@ struct node {
 };
 typedef struct node node;
 
-enum status{
+enum status {
     success = 0,
     fail = -1
 };
