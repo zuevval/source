@@ -1,11 +1,11 @@
 %XeLaTeX+makeIndex+BibTeX
 \documentclass[a4paper,12pt]{article} %14pt - extarticle
-%\usepackage[utf8]{inputenc} %русский язык, не менять
+\usepackage[utf8]{inputenc} %русский язык, не менять
 \usepackage[T2A, T1]{fontenc} %русский язык, не менять
 \usepackage[english, russian]{babel} %русский язык, не менять
-%\usepackage{fontspec} %различные шрифты
-%\setmainfont{Times New Roman}
-%\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
+\usepackage{fontspec} %различные шрифты
+\setmainfont{Times New Roman}
+\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
 \usepackage{hyperref} %гиперссылки
 \hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
 \usepackage{subfiles}%включение тех-текста
@@ -28,7 +28,7 @@
 	columns=fullflexible,
 	numbers=left,
 	escapechar=@,
-	morekeywords={UINT_MAX}}
+	morekeywords={UINT_MAX, TEST, EXPECT_EQ}}
 %хорошая статья об этом пакете: http://mydebianblog.blogspot.com/2012/12/latex.html
 %morekeywords={var,function,console,log,push,pop},extendedchars=\true}
 
@@ -38,4 +38,8 @@
 \tableofcontents
 \newpage
 \subfile{part1}
+\subfile{part2}
+\begin{thebibliography}{100}
+	\bibitem{novikov} Новиков Ф. А. Дискретная математика для программистов: Учебник для вузов. 3-е изд. -- СПб: Питер, 2008. -- 384 с.: ил. -- (Серия <<Учебник для вузов>>).
+\end{thebibliography}
 \end{document}
