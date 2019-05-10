@@ -1,0 +1,73 @@
+==9274== Memcheck, a memory error detector
+==9274== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==9274== Using Valgrind-3.13.0 and LibVEX; rerun with -h for copyright info
+==9274== Command: /home/zuevval/source/tex/primat/discrete/aux_discrete/code/cmake-build-debug/code
+==9274== 
+[==========] Running 18 tests from 6 test cases.
+[----------] Global test environment set-up.
+[----------] 3 tests from cmn
+[ RUN      ] cmn.basic
+[       OK ] cmn.basic (27 ms)
+[ RUN      ] cmn.underCrit
+[       OK ] cmn.underCrit (5 ms)
+[ RUN      ] cmn.overCrit
+[       OK ] cmn.overCrit (7 ms)
+[----------] 3 tests from cmn (59 ms total)
+
+[----------] 3 tests from amn
+[ RUN      ] amn.basic
+[       OK ] amn.basic (5 ms)
+[ RUN      ] amn.underCrit
+[       OK ] amn.underCrit (5 ms)
+[ RUN      ] amn.overCrit
+[       OK ] amn.overCrit (4 ms)
+[----------] 3 tests from amn (16 ms total)
+
+[----------] 3 tests from pn
+[ RUN      ] pn.basic
+[       OK ] pn.basic (5 ms)
+[ RUN      ] pn.underCrit
+[       OK ] pn.underCrit (3 ms)
+[ RUN      ] pn.overCrit
+[       OK ] pn.overCrit (3 ms)
+[----------] 3 tests from pn (11 ms total)
+
+[----------] 3 tests from umn
+[ RUN      ] umn.basic
+[       OK ] umn.basic (5 ms)
+[ RUN      ] umn.underCrit
+[       OK ] umn.underCrit (5 ms)
+[ RUN      ] umn.overCrit
+[       OK ] umn.overCrit (5 ms)
+[----------] 3 tests from umn (16 ms total)
+
+[----------] 3 tests from vmn
+[ RUN      ] vmn.basic
+[       OK ] vmn.basic (7 ms)
+[ RUN      ] vmn.underCrit
+[       OK ] vmn.underCrit (4 ms)
+[ RUN      ] vmn.overCrit
+[       OK ] vmn.overCrit (6 ms)
+[----------] 3 tests from vmn (18 ms total)
+
+[----------] 3 tests from fib
+[ RUN      ] fib.basic
+[       OK ] fib.basic (5 ms)
+[ RUN      ] fib.underCrit
+[       OK ] fib.underCrit (3 ms)
+[ RUN      ] fib.overCrit
+[       OK ] fib.overCrit (4 ms)
+[----------] 3 tests from fib (14 ms total)
+
+[----------] Global test environment tear-down
+[==========] 18 tests from 6 test cases ran. (223 ms total)
+[  PASSED  ] 18 tests.
+==9274== 
+==9274== HEAP SUMMARY:
+==9274==     in use at exit: 0 bytes in 0 blocks
+==9274==   total heap usage: 359 allocs, 359 frees, 136,746 bytes allocated
+==9274== 
+==9274== All heap blocks were freed -- no leaks are possible
+==9274== 
+==9274== For counts of detected and suppressed errors, rerun with: -v
+==9274== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

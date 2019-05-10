@@ -14,6 +14,10 @@ extern "C" {
 
 unsigned int C(unsigned int m, unsigned int n);
 unsigned int A(unsigned int m, unsigned int n);
+unsigned int P(unsigned int n);
+unsigned int U(unsigned int m, unsigned int n);
+unsigned int V(unsigned int m, unsigned int n);
+unsigned int fib(unsigned int n);
 
 
 #ifdef __cplusplus

@@ -3,6 +3,7 @@ unsigned int fib(unsigned int n) {
 	if (n == 1 || n == 2)
 		return 1;
 	for (i = 3; i <= n; i++) {
+		if (UINT_MAX - fib1 < fib2) return UINT_MAX;
 		t = fib1 + fib2;
 		fib1 = fib2;
 		fib2 = t;
