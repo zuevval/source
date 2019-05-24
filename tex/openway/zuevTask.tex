@@ -1,0 +1,64 @@
+%XeLaTeX+makeIndex+BibTeX OR LuaLaTeX+...
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} %русский язык, не менять
+\usepackage[T2A, T1]{fontenc} %русский язык, не менять
+\usepackage[english, russian]{babel} %русский язык, не менять
+\usepackage{fontspec} %различные шрифты
+\setmainfont{Times New Roman}
+\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
+\usepackage{hyperref} %гиперссылки
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
+\usepackage{subfiles}%включение тех-текста
+\usepackage{graphicx} %изображения
+\usepackage{float}%картинки где угодно
+\usepackage{textcomp}
+
+\usepackage{tikz} %vector graphics 
+\usetikzlibrary{graphs}
+
+
+\begin{document}
+\author{Валерий Зуев \\ \href{mailto:valera.zuev.zva@gmail.com}{valera.zuev.zva@gmail.com}}
+\title{Ответ на вступительное задание летней школы OpenWay 2019}
+\maketitle
+
+\section{Задание 1}
+Ниже перечислены три достижения моей жизни, которым было уделено больше всего сил и принесшие ожидаемый результат.
+\begin{enumerate}
+	\item \textbf{История семьи}. В течение трёх лет записывал воспоминания своего дедушки-геолога, затем перевёл в электронный формат. Кратко записал воспоминания бабушки о военных годах. Перевёл в электронный формат фронтовые письма прадеда.
+	\item \textbf{Водительские права}. Летом 2016 года отец, работающий в США, пригласил маму со мной и сестрой к себе. Он предложил выучить правила дорожного движения, потренироваться на его автомобиле и сдать экзамен на водительские права. В тот год я сдал теоретическую часть, на следующий год снова прилетел в США и досдал практику.
+	\item \textbf{победа в Инженерных соревнованиях}. Весной 2018 года с однокурсниками
+\end{enumerate}
+\section{Задание 2}
+
+\section{Задание 3}
+
+%TODO: make subfile
+
+\begin{tikzpicture}
+\graph[nodes={align=center,rectangle,draw=black}, grow down sep, branch right sep] {
+	Диакритика? ->
+	{
+		"Много над E:\\ \`{E}, \'{E}, \^{E}, \"{E}",
+		Мало -> "Хоть что-то есть?" -> 
+		{
+			"\c{C} и \"{E}" -> Точно не французский? -> 
+			{ 
+				"Ой$\dots$он",
+				Вроде нет -> Албанский[not target]
+			},
+			"Только \"{A} и \"{O} \\ но мноогоо \\ сдвооенных" -> Финский[not target]
+		}
+	} -> 
+	Французский
+};
+\end{tikzpicture}
+
+\section{Задание 4}
+
+\section{Задание 5}
+См. сопровождающие файлы
+
+
+	
+\end{document}

@@ -11,8 +11,9 @@ Yprecize = F(X0);
 Delta = zeros(m,n);
 format compact
 for i = 1:1:m
-    n = n * 2^(i-1);
     h = (b0-a0)/(n-1);
     Y = rungeKutta(X0,h, f, y0);
+    %Y = adams4(X0,h, f, y0);
     Delta(i, :) = Y - Yprecize;
+    n = n * 2;
 end
