@@ -5,7 +5,7 @@
 class A11
 {
 public:
-	A11() { std::cout << std::endl; m_x = 0; }
+	A11() { std::cout << "A" << std::endl; m_x = 0; }
 	A11(int) { std::cout << "A" << std::endl; m_x = 1; }
 	A11(const A11&) { std::cout << "A->a" << std::endl; }
 	~A11() { std::cout << "~A(" << m_x << ")" << std::endl; }
