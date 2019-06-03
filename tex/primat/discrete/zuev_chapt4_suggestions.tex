@@ -1,0 +1,59 @@
+%XeLaTeX+makeIndex+BibTeX OR LuaLaTeX+...
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} %русский язык, не менять
+\usepackage[T2A, T1]{fontenc} %русский язык, не менять
+\usepackage[english, russian]{babel} %русский язык, не менять
+\usepackage{fontspec} %различные шрифты
+\setmainfont{Times New Roman}
+\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
+\usepackage{hyperref} %гиперссылки
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
+\usepackage{subfiles}%включение тех-текста
+\usepackage{graphicx} %изображения
+\usepackage{float}%картинки где угодно
+\usepackage{textcomp}
+\usepackage{amssymb}
+
+\usepackage{listings} %code formatting
+\lstset{language=pascal,
+	%keywordstyle=\color{blue},
+	%commentstyle=\color{},
+	%stringstyle=\color{red},
+	tabsize=1,
+	breaklines=true,
+	columns=fullflexible,
+	%numbers=left,
+	escapechar=@,
+	morekeywords={return}}
+
+
+\begin{document}
+\author{Валерий Зуев} %\\ %\href{mailto:valera.zuev.zva@gmail.com}{valera.zuev.zva@gmail.com}}
+\title{Предлагаемые уточнения к главе 4}
+\maketitle
+\begin{enumerate}
+	\item{4.1.6 (620/1496)} \textit{Квантор $\exists!$ - <<синтаксический сахар>>}: если продолжить эту мысль, можно заметить, что в алгебре высказываний, ввведённой в 4.1.4 (2/4) как $<{T,F}; \vee, \&, \neg>$ тоже что-то можно назвать синтаксическим сахаром. Например, $a\vee b \Leftrightarrow \neg(\neg a \& \neg b), T \Leftrightarrow \neg F$
+	\item{4.2.5 (620/1496)} Строка 1. Предположительно не $\mathcal{T}\rightarrow M$, а  $\mathcal{T}\rightarrow\mathcal{M}$, в соответствии с определением интерпретации формальной теории, данным в 4.2.3 (618/1496)
+	\item {4.3.3 (5/6) (632/1496)} Вся нижняя половина страницы - условное ветвление внутри 
+	\begin{lstlisting}
+		if var(b) & b @$\in$@ A then
+	\end{lstlisting}
+	никогда не будет достигнута, поскольку в коде в верхней половине слайда все возможные сценарии ветвления в строках
+	\begin{lstlisting}
+	if var(a) & a @$\in$@ B then
+	...
+	end if
+	\end{lstlisting}
+	заканчиваются возвратом чего-либо. Предлагаю модифицировать весь блок:
+	\begin{lstlisting}
+	if var(a) @$\vee$@ var(b) then
+		for <@$\alpha, \beta, \vartheta$@ > in {<a, b, B>,<b, a, A>} do
+			if not var(@$\alpha$@) then next for <@$\alpha, \beta, \vartheta$@ >  end if
+			if @$\alpha \in \vartheta$@ then return 0 end if
+			if @$S[\alpha]=\varnothing$@ then @$S[\alpha]=\vartheta$@ return 1 end if
+			return @$S[\alpha]=\vartheta$@
+		end for
+	end if
+	\end{lstlisting}
+\end{enumerate}
+\end{document}
