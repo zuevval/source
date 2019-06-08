@@ -1,4 +1,4 @@
-#include"classes.h"
+#include"arkanoid-core.h"
 #include<fstream>
 
 void gotoxy(int x, int y)
@@ -10,7 +10,7 @@ void gotoxy(int x, int y)
 }
 constexpr int maxBufSize = 10;
 constexpr int barrierSize = 1;
-figure::figure(double X, double Y) :x(X), y(Y) { 
+figure::figure(double X, double Y) :x(X), y(Y), vx(0), vy(0) { 
 	image.resize(height);
 	ifstream in(imageFilename);
 	char * buf = new char[maxBufSize + barrierSize];
@@ -49,9 +49,13 @@ void figure::erase() {
 	}
 }
 
-void figure::moveTo(double X, double Y) {
+void figure::jumpTo(double X, double Y) {
 	erase();
 	x = X;
 	y = Y;
 	draw();
+}
+
+void figure::move() {
+	jumpTo(x + vx, y + vy);
 }
