@@ -59,3 +59,21 @@ void figure::jumpTo(double X, double Y) {
 void figure::move() {
 	jumpTo(x + vx, y + vy);
 }
+
+void figure::jumpBack(shared_ptr<figure> & f) {
+	assert(actionOnBump == jump);
+	int targetX = f->getXint();
+	int targetY = f->getYint();
+	int targetWidth = f->getWidth();
+	int targetHeight = f->getHeight();
+	bool cameHorisontally = false;
+	bool cameVertically = false;
+	cameHorisontally |= x - vx <= targetX;
+	cameHorisontally |= x - vx >= targetX + targetWidth;
+	cameVertically |= y - vy <= targetY;
+	cameVertically |= y - vy >= targetY + targetHeight;
+	if (cameHorisontally) vx *= -1;
+	if (cameVertically) vy *= -1;
+	move();
+	f->draw();
+}

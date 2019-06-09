@@ -1,4 +1,3 @@
-//#include"arkanoid-core.h"
 #include"arkanoid.h"
 
 int main(void) {

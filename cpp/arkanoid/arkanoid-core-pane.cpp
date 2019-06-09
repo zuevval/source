@@ -34,16 +34,39 @@ void pane::destroy(int figureID) {
 }
 
 void pane::moveFigure(int figID) {
-	figures.at(figID)->move();
-	//TODO:
 	//draws figure in a new place
 	//if the place is different from old, changes figuresMap
-	//checks wheter the figure intersects something, and, if yes, bumps it into that ones
+	//checks wheter the figure intersects others, and, if yes, bumps
+	int xOld = figures.at(figID)->getXint();
+	int yOld = figures.at(figID)->getYint();
+	figures.at(figID)->move();
+	if (xOld != figures.at(figID)->getXint() || yOld != figures.at(figID)->getYint()) {
+		set<int> intersectingIDs = intersects(figID);
+		for (int id : intersectingIDs) {
+			bump(make_pair(figID, id));
+		}
+	}
 }
 
-vector<int> pane::intersects(int figID) {
+void pane::bump(pair<int, int> f) {
+	if (figures.find(f.first) == figures.end()) return;
+	if (figures.find(f.second) == figures.end()) return;
+	onBump actFirst = figures.at(f.first)->getOnBump();
+	onBump actSecond = figures.at(f.second)->getOnBump();
+	if (actFirst == crush || actSecond == crush) {
+		if (actFirst == crush) destroy(f.first);
+		if (actSecond == crush) destroy(f.second);
+		return;
+	}
+	if(actFirst == jump)
+		figures.at(f.first)->jumpBack(figures.at(f.second));
+	if(actSecond == jump)
+		figures.at(f.second)->jumpBack(figures.at(f.first));
+};
+
+set<int> pane::intersects(int figID) {
 	/**@return IDs of figures intersecting with figID*/
-	vector<int> res;
+	set<int> res;
 	auto findFig = figures.find(figID);
 	if (findFig == figures.end()) return res;
 	shared_ptr<figure> f = figures.at(figID);
@@ -54,23 +77,21 @@ vector<int> pane::intersects(int figID) {
 	for (int i = x; i < maxX; i++) {
 		for (int j = y; j < maxY; j++) {
 			for (int otherFigID : figuresMap[i][j]) {
-				if (otherFigID != figID) res.push_back(otherFigID);
+				res.emplace(otherFigID);
 			}
 		}
 	}
+	res.erase(figID);
 	return res;
 }
 
 void pane::refresh() {
-	//gotoxy(0, height/2);
 	for (auto & fStruct : figures) {
 		if (fStruct.second->getVx() != 0 || fStruct.second->getVy() != 0) {
 			int fID = fStruct.first;
 			moveFigure(fID);
 		}
-		vector<int> intersectingFigures = intersects(fStruct.first);
-		//cout << "figID: "<< fStruct.first << endl;
-		//for (int figID : intersectingFigures) cout << figID << endl;
+		set<int> intersectingFigures = intersects(fStruct.first);
 	}
 }
 

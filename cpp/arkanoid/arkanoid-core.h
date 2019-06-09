@@ -10,6 +10,7 @@
 #include<map>
 #include<set>
 #include<memory>
+#include<cassert>
 using namespace std;
 
 void gotoxy(int x, int y);
@@ -33,10 +34,8 @@ protected:
 public:
 	void move();
 	void erase();
-	void setSpeed(double Vx, double Vy) { 
-		vx = Vx;
-		vy = Vy; 
-	};
+	void setSpeed(double Vx, double Vy) { vx = Vx; vy = Vy; };
+	void jumpBack(shared_ptr<figure> & f);
 	double getVx() { return vx; };
 	double getVy() { return vy; };
 	int getXint() { return (int)x; };
@@ -59,9 +58,8 @@ class pane {
 	bool findFigure(int figureID);
 	void destroy(int figureID);
 	void moveFigure(int figID);
-	vector<int> intersects(int figID);
-	//TODO:  implement moveFigure with re-drawing & changing position in figuresMap
-	void bump(pair<int, int> figuresIDs) {}; //TODO: implement
+	set<int> intersects(int figID);
+	void bump(pair<int, int> figuresIDs);
 public:
 	void makeMoving(int figureID, double vx, double vy);
 	void stop(int figureID);
