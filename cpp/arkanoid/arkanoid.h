@@ -1,16 +1,25 @@
 #ifndef H_ARKANOID_GAME
 #define H_ARKANOID_GAME
 #include"arkanoid-core.h"
-typedef bool gameoverFlag;
+
+class statBar :public figure {
+	int score;
+	void refresh() { draw(); };
+protected:
+	void draw();
+public:
+	int getScore() { return score; };
+	void setScore(int points) { score = points; refresh(); };
+	statBar(double X, double Y);
+};
+
 class gamePane :public pane {
+	unsigned int timeCounter;
 	int platformID;
 	int ballID;
+	shared_ptr<statBar> StatusBar;
 public:
-	gameoverFlag refresh() {
-		pane::refresh();
-		auto ball = figures.at(ballID);
-		return ball->getVx() == 0 && ball->getVy() == 0; //if ball stopped, gameover
-	}
+	gameoverFlag refresh();
 	gamePane();
 	void onleftkeyup() { stop(platformID); };
 	void onleftkeydown() { makeMoving(platformID, -0.25, 0); };
@@ -38,12 +47,10 @@ public:
 	ball(double X, double Y);
 };
 
-class statBar {
-	int score;
-	int x, y, width;
+class block :public figure {
+	int innerPoints = 10;
 public:
-	int getScore() { return score; };
-	void addScore(int points) { score += points; /*draw(); */ };
+	block(double X, double Y);
+	int erase();
 };
-
 #endif

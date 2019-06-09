@@ -1,5 +1,14 @@
 #include"arkanoid-core.h"
 
+bool pane::mapFreeAt(int x, int y, int w, int h) {
+	if (x + w >= windowWidth || y + h >= windowHeight || min(x, y) < 0) return false;
+	bool res = true;
+	for (int i = x; i < x+w; i++) {
+		for (int j = y; j < y+h; j++) res &= (figuresMap[i][j].size() == 0);
+	}
+	return res;
+};
+
 int pane::add(shared_ptr<figure> & f) {
 	int figID = ++figuresNum;
 	figures.insert(make_pair(figID, f));
@@ -46,9 +55,10 @@ void pane::stop(int figureID) {
 	figures.at(figureID)->setSpeed(0,0);
 }
 
-void pane::destroy(int figureID) {
-	if (!findFigure(figureID)) return;
-	figures.at(figureID)->erase();
+int pane::destroy(int figureID) {
+	if (!findFigure(figureID)) return 0;
+	eraseOnMap(figureID);
+	return figures.at(figureID)->erase();
 }
 
 void pane::refreshFigure(int figID) {
@@ -66,20 +76,22 @@ void pane::refreshFigure(int figID) {
 	if (xOld != xNew || yOld != yNew) {
 		set<int> intersectingIDs = intersects(figID);
 		for (int id : intersectingIDs) {
-			bump(make_pair(figID, id));
+			score += bump(make_pair(figID, id));
 		}
 	}
 }
 
-void pane::bump(pair<int, int> f) {
-	if (figures.find(f.first) == figures.end()) return;
-	if (figures.find(f.second) == figures.end()) return;
+int pane::bump(pair<int, int> f) {
+	/**@return points collected from bump*/
+	int res = 0;
+	if (figures.find(f.first) == figures.end()) return res;
+	if (figures.find(f.second) == figures.end()) return res;
 	onBump actFirst = figures.at(f.first)->getOnBump();
 	onBump actSecond = figures.at(f.second)->getOnBump();
 	if (actFirst == crush || actSecond == crush) {
-		if (actFirst == crush) destroy(f.first);
-		if (actSecond == crush) destroy(f.second);
-		return;
+		if (actFirst == crush) res += destroy(f.first);
+		if (actSecond == crush) res += destroy(f.second);
+		return res;
 	}
 	if (actFirst == jump) {
 		eraseOnMap(f.first);
@@ -91,6 +103,7 @@ void pane::bump(pair<int, int> f) {
 		figures.at(f.second)->jumpBack(figures.at(f.first));
 		placeOnMap(f.second);
 	}
+	return res;
 };
 
 set<int> pane::intersects(int figID) {
@@ -114,8 +127,9 @@ set<int> pane::intersects(int figID) {
 	return res;
 }
 
-void pane::refresh() {
+gameoverFlag pane::refresh() {
 	for (auto & fStruct : figures) refreshFigure(fStruct.first);
+	return false;
 }
 
 pane::pane() { 

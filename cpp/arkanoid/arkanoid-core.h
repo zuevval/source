@@ -5,6 +5,7 @@
 #include<iostream>
 #include<conio.h>
 #include <windows.h>
+#pragma comment(lib, "Winmm.lib")
 //#include <chrono>
 #include <time.h>
 #include<map>
@@ -12,6 +13,8 @@
 #include<memory>
 #include<cassert>
 using namespace std;
+
+typedef bool gameoverFlag;
 
 void gotoxy(int x, int y);
 
@@ -29,12 +32,12 @@ protected:
 	int height = 2;
 	int width = 2;
 	string imageFilename = "icons/figure.txt";
-	void draw();
+	virtual void draw();
 	void jumpTo(double X, double Y);
 	void spawn(double X, double Y);
 public:
 	void move();
-	void erase();
+	virtual int erase();
 	virtual void refresh() { if (vx != 0 || vy != 0) move(); };
 	void setSpeed(double Vx, double Vy) { vx = Vx; vy = Vy; };
 	void jumpBack(shared_ptr<figure> & f);
@@ -50,25 +53,27 @@ public:
 };
 
 constexpr int windowHeight = 24;
-constexpr int windowWidth = 70;
+constexpr int windowWidth = 80;
 
 class pane {
 	const int width = windowWidth, height = windowHeight;
 	vector<vector<set<int>>> figuresMap;
 	bool findFigure(int figureID);
-	void destroy(int figureID);
+	int destroy(int figureID);
 	void eraseOnMap(int figureID);
 	void placeOnMap(int figureID);
 	void refreshFigure(int figID);
 	set<int> intersects(int figID);
-	void bump(pair<int, int> figuresIDs);
+	int bump(pair<int, int> figuresIDs);
 protected:
+	int score = 0;
 	int figuresNum = 0;
 	map <int, shared_ptr<figure>> figures;
+	bool mapFreeAt(int x, int y, int w, int h);
 public:
 	void makeMoving(int figureID, double vx, double vy);
 	void stop(int figureID);
-	void refresh();
+	virtual gameoverFlag refresh();
 	int add(shared_ptr<figure> & f);
 	pane();
 };

@@ -30,13 +30,57 @@ ball::ball(double X, double Y) {
 	spawn(X, Y);
 }
 
+block::block(double X, double Y) {
+	actionOnBump = crush;
+	spawn(X, Y);
+}
+
+int block::erase() {
+	figure::erase();
+	return innerPoints;
+}
+
+void statBar::draw() {
+	gotoxy(getXint(), getYint());
+	cout << "Score: " << score;
+}
+
+statBar::statBar(double X, double Y) {
+	height = 1;
+	width = 10;
+	score = 0;
+	setSpeed(0, 0);
+	jumpTo(X, Y);
+	draw();
+}
+
+gameoverFlag gamePane::refresh() {
+	pane::refresh();
+	timeCounter++;
+	if (timeCounter % 100 == 0) {
+		int x, y;
+		srand(time(NULL));
+		x = rand() % (windowWidth - 10);
+		y = rand() % (windowHeight - 10);
+		if (mapFreeAt(x, y, 2, 2)) { //2,2 - block dimensions
+			shared_ptr<figure> newBlock = make_shared<block>(block(x, y));
+			add(newBlock);
+		}
+	};
+	StatusBar->setScore(score);
+	auto ball = figures.at(ballID);
+	return ball->getVx() == 0 && ball->getVy() == 0; //if ball stopped, gameover
+}
+
 
 
 gamePane::gamePane() {
-	shared_ptr<figure> block1 = make_shared<figure>(figure(5, 5));
-	shared_ptr<figure> block2 = make_shared<figure>(figure(30, 5));
-	shared_ptr<figure> block3 = make_shared<figure>(figure(15, 15));
-	shared_ptr<figure> block4 = make_shared<figure>(figure(15, 19));
+	timeCounter = 0;
+	shared_ptr<statBar> sb = make_shared<statBar>(statBar(windowWidth - 12, 0));
+	shared_ptr<figure> block1 = make_shared<block>(block(5, 5));
+	shared_ptr<figure> block2 = make_shared<block>(block(30, 5));
+	shared_ptr<figure> block3 = make_shared<block>(block(15, 15));
+	shared_ptr<figure> block4 = make_shared<block>(block(15, 19));
 	shared_ptr<figure> leftWall = make_shared<wall>(wall(0, 0));
 	shared_ptr<figure> rightWall = make_shared<wall>(wall(windowWidth - 2, 0));
 	shared_ptr<figure> TopCeiling = make_shared<ceiling>(ceiling(2, 0));
@@ -49,8 +93,11 @@ gamePane::gamePane() {
 	add(leftWall);
 	add(rightWall);
 	add(TopCeiling);
+	shared_ptr<figure> sbToFigure = (shared_ptr<figure>)sb;
+	add(sbToFigure);
 	ballID = add(mainBall);
 	makeMoving(ballID, 0.1, -0.1);
 	platformID = add(mainPlatform);
+	StatusBar = sb;
 }
 

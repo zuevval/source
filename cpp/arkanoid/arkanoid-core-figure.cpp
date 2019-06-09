@@ -46,7 +46,7 @@ void figure::draw() {
 	}
 }
 
-void figure::erase() {
+int figure::erase() {
 	int xInt = getXint();
 	int yInt = getYint();
 	string empty;
@@ -55,6 +55,8 @@ void figure::erase() {
 		gotoxy(xInt, yInt + i);
 		cout << empty;
 	}
+	int innerBonus = 0;
+	return innerBonus;
 }
 
 void figure::jumpTo(double X, double Y) {
