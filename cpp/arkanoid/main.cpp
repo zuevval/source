@@ -21,7 +21,11 @@ int main(void) {
 			leftKeyState = false;
 			gp.onleftkeyup();
 		}
-		gp.refresh();
+		gameoverFlag gflag = gp.refresh();
+		if (gflag == true) {
+			gotoxy(windowWidth / 2 - 5, windowHeight / 2);
+			cout << "GAME OVER";
+		}
 		Sleep(5);
 	}
 	return 0;

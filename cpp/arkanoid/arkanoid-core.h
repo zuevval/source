@@ -23,17 +23,19 @@ enum onBump {
 
 class figure {
 	double x, y, vx, vy;
-	const int height = 2;
-	const int width = 2;
-	const string imageFilename = "icons/figure.txt";
 	vector<string> image;
-	onBump actionOnBump = jump;
 protected:
+	onBump actionOnBump = jump;
+	int height = 2;
+	int width = 2;
+	string imageFilename = "icons/figure.txt";
 	void draw();
 	void jumpTo(double X, double Y);
+	void spawn(double X, double Y);
 public:
 	void move();
 	void erase();
+	virtual void refresh() { if (vx != 0 || vy != 0) move(); };
 	void setSpeed(double Vx, double Vy) { vx = Vx; vy = Vy; };
 	void jumpBack(shared_ptr<figure> & f);
 	double getVx() { return vx; };
@@ -42,24 +44,27 @@ public:
 	int getYint() { return (int)y; };
 	int getHeight() { return height; };
 	int getWidth() { return width; };
-	figure(double X, double Y);
+	figure() {};
+	figure(double X, double Y) { spawn(X, Y); };
 	onBump getOnBump() { return actionOnBump; };
 };
 
-constexpr int windowHeight = 40;
-constexpr int windowWidth = 40;
+constexpr int windowHeight = 24;
+constexpr int windowWidth = 70;
 
 class pane {
 	const int width = windowWidth, height = windowHeight;
-	int figuresNum = 0;
-
-	map <int, shared_ptr<figure>> figures;
 	vector<vector<set<int>>> figuresMap;
 	bool findFigure(int figureID);
 	void destroy(int figureID);
-	void moveFigure(int figID);
+	void eraseOnMap(int figureID);
+	void placeOnMap(int figureID);
+	void refreshFigure(int figID);
 	set<int> intersects(int figID);
 	void bump(pair<int, int> figuresIDs);
+protected:
+	int figuresNum = 0;
+	map <int, shared_ptr<figure>> figures;
 public:
 	void makeMoving(int figureID, double vx, double vy);
 	void stop(int figureID);

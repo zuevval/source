@@ -3,15 +3,33 @@
 int pane::add(shared_ptr<figure> & f) {
 	int figID = ++figuresNum;
 	figures.insert(make_pair(figID, f));
-	int x = f->getXint();
-	int y = f->getYint();
-	if (x >= height || y >= width || min(x, y) < 0) throw ERROR; //TODO: throw more specific exception & handle it
-	int maxX = min(x + f->getWidth(), width);
-	int maxY = min(y + f->getHeight(), height);
+	placeOnMap(figID);
+	return figID;
+}
+
+//TODO: unite two functions below (templates? pointers to functions?)
+void pane::placeOnMap(int figID) {
+	if (figures.find(figID) == figures.end()) return;
+	int x = figures.at(figID)->getXint();
+	int y = figures.at(figID)->getYint();
+	if (x >= width || y >= height || min(x, y) < 0) throw ERROR; //TODO: throw more specific exception & handle it
+	int maxX = min(x + figures.at(figID)->getWidth(), width);
+	int maxY = min(y + figures.at(figID)->getHeight(), height);
 	for (int i = x; i < maxX; i++) {
 		for (int j = y; j < maxY; j++) figuresMap[i][j].insert(figID);
 	}
-	return figID;
+}
+
+void pane::eraseOnMap(int figID) {
+	if (figures.find(figID) == figures.end()) return;
+	int x = figures.at(figID)->getXint();
+	int y = figures.at(figID)->getYint();
+	if (x >= width || y >= height || min(x, y) < 0) throw ERROR; //TODO: throw more specific exception & handle it
+	int maxX = min(x + figures.at(figID)->getWidth(), width);
+	int maxY = min(y + figures.at(figID)->getHeight(), height);
+	for (int i = x; i < maxX; i++) {
+		for (int j = y; j < maxY; j++) figuresMap[i][j].erase(figID);
+	}
 }
 
 bool pane::findFigure(int figureID) {
@@ -33,14 +51,19 @@ void pane::destroy(int figureID) {
 	figures.at(figureID)->erase();
 }
 
-void pane::moveFigure(int figID) {
+void pane::refreshFigure(int figID) {
 	//draws figure in a new place
 	//if the place is different from old, changes figuresMap
 	//checks wheter the figure intersects others, and, if yes, bumps
+	if (figures.at(figID)->getVx() == 0 && figures.at(figID)->getVy()) return;
 	int xOld = figures.at(figID)->getXint();
 	int yOld = figures.at(figID)->getYint();
-	figures.at(figID)->move();
-	if (xOld != figures.at(figID)->getXint() || yOld != figures.at(figID)->getYint()) {
+	eraseOnMap(figID);
+	figures.at(figID)->refresh();
+	placeOnMap(figID);
+	int xNew = figures.at(figID)->getXint();
+	int yNew = figures.at(figID)->getYint();
+	if (xOld != xNew || yOld != yNew) {
 		set<int> intersectingIDs = intersects(figID);
 		for (int id : intersectingIDs) {
 			bump(make_pair(figID, id));
@@ -58,10 +81,16 @@ void pane::bump(pair<int, int> f) {
 		if (actSecond == crush) destroy(f.second);
 		return;
 	}
-	if(actFirst == jump)
+	if (actFirst == jump) {
+		eraseOnMap(f.first);
 		figures.at(f.first)->jumpBack(figures.at(f.second));
-	if(actSecond == jump)
+		placeOnMap(f.first);
+	}
+	if (actSecond == jump) {
+		eraseOnMap(f.second);
 		figures.at(f.second)->jumpBack(figures.at(f.first));
+		placeOnMap(f.second);
+	}
 };
 
 set<int> pane::intersects(int figID) {
@@ -86,13 +115,7 @@ set<int> pane::intersects(int figID) {
 }
 
 void pane::refresh() {
-	for (auto & fStruct : figures) {
-		if (fStruct.second->getVx() != 0 || fStruct.second->getVy() != 0) {
-			int fID = fStruct.first;
-			moveFigure(fID);
-		}
-		set<int> intersectingFigures = intersects(fStruct.first);
-	}
+	for (auto & fStruct : figures) refreshFigure(fStruct.first);
 }
 
 pane::pane() { 

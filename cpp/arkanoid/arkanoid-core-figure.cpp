@@ -8,19 +8,27 @@ void gotoxy(int x, int y)
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
-constexpr int maxBufSize = 10;
+
+constexpr int maxBufSize = 100;
 constexpr int barrierSize = 1;
-figure::figure(double X, double Y) :x(X), y(Y), vx(0), vy(0) { 
+void figure::spawn(double X, double Y) {
+	x = X;
+	y = Y;
+	vx = 0;
+	vy = 0;
 	image.resize(height);
 	ifstream in(imageFilename);
 	char * buf = new char[maxBufSize + barrierSize];
-	for (int i = 0; i < height; i++) {
+	in.getline(buf, maxBufSize);
+	image[0] = string(buf);
+	if(width != image[0].size()) width = image[0].size();
+	for (int i = 1; i < height; i++) {
 		 in.getline(buf, maxBufSize);
 		 image[i] = string(buf);
 		 if (image[i].size() != width) {
-			 delete[] buf;
 			 in.close();
-			 throw ERROR;
+			 delete buf;
+			 return;
 		 }
 	}
 	delete[] buf;
@@ -42,7 +50,7 @@ void figure::erase() {
 	int xInt = getXint();
 	int yInt = getYint();
 	string empty;
-	for (int i = 0; i < height; i++) empty += ' ';
+	for (int i = 0; i < width; i++) empty += ' ';
 	for (int i = 0; i < height; i++) {
 		gotoxy(xInt, yInt + i);
 		cout << empty;
@@ -58,6 +66,7 @@ void figure::jumpTo(double X, double Y) {
 
 void figure::move() {
 	jumpTo(x + vx, y + vy);
+	if (x < 0 || x + width > windowWidth || y < 0 || y + height >= windowHeight) setSpeed(0, 0);
 }
 
 void figure::jumpBack(shared_ptr<figure> & f) {
