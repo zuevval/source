@@ -9,8 +9,8 @@ void gotoxy(int x, int y)
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-constexpr int maxBufSize = 100;
-constexpr int barrierSize = 1;
+const int maxBufSize = 100;
+const int barrierSize = 1;
 void figure::spawn(double X, double Y) {
 	x = X;
 	y = Y;
@@ -55,8 +55,7 @@ int figure::erase() {
 		gotoxy(xInt, yInt + i);
 		cout << empty;
 	}
-	int innerBonus = 0;
-	return innerBonus;
+	return innerPoints;
 }
 
 void figure::jumpTo(double X, double Y) {
@@ -86,5 +85,5 @@ void figure::jumpBack(shared_ptr<figure> & f) {
 	if (cameHorisontally) vx *= -1;
 	if (cameVertically) vy *= -1;
 	move();
-	f->draw();
+	if (f->getOnBump() != crushButReflect) f->draw();
 }

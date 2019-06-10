@@ -6,12 +6,12 @@
 #include<conio.h>
 #include <windows.h>
 #pragma comment(lib, "Winmm.lib")
-//#include <chrono>
 #include <time.h>
 #include<map>
 #include<set>
 #include<memory>
 #include<cassert>
+#include"constant-dimensions.h"
 using namespace std;
 
 typedef bool gameoverFlag;
@@ -22,20 +22,30 @@ enum onBump {
 	stay,
 	crush,
 	jump,
+	crushButReflect,
+};
+
+enum _bonusType {
+	none,
+	drops,
+	bigPlatf,
 };
 
 class figure {
 	double x, y, vx, vy;
 	vector<string> image;
 protected:
+	int innerPoints = 0;
+	_bonusType innerBonus = none;
 	onBump actionOnBump = jump;
-	int height = 2;
-	int width = 2;
+	int height = dim::blockHeight;
+	int width = dim::blockWidth;
 	string imageFilename = "icons/figure.txt";
 	virtual void draw();
 	void jumpTo(double X, double Y);
 	void spawn(double X, double Y);
 public:
+	_bonusType getBonus() { return innerBonus; }
 	void move();
 	virtual int erase();
 	virtual void refresh() { if (vx != 0 || vy != 0) move(); };
@@ -52,20 +62,22 @@ public:
 	onBump getOnBump() { return actionOnBump; };
 };
 
-constexpr int windowHeight = 24;
-constexpr int windowWidth = 80;
+const int windowHeight = dim::windowHeight;
+const int windowWidth = dim::windowWidth;
 
 class pane {
 	const int width = windowWidth, height = windowHeight;
 	vector<vector<set<int>>> figuresMap;
 	bool findFigure(int figureID);
-	int destroy(int figureID);
 	void eraseOnMap(int figureID);
 	void placeOnMap(int figureID);
 	void refreshFigure(int figID);
 	set<int> intersects(int figID);
-	int bump(pair<int, int> figuresIDs);
+	void bump(pair<int, int> figuresIDs);
+	set<int> figuresToDestroy;
 protected:
+	virtual int destroy(int figureID);
+	int lives = consts::defaultLives;
 	int score = 0;
 	int figuresNum = 0;
 	map <int, shared_ptr<figure>> figures;

@@ -58,52 +58,55 @@ void pane::stop(int figureID) {
 int pane::destroy(int figureID) {
 	if (!findFigure(figureID)) return 0;
 	eraseOnMap(figureID);
-	return figures.at(figureID)->erase();
+	int points = figures.at(figureID)->erase();
+	figures.erase(figureID);
+	return points;
 }
 
 void pane::refreshFigure(int figID) {
 	//draws figure in a new place
 	//if the place is different from old, changes figuresMap
 	//checks wheter the figure intersects others, and, if yes, bumps
-	if (figures.at(figID)->getVx() == 0 && figures.at(figID)->getVy()) return;
+	if (figures.at(figID)->getVx() == 0 && figures.at(figID)->getVy() == 0) return;
 	int xOld = figures.at(figID)->getXint();
 	int yOld = figures.at(figID)->getYint();
 	eraseOnMap(figID);
 	figures.at(figID)->refresh();
-	placeOnMap(figID);
-	int xNew = figures.at(figID)->getXint();
-	int yNew = figures.at(figID)->getYint();
-	if (xOld != xNew || yOld != yNew) {
-		set<int> intersectingIDs = intersects(figID);
-		for (int id : intersectingIDs) {
-			score += bump(make_pair(figID, id));
+	int maxHeight = dim::gameAreaHeight + dim::ceilingHeight + dim::platformHeight;
+	if (figures.at(figID)->getYint() < maxHeight) {
+		placeOnMap(figID);
+		int xNew = figures.at(figID)->getXint();
+		int yNew = figures.at(figID)->getYint();
+		if (xOld != xNew || yOld != yNew) {
+			set<int> intersectingIDs = intersects(figID);
+			for (int id : intersectingIDs) bump(make_pair(figID, id));
 		}
 	}
+	else figuresToDestroy.insert(figID);
 }
 
-int pane::bump(pair<int, int> f) {
+void pane::bump(pair<int, int> f) {
 	/**@return points collected from bump*/
 	int res = 0;
-	if (figures.find(f.first) == figures.end()) return res;
-	if (figures.find(f.second) == figures.end()) return res;
+	if (figures.find(f.first) == figures.end()) return;
+	if (figures.find(f.second) == figures.end()) return;
 	onBump actFirst = figures.at(f.first)->getOnBump();
 	onBump actSecond = figures.at(f.second)->getOnBump();
-	if (actFirst == crush || actSecond == crush) {
-		if (actFirst == crush) res += destroy(f.first);
-		if (actSecond == crush) res += destroy(f.second);
-		return res;
-	}
-	if (actFirst == jump) {
+	if (actFirst == jump && actSecond != crush) {
 		eraseOnMap(f.first);
 		figures.at(f.first)->jumpBack(figures.at(f.second));
 		placeOnMap(f.first);
 	}
-	if (actSecond == jump) {
+	if (actSecond == jump && actFirst != crush) {
 		eraseOnMap(f.second);
 		figures.at(f.second)->jumpBack(figures.at(f.first));
 		placeOnMap(f.second);
 	}
-	return res;
+	if (actFirst == crush || actSecond == crush
+		||actFirst == crushButReflect || actSecond == crushButReflect) {
+		if (actFirst == crush || actFirst == crushButReflect) figuresToDestroy.insert(f.first);
+		if (actSecond == crush || actSecond == crushButReflect) figuresToDestroy.insert(f.second);
+	}
 };
 
 set<int> pane::intersects(int figID) {
@@ -129,6 +132,10 @@ set<int> pane::intersects(int figID) {
 
 gameoverFlag pane::refresh() {
 	for (auto & fStruct : figures) refreshFigure(fStruct.first);
+	for (int fID : figuresToDestroy) {
+		score += destroy(fID);
+	}
+	figuresToDestroy.clear();
 	return false;
 }
 
