@@ -81,3 +81,7 @@ git add README.md
 git commit -m "first commit"
 git remote add origin https://github.com/zuevval/braille.git
 git push -u origin master 
+
+||---------Cygwin---------||
+apt-cyg install <package>
+
