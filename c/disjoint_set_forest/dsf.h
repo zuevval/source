@@ -1,10 +1,12 @@
 #ifndef H_DSF_MY
 #define H_DSF_MY
+#include<stdio.h>
+#include<stdlib.h>
 struct Node {
 	int data;
 	struct Node * next;
 	struct Node * head;
-	struct Node * tail;
+	struct Node * tail; //points to true tail ONLY if node is head
 };
 
 typedef struct Node node_t;
@@ -17,7 +19,8 @@ struct DSU {
 typedef struct DSU dsu_t;
 
 node_t * initSet(int data);
+void printSet(node_t * head);
 void freeSet(node_t * head);
-//node_t find(node_t x, no); TODO: implement or ensure it's unnecessary
-node_t * unite(node_t * a, node_t * b);
+void unite(node_t * a, node_t * b);
+void freeDSU(dsu_t dsu);
 #endif
