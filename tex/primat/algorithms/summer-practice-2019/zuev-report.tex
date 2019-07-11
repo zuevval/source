@@ -1,0 +1,65 @@
+%XeLaTeX+makeIndex+BibTeX
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} %русский язык, не менять
+\usepackage[T2A, T1]{fontenc} %русский язык, не менять
+\usepackage[english, russian]{babel} %русский язык, не менять
+\usepackage{fontspec} %различные шрифты
+\setmainfont{Times New Roman}
+\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
+\usepackage{hyperref} %гиперссылки
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
+\usepackage{subfiles}%включение тех-текста
+\usepackage{graphicx} %изображения
+\usepackage{float}%картинки где угодно
+\usepackage{textcomp}
+
+%\usepackage[dvips]{color} %попытка добавить цвета типа OliveGreen. Пропадают все картинки
+
+\usepackage{dsfont}%мат. символы
+\newcommand{\ovr}[1]{\overrightarrow{#1}}
+\usepackage{listings} %code formatting
+\lstset{language=c,
+	%keywordstyle=\color{blue},
+	%commentstyle=\color{},
+	%stringstyle=\color{red},
+	tabsize=1,
+	breaklines=true,
+	columns=fullflexible,
+	%numbers=left,
+	escapechar=@,
+	morekeywords={UINT_MAX, TEST, EXPECT_EQ}}
+
+
+\begin{document}
+\subfile{titlepage}
+\setcounter{page}{2}
+\tableofcontents
+\newpage
+\subfile{part1}
+\newpage
+\section{Исходный код программы}
+\subsection{файл <<main.c>>}
+main.c - контроллер программы.
+\lstinputlisting{code/main.c}
+\subsection{файл <<graph.h>>}
+Файлы graph.c, graph.h содержат функции для работы с графом как множеством рёбер.
+\lstinputlisting{code/graph.h}
+\subsection{файл <<graph.c>>}
+\lstinputlisting{code/graph.c}
+\subsection{файл <<dsf.h>>}
+Файлы dsf.h, dsf.c содержат функции для работы с системой непересекающихся множеств (Disjoint set forest, DSF).
+\lstinputlisting{code/dsf.h}
+\newpage
+\subsection{файл <<dsf.c>>}
+\lstinputlisting{code/dsf.c}
+\section{Описание тестирования}
+Раздельно протестированы функции ... Также проведён контроль отсутствия утечек памяти.
+\section{Результаты тестирования}
+\section{Выводы}
+Использование системы непересекающихся множеств, реализованной на списках, позволяет достичь алгоритмической сложности $O(n + m)$ при объединении двух множеств, где $n, m$ - мощности объединяемых множеств. Следовательно, алгоритм вычисления множеств вершин, находящихся в одной компоненте связности, работает за O(p * (q + 1)), p - множество вершин, q - множество рёбер. На графах с малым количеством рёбер это выгоднее по времени, чем алгоритм Флойда вычисления транзитивного замыкания
+%сослаться на Новикова
+%\subfile{part2}
+\begin{thebibliography}{100}
+	\bibitem{ifmo}{СНМ (наивные реализации) [Электронный ресурс] // Викиконспекты ИТМО, 2018. URL: \href{https://neerc.ifmo.ru/wiki/index.php?title=\%D0\%A1\%D0\%9D\%D0\%9C_(\%D0\%BD\%D0\%B0\%D0\%B8\%D0\%B2\%D0\%BD\%D1\%8B\%D0\%B5_\%D1\%80\%D0\%B5\%D0\%B0\%D0\%BB\%D0\%B8\%D0\%B7\%D0\%B0\%D1\%86\%D0\%B8\%D0\%B8)}{https://neerc.ifmo.ru/wiki/index.php?title=СНМ\_(наивные\_реализации)}  (Дата обращения: 10.07.2019)}
+\end{thebibliography}
+\end{document}
