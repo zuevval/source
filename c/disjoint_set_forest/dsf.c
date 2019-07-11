@@ -5,7 +5,6 @@ node_t * initSet(int data) {
 	head->next = NULL;
 	head->data = data;
 	head->head = head;
-	head->tail = head;
 	return head;
 }
 
@@ -29,13 +28,13 @@ void printSet(node_t * head){
 }
 
 void unite(node_t * a, node_t * b){
-    a = a->head;
+	node_t * aHead = a->head;
     b = b->head;
-    if(a->data == b->data) return;
-    a->tail->next = b;
-    a->tail = b->tail;
-    while(b != NULL){
-        b->head = a;
+    if(aHead->data == b->data) return;
+	while (a->next != NULL) a = a->next; //a is tail now
+	a->next = b; //connect tail of A with head of B
+	while(b != NULL){
+        b->head = aHead;
         b = b->next;
     }
 }

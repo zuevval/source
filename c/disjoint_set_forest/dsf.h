@@ -6,7 +6,6 @@ struct Node {
 	int data;
 	struct Node * next;
 	struct Node * head;
-	struct Node * tail; //points to true tail ONLY if node is head
 };
 
 typedef struct Node node_t;
