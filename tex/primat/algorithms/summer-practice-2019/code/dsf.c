@@ -36,4 +36,5 @@ void unite(node_t * a, node_t * b){
 }
 void freeDSU(dsu_t dsu){
     for (int i=0; i<dsu.nUnions; i++) freeSet(dsu.unions[i]);
+    free(dsu.unions);
 }
