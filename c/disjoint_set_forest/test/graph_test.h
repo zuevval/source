@@ -29,6 +29,7 @@ void graphRead(int q, int ** graph, FILE * fin) {
 void graphMemFree(int q, int ** graph) {
     for (int i = 0; i < q; i++)
         free(graph[i]);
+    free(graph);
 }
 
 #endif //DISJOINT_SET_FOREST_GRAPH_TEST_H

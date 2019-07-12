@@ -6,6 +6,7 @@
 #define DISJOINT_SET_FOREST_FUNCTIONS_TEST_H
 
 #include"dsf_test.h"
+#include"graph_test.h"
 #define MAX_BUF_SIZE (100)
 
 dsu_t toDSU (int ** graph, int p, int q){
