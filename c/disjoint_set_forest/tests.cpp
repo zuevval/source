@@ -136,8 +136,7 @@ TEST(toDSU, basic){
 TEST(toDSU, bigGraph){
     int p = 100;
     int q = 300;
-    //testDSU(p, q);
-
+    testDSU(p, q);
 }
 
 int main(int argc, char **argv) {
