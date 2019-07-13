@@ -13,8 +13,7 @@ void freeSet(node_t * head) {
         temp = nd->next;
         free(nd);
         nd = temp;
-    }
-}
+}}
 void printSet(node_t * head){
     node_t * nd = head;
     while(nd != NULL){
