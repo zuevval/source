@@ -18,6 +18,9 @@ grad = zeros(size(theta));
 %               Compute the partial derivatives and set grad to the partial
 %               derivatives of the cost w.r.t. each parameter in theta
 %
+h = sigmoid(X* theta); %hypothesis
+J = -1./m  * sum(y .* log(h) + (1-y) .* log(1-h)); %not regularized
+grad = X'*(h-y); %not regularized 
 % Hint: The computation of the cost function and gradients can be
 %       efficiently vectorized. For example, consider the computation
 %
