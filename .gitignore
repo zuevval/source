@@ -1,3 +1,9 @@
+#JetBrains
+**/.idea
+*.iml
+**/cmake*
+
+
 #---MS OFFICE---
 *.docx
 *.doc
@@ -82,3 +88,9 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+#--Java--
+*.jar
+*.war
+*.class
+
