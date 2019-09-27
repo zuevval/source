@@ -4,13 +4,21 @@ package com.zuevval.lab2ArithmCoding;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.*;
 
 public class Main {
     final static private int nArguments;
+    final static private String outputFilename;
 
     static {
         nArguments = 1;
+        outputFilename = "out.txt";
     }
 
     /** entry point of arithmetic coding console application
@@ -32,7 +40,21 @@ public class Main {
 
         if (parser.encodeMode()){
             EncodedText encodedText = Converter.encode(input);
-            System.out.println(encodedText.value);
+            writeOutput(encodedText, logger);
+        }
+    }
+
+    private static void writeOutput (EncodedText encodedText, Logger logger){
+        List<String> lines = new ArrayList<>();
+        lines.add(encodedText.value+"");
+        for (Character key : encodedText.dictionary.keySet()){
+            lines.add(key + ":" + encodedText.dictionary.get(key).toString());
+        }
+        Path outputFile = Paths.get(outputFilename);
+        try{
+            Files.write(outputFile, lines, StandardCharsets.UTF_8);
+        } catch (IOException e){
+            logger.severe("unable to write output: \n" + e.getMessage());
         }
     }
 
