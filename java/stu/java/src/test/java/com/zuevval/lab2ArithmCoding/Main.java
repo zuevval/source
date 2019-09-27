@@ -1,7 +1,7 @@
-package test.java.com.zuevval.lab2ArithmCoding;
+package com.zuevval.lab2ArithmCoding;
 
-import main.java.com.zuevval.lab2ArithmCoding.EncodedText;
-import main.java.com.zuevval.lab2ArithmCoding.Converter;
+import com.zuevval.lab2ArithmCoding.EncodedText;
+import com.zuevval.lab2ArithmCoding.Converter;
 import org.junit.Assert;
 import org.junit.Test;
 

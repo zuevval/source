@@ -1,4 +1,4 @@
-package main.java.com.zuevval.lab2ArithmCoding;
+package com.zuevval.lab2ArithmCoding;
 
 /** Segment - a unit representing an interval [left; right) in real numbers
  *  serves Converter class for arithmetic coding

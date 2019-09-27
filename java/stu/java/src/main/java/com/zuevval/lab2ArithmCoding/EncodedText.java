@@ -1,4 +1,4 @@
-package main.java.com.zuevval.lab2ArithmCoding;
+package com.zuevval.lab2ArithmCoding;
 
 import java.util.Map;
 
