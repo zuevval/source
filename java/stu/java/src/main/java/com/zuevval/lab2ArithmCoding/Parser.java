@@ -7,16 +7,28 @@ import java.util.Properties;
 
 public class Parser {
 
-    private static final String ModeName;
-    private static final String EncodeModeName;
-    private static final String DecodeModeName;
-    private static final String inputFilenameName;
+    private enum field{
+        inputFilename("inputFilename"),
+        mode("mode");
+        public enum modeValue {
+            encode("encode"),
+            decode("decode");
+            private final String title;
 
-    static {
-        ModeName = "mode";
-        EncodeModeName = "encode";
-        DecodeModeName = "decode";
-        inputFilenameName = "inputFilename";
+            modeValue(String title) {
+                this.title = title;
+            }
+        }
+
+        private final String title;
+
+        public String toString(){
+            return title;
+        }
+
+        field(String title) {
+            this.title = title;
+        }
     }
 
     private Properties properties;
@@ -31,21 +43,22 @@ public class Parser {
 
     public Parser (String configFilename) throws IOException, MissingParametersException {
         properties = readConfig(configFilename);
-        if(properties.getProperty(ModeName) == null){
+        if(properties.getProperty(field.mode.toString()) == null){
             throw new MissingParametersException(
-                    "No such parameter in properties file: " + ModeName);
+                    "No such parameter in properties file: " + field.mode);
         }
-        if (properties.getProperty(inputFilenameName) == null){
+        if (properties.getProperty(field.inputFilename.toString()) == null){
             throw new MissingParametersException(
-                    "No such parameter in properties file: " + inputFilenameName);
+                    "No such parameter in properties file: " + field.inputFilename);
         }
     }
 
     public Boolean encodeMode () {
-        return properties.getProperty(ModeName).equals(EncodeModeName);
+        return properties.getProperty(field.mode.toString()).equals(
+                field.modeValue.encode.toString());
     }
 
     public String inputFilename () {
-        return properties.getProperty(inputFilenameName);
+        return properties.getProperty(field.inputFilename.toString());
     }
 }
