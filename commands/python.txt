@@ -1,0 +1,8 @@
+---Python debugger---
+python3 -m pdb <filename.py> - start python debugger
+w - "where"
+s - "step"
+n - "next"
+p <expression> - print expression
+l - list source code for current line
+ll - list current function
