@@ -4,79 +4,70 @@ We may move step-by-step between cells which contain '1'
 Island is a set of interconnected cells
 Task: compute the quantity of islands
 """
-"""
-TODO rename 'i', 'j' (var names must be meaningful)
-Explanation: I'm used to Java, where naming iterator as a single char is
-a good practice (unlike in dynamically typed Python, where we have no cue
-to which is the type of variable)
-"""
 
 from enum import Enum
+from dataclasses import dataclass
 
 class cell_t(Enum):
 	ISLAND = 1
 	WATER = 0
 	VISITED = -1
 
-class Maze:
-	field = []
-	def possible_neighbours(self, coord):
+@dataclass
+class Coord:
+	irow: int
+	icol: int
+
+def possible_neighbours(maze, coord):
 		"""
-		return all neighbours in 'self.field'
+		return all neighbours in 'maze'
 		"""
 		res = []
-		i = coord.i
-		j = coord.j
+		irow = coord.irow
+		icol = coord.icol
 
-		if i > 0 : #  assume all rows of the same length
-			res.append(Coord(i - 1, j))
-		if coord.i + 1 < len(self.field):
-			res.append(Coord(i + 1, j))
-		if j > 0:
-			res.append(Coord(i, j - 1))
-		if j + 1 < len(self.field[i]):
-			res.append(Coord(i, j + 1))
+		if irow > 0 : #  assume all rows of the same length
+			res.append(Coord(irow - 1, icol))
+		if coord.irow + 1 < len(maze):
+			res.append(Coord(irow + 1, icol))
+		if icol > 0:
+			res.append(Coord(irow, icol - 1))
+		if icol + 1 < len(maze[irow]):
+			res.append(Coord(irow, icol + 1))
 		return res
 
-class Coord:
-	i = 0
-	j = 0
-	def __init__(self,i,j):
-		self.i = i
-		self.j = j
-
 def read_mtx (filename):
-	res = Maze()
+	res = []
 	with open(filename) as fin:
 		for line in fin:
-			row = [int(i) for i in line.strip()]
+			row = [int(irow) for irow in line.strip()]
 			print(row)
-			res.field.append(row)
+			res.append(row)
 	return res
 
 def bfs(maze, start):
 	"""
-	breadth first search in integer matrix 'maze.field'
-	starting point is (start.i, start.j)
+	breadth first search in integer matrix 'maze'
+	starting point is (start.irow, start.icol)
 	marks all visited cells as cell_t.VISITED
 	"""
-	stack = []
-	stack.append(start)
+	stack = [start]
 	while stack:
 		cell = stack.pop()
-		maze.field[cell.i][cell.j] = cell_t.VISITED.value
-		for nbr in maze.possible_neighbours(cell):
-			if maze.field[nbr.i][nbr.j] == cell_t.ISLAND.value:
+		maze[cell.irow][cell.icol] = cell_t.VISITED.value
+		for nbr in possible_neighbours(maze, cell):
+			if maze[nbr.irow][nbr.icol] == cell_t.ISLAND.value:
 				stack.append(nbr)
 
 def count_islands(mtx):
-	count = 0
-	for i, row  in enumerate(mtx.field):
-		for j in range(len(row)):
-			if mtx.field[i][j] == cell_t.ISLAND.value:
-				count += 1
-				bfs(mtx, Coord(i, j))
-	return count
+	count_isl = 0
+	for irow, row  in enumerate(mtx):
+		for icol in range(len(row)):
+			if mtx[irow][icol] == cell_t.ISLAND.value:
+				count_isl += 1
+				bfs(mtx, Coord(irow, icol))
+	return count_isl
+
 mtx = read_mtx("input.txt")
 print(count_islands(mtx))
 
