@@ -1,5 +1,6 @@
 package com.zuevval.lab2ArithmCoding;
 
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 

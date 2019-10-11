@@ -31,10 +31,10 @@ public class Parser {
         }
     }
 
-    private Properties properties;
+    private MyProperties properties;
 
-    private static Properties readConfig (String configFilename) throws IOException {
-        Properties res = new Properties();
+    private static MyProperties readConfig (String configFilename) throws IOException {
+        MyProperties res = new MyProperties();
         InputStream is = new FileInputStream(configFilename);
         res.load(is);
         is.close();

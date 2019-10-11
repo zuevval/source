@@ -15,10 +15,18 @@ import java.util.logging.*;
 public class Main {
     final static private int nArguments;
     final static private String outputFilename;
+    final static private String logFilename;
+    final static private String loggerTitle;
+    final static private String keyValueSeparator;
+    final static private String lineSeparator;
 
     static {
         nArguments = 1;
         outputFilename = "out.txt";
+        logFilename = "./error.log";
+        loggerTitle = "arithmeticCoding";
+        keyValueSeparator = ":";
+        lineSeparator = System.getProperty("line.separator");
     }
 
     /** entry point of arithmetic coding console application
@@ -48,7 +56,7 @@ public class Main {
         List<String> lines = new ArrayList<>();
         lines.add(encodedText.value+"");
         for (Character key : encodedText.dictionary.keySet()){
-            lines.add(key + ":" + encodedText.dictionary.get(key).toString());
+            lines.add(key + keyValueSeparator + encodedText.dictionary.get(key).toString());
         }
         Path outputFile = Paths.get(outputFilename);
         try{
@@ -64,16 +72,15 @@ public class Main {
             BufferedReader reader = new BufferedReader(new FileReader(inputFilename));
             StringBuilder stringBuilder = new StringBuilder();
             String line = null;
-            String ls = System.getProperty("line.separator");
             while ((line = reader.readLine()) != null) {
                 stringBuilder.append(line);
-                stringBuilder.append(ls);
+                stringBuilder.append(lineSeparator);
             }
             reader.close();
 
             res = stringBuilder.toString();
             // delete the last new line separator
-            res = res.substring(0, res.length() - ls.length());
+            res = res.substring(0, res.length() - lineSeparator.length());
         } catch (IOException e){
             logger.severe("error processing input file: ");
             logger.info(e.getMessage());
@@ -94,10 +101,10 @@ public class Main {
     }
 
     private static Logger setupLogger() {
-        Logger logger = Logger.getLogger("ArithmeticCoding");
+        Logger logger = Logger.getLogger(loggerTitle);
         FileHandler fh;
         try{
-            fh = new FileHandler("./error.log");
+            fh = new FileHandler(logFilename);
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
