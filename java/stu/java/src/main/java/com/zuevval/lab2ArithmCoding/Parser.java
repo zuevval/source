@@ -43,22 +43,22 @@ public class Parser {
 
     public Parser (String configFilename) throws IOException, MissingParametersException {
         properties = readConfig(configFilename);
-        if(properties.getProperty(field.mode.toString()) == null){
+        if(properties.get(field.mode.toString()) == null){
             throw new MissingParametersException(
                     "No such parameter in properties file: " + field.mode);
         }
-        if (properties.getProperty(field.inputFilename.toString()) == null){
+        if (properties.get(field.inputFilename.toString()) == null){
             throw new MissingParametersException(
                     "No such parameter in properties file: " + field.inputFilename);
         }
     }
 
     public Boolean encodeMode () {
-        return properties.getProperty(field.mode.toString()).equals(
+        return properties.get(field.mode.toString()).equals(
                 field.modeValue.encode.toString());
     }
 
     public String inputFilename () {
-        return properties.getProperty(field.inputFilename.toString());
+        return properties.get(field.inputFilename.toString());
     }
 }

@@ -1,9 +1,7 @@
 package com.zuevval.lab2ArithmCoding;
 
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +17,7 @@ public class Main {
     final static private String loggerTitle;
     final static private String keyValueSeparator;
     final static private String lineSeparator;
+    final static private String emptyString;
 
     static {
         nArguments = 1;
@@ -27,6 +26,7 @@ public class Main {
         loggerTitle = "arithmeticCoding";
         keyValueSeparator = ":";
         lineSeparator = System.getProperty("line.separator");
+        emptyString = "";
     }
 
     /** entry point of arithmetic coding console application
@@ -43,18 +43,18 @@ public class Main {
         if(parser == null) return;
 
         String inputFilename = parser.inputFilename();
-        String input = readInput(inputFilename, logger);
-        if(input == null) return;
-
         if (parser.encodeMode()){
-            EncodedText encodedText = Converter.encode(input);
+            EncodedText encodedText = encodeInput(inputFilename, logger);
+            if (encodedText == null) return;
             writeOutput(encodedText, logger);
         }
+
+
     }
 
     private static void writeOutput (EncodedText encodedText, Logger logger){
         List<String> lines = new ArrayList<>();
-        lines.add(encodedText.value+"");
+        lines.add(encodedText.value+emptyString);
         for (Character key : encodedText.dictionary.keySet()){
             lines.add(key + keyValueSeparator + encodedText.dictionary.get(key).toString());
         }
@@ -66,21 +66,12 @@ public class Main {
         }
     }
 
-    private static String readInput(String inputFilename, Logger logger){
-        String res = null;
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader(inputFilename));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-                stringBuilder.append(lineSeparator);
-            }
-            reader.close();
-
-            res = stringBuilder.toString();
-            // delete the last new line separator
-            res = res.substring(0, res.length() - lineSeparator.length());
+    private static EncodedText encodeInput(String inputFilename, Logger logger){
+        EncodedText res = null;
+        try {
+            InputStream inStream = new FileInputStream(inputFilename);
+            Converter converter = Converter.initFromRaw(inStream, logger);
+            res = converter.getEncoded();
         } catch (IOException e){
             logger.severe("error processing input file: ");
             logger.info(e.getMessage());
@@ -94,6 +85,7 @@ public class Main {
             res = new Parser(configFilename);
         } catch (IOException e){
             logger.severe("error opening properties file");
+            logger.info(e.getMessage());
         } catch (MissingParametersException e){
             logger.severe(e.getMessage());
         }
@@ -108,6 +100,7 @@ public class Main {
             logger.addHandler(fh);
             SimpleFormatter formatter = new SimpleFormatter();
             fh.setFormatter(formatter);
+
             // disable default console handler
             logger.setUseParentHandlers(false);
         } catch (SecurityException e){

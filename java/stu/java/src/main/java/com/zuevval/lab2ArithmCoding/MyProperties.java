@@ -2,30 +2,26 @@ package com.zuevval.lab2ArithmCoding;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Hashtable;
 
-public class MyProperties extends Hashtable <String, String> {
+class MyProperties extends Hashtable <String, String> {
 
     final private static char keyValueSeparator = '=';
     final private static char lineSeparator = '\n';
     final private static char empty = ' ';
     final private static int eof = -1;
-    final private static String charset;
+    final private static Charset charset;
 
     static {
-        /*  By the way. Even Java developers sometimes don't mind hardcode :)
-         *   "...if ((c == '=' ||  c == ':') && !precedingBackslash)..."
-         *   (C) java/util/Properties.java, line 364 */
-        charset = "UTF-8";
-    }
-
-    String getProperty(String key) {
-        return super.get(key);
+        /*  By the way. Core developers sometimes don't mind hardcode :)
+         *  "...if ((c == '=' ||  c == ':') && !precedingBackslash)..."
+         *  (C) java/util/Properties.java, line 364 */
+        charset = StandardCharsets.UTF_8;
     }
 
     void load(InputStream inStream) throws IOException{
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inStream,
-                Charset.forName(charset)));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inStream, charset));
         int currentChar;
         StringBuilder key = new StringBuilder();
         StringBuilder value = new StringBuilder();
