@@ -23,12 +23,20 @@ enum onBump {
 	crush,
 	jump,
 	crushButReflect,
+	loseFirmness,
+	asTrampoline,
 };
 
 enum _bonusType {
 	none,
 	drops,
 	bigPlatf,
+	giantBall,
+	boostPlatf,
+	boostBall,
+	trampolineOn,
+	secondBall,
+	oneLife,
 };
 
 class figure {
@@ -48,7 +56,7 @@ public:
 	_bonusType getBonus() { return innerBonus; }
 	void move();
 	virtual int erase();
-	virtual void refresh() { if (vx != 0 || vy != 0) move(); };
+	virtual void refresh() { if (vx != 0 || vy != 0) move(); else draw(); };
 	void setSpeed(double Vx, double Vy) { vx = Vx; vy = Vy; };
 	void jumpBack(shared_ptr<figure> & f);
 	double getVx() { return vx; };
@@ -60,6 +68,7 @@ public:
 	figure() {};
 	figure(double X, double Y) { spawn(X, Y); };
 	onBump getOnBump() { return actionOnBump; };
+	virtual void setOnBump(onBump newOnBump) { actionOnBump = newOnBump; };
 };
 
 const int windowHeight = dim::windowHeight;
@@ -73,10 +82,10 @@ class pane {
 	void placeOnMap(int figureID);
 	void refreshFigure(int figID);
 	set<int> intersects(int figID);
-	void bump(pair<int, int> figuresIDs);
-	set<int> figuresToDestroy;
 protected:
-	virtual int destroy(int figureID);
+	set<int> figuresToDamage;
+	virtual void bump(pair<int, int> figuresIDs);
+	virtual int damage(int figureID);
 	int lives = consts::defaultLives;
 	int score = 0;
 	int figuresNum = 0;

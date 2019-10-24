@@ -17,21 +17,25 @@ public:
 class gamePane :public pane {
 	unsigned int timeCounter;
 	int platformID;
+	double platformVx = consts::platformVelocity;
 	int ballID;
+	int trampolineID = -1;
 	shared_ptr<statBar> StatusBar;
+	map<_bonusType, int> bonusTimeCounters;
+
+	void switchPlatform(bool toBig); 
+	void switchBall(bool toBig);
 protected:
-	int bonusTimer = 0;
-	bool bonusSet = false;
-	void refreshBonusState();
-	virtual int destroy(int figureID) override;
+	virtual int damage(int figureID);
+	void bump(pair<int, int> figuresIDs);
 	void dropBonus(int x, int y);
 public:
 	gameoverFlag refresh();
 	gamePane();
 	void onleftkeyup() { stop(platformID); };
-	void onleftkeydown() { makeMoving(platformID, -consts::platformVelocity, 0); };
+	void onleftkeydown() { makeMoving(platformID, -platformVx, 0); };
 	void onrightkeyup() { stop(platformID); };
-	void onrightkeydown() { makeMoving(platformID, consts::platformVelocity, 0); };
+	void onrightkeydown() { makeMoving(platformID, platformVx, 0); };
 };
 
 class wall :public figure {
@@ -46,7 +50,6 @@ public:
 
 class platform :public figure {
 public:
-	void jumpBack();
 	platform(double X, double Y);
 	platform() {};
 };
@@ -54,6 +57,11 @@ public:
 class ball :public figure {
 public:
 	ball(double X, double Y);
+};
+
+class bigBall :public figure {
+public:
+	bigBall(double X, double Y);
 };
 
 class token :public figure {
@@ -74,6 +82,19 @@ public:
 	solidBlock(double X, double Y);
 };
 
+class semiSolidBlock :public block {
+public:
+	semiSolidBlock(double X, double Y);
+	void setOnBump(onBump newOnBump);
+};
+
+class flyingBlock :public block {
+	int innerTimeCounter = 0;
+public:
+	flyingBlock(double X, double Y);
+	void refresh();
+};
+
 class bonusBlock :public block {
 public:
 	bonusBlock(double X, double Y);
@@ -82,5 +103,11 @@ public:
 class bigPlatform:public platform {
 public:
 	bigPlatform(double X, double Y);
+};
+
+class trampoline :public figure {
+public:
+	trampoline();
+	void spawn() { figure::spawn(dim::wallWidth, dim::trampolineYoffset); };
 };
 #endif

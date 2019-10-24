@@ -55,8 +55,12 @@ void pane::stop(int figureID) {
 	figures.at(figureID)->setSpeed(0,0);
 }
 
-int pane::destroy(int figureID) {
+int pane::damage(int figureID) {
 	if (!findFigure(figureID)) return 0;
+	if (figures.at(figureID)->getOnBump() == loseFirmness) {
+		figures.at(figureID)->setOnBump(crushButReflect);
+		return 0; //no points from this hit
+	}
 	eraseOnMap(figureID);
 	int points = figures.at(figureID)->erase();
 	figures.erase(figureID);
@@ -72,8 +76,9 @@ void pane::refreshFigure(int figID) {
 	int yOld = figures.at(figID)->getYint();
 	eraseOnMap(figID);
 	figures.at(figID)->refresh();
-	int maxHeight = dim::gameAreaHeight + dim::ceilingHeight + dim::platformHeight;
-	if (figures.at(figID)->getYint() < maxHeight) {
+	int maxHeight = dim::maxY;
+	int figProjecting = figures.at(figID)->getYint() + figures.at(figID)->getHeight();
+	if (figProjecting <= maxHeight) {
 		placeOnMap(figID);
 		int xNew = figures.at(figID)->getXint();
 		int yNew = figures.at(figID)->getYint();
@@ -82,12 +87,10 @@ void pane::refreshFigure(int figID) {
 			for (int id : intersectingIDs) bump(make_pair(figID, id));
 		}
 	}
-	else figuresToDestroy.insert(figID);
+	else figuresToDamage.insert(figID);
 }
 
 void pane::bump(pair<int, int> f) {
-	/**@return points collected from bump*/
-	int res = 0;
 	if (figures.find(f.first) == figures.end()) return;
 	if (figures.find(f.second) == figures.end()) return;
 	onBump actFirst = figures.at(f.first)->getOnBump();
@@ -104,9 +107,11 @@ void pane::bump(pair<int, int> f) {
 	}
 	if (actFirst == crush || actSecond == crush
 		||actFirst == crushButReflect || actSecond == crushButReflect) {
-		if (actFirst == crush || actFirst == crushButReflect) figuresToDestroy.insert(f.first);
-		if (actSecond == crush || actSecond == crushButReflect) figuresToDestroy.insert(f.second);
+		if (actFirst == crush || actFirst == crushButReflect) figuresToDamage.insert(f.first);
+		if (actSecond == crush || actSecond == crushButReflect) figuresToDamage.insert(f.second);
 	}
+	if (actFirst == loseFirmness) damage(f.first);
+	if (actSecond == loseFirmness) damage(f.second);
 };
 
 set<int> pane::intersects(int figID) {
@@ -132,10 +137,10 @@ set<int> pane::intersects(int figID) {
 
 gameoverFlag pane::refresh() {
 	for (auto & fStruct : figures) refreshFigure(fStruct.first);
-	for (int fID : figuresToDestroy) {
-		score += destroy(fID);
+	for (int fID : figuresToDamage) {
+		score += damage(fID);
 	}
-	figuresToDestroy.clear();
+	figuresToDamage.clear();
 	return false;
 }
 

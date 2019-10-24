@@ -67,7 +67,7 @@ void figure::jumpTo(double X, double Y) {
 
 void figure::move() {
 	jumpTo(x + vx, y + vy);
-	if (x < 0 || x + width > windowWidth || y < 0 || y + height >= windowHeight) setSpeed(0, 0);
+	if (x < 0 || x + width > windowWidth || y < 0 || y + height > windowHeight) setSpeed(0, 0);
 }
 
 void figure::jumpBack(shared_ptr<figure> & f) {
