@@ -1,6 +1,7 @@
 import math
 from collections import defaultdict
 
+
 def get_ktuples(rmap, k):
     ktuples = defaultdict(list)
     for idx in range(0, len(rmap)-k + 1):
@@ -37,3 +38,11 @@ def get_locations(ref, query):
                     res.add((offset, len(ktup)))
     return sorted(res)
 
+
+def align(rmap, ref, miss_penalty, delta):
+    print(get_locations(ref, rmap))
+
+if __name__ == '__main__':
+    rmap = [22.98, 2.93, 1.87, 27.14, 10.69, 6.49]
+    ref = [23.13, 3.03, 1.78, 27.13, 3.06, 7.29, 23.93]
+    align(rmap, ref, 0, 0)
