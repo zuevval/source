@@ -7,4 +7,5 @@ cd ../braille3parts/
 git pull
 cd ../braille_ocr/
 git pull
-
+cd ../cv/
+git pull
