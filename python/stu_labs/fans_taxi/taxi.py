@@ -26,9 +26,7 @@ def adjacent_components(nodes: int, pairs: List[Tuple[int, int]]) -> DefaultDict
                 first_component = component
             if pair[1] in component:
                 second_component = component
-        if first_component is None or second_component is None:
-            print("err in adjacent_components")
-            return defaultdict(int)
+        assert first_component is not None and second_component is not None
         if first_component != second_component:  # merge components
             components.remove(second_component)
             first_component.extend(second_component)
