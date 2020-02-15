@@ -5,8 +5,9 @@ Crop image: https://stackoverflow.com/questions/28759253/how-to-crop-the-interna
 Otsu's thresholding: https://docs.opencv.org/master/d7/d4d/tutorial_py_thresholding.html
 Bounding rectangle: https://docs.opencv.org/3.4/dd/d49/tutorial_py_contour_features.html
 '''
+from typing import List
 
-import numpy as np
+from matplotlib import pyplot as plt
 import cv2
 
 
@@ -24,10 +25,7 @@ def find_pentagons(img):
             bigcontours.append(cnt)
             cv2.drawContours(displayed_pic,[cnt],0,255,-1)
 
-    cv2.imshow('img',displayed_pic)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    return bigcontours
+    return bigcontours, displayed_pic
 
 
 def crop_letters(img, contours):
@@ -59,27 +57,74 @@ def find_dots(letter_pic):
         coords.append((x + w/2, y + h/2))
 
     height, width, _ = letter_pic.shape
-    coords = [(c[0]/height, c[1]/width) for c in coords]
+    coords = [(c[0]/width, c[1]/height) for c in coords]
+    dots = []
     for coord in coords:
-        classify_dots(coord)
+        dots.append(classify_dots(coord))
+    dots.sort()
 
-    cv2.imshow("output", thresh)
-    cv2.waitKey(0)
-    return coords, thresh
+    #cv2.imshow("binarized letter", thresh)
+    #cv2.waitKey(0)
+    return brl_to_rus(dots), thresh
 
 def classify_dots(coord):
-    col = 1 if coord[0] < 0.33 else 2
-    print("col:" + str(col))
-    # TODO detect row
+    col = 0 if coord[0] < 0.5 else 1
+    if coord[1] < 11/30:
+        row = 0
+    elif coord[1] < 19/30:
+        row = 1
+    else:
+        row = 2
+    #print("col coord: "+ str(coord[0]) + ", col: " + str(col))
+    #print("row coord: "+ str(coord[1]) + ", row: " + str(row))
+    return row + 3*col + 1  # dot number from 1 to 6
 
 
-
+def brl_to_rus(brl: List[int]) -> str:
+    if brl == [1]:
+        return "а"
+    elif brl == [1, 2]:
+        return "б"
+    elif brl == [2, 4, 5, 6]:
+        return "в"
+    elif brl == [1, 2, 4, 5]:
+        return "г"
+    elif brl == [1, 4, 5]:
+        return "д"
+    elif brl == [1, 5]:
+        return "е"
+    elif brl == [1, 6]:
+        return "ё"
+    elif brl == [2, 4, 5]:
+        return "ж"
+    elif brl == [1, 3, 5, 6]:
+        return "з"
+    elif brl == [2, 4]:
+        return "и"
+    return ""
 
 
 if __name__ == "__main__":
     whole_img = cv2.imread('tiles2.JPG')
-    pentagon_contours = find_pentagons(whole_img)
+    pentagon_contours, img_with_pentagons = find_pentagons(whole_img)
     cropped_letters = crop_letters(whole_img, pentagon_contours)
+    classified = []
     for i in range(len(cropped_letters)):
-        coords, thresh = find_dots(cropped_letters[i])
-        print(coords)
+        let, thresh = find_dots(cropped_letters[i])
+        classified.append((let, thresh))
+        print(let)
+    fig = plt.figure()
+    subplots = []
+    n = len(classified)
+    for i in range(n):
+        subplots.append(fig.add_subplot(1, n, i+1))
+        subplots[-1].set_title(classified[i][0])
+        subfig = plt.imshow(classified[i][1], cmap='binary')
+        subfig.axes.get_xaxis().set_visible(False)
+        subfig.axes.get_yaxis().set_visible(False)
+    plt.axis('off')
+
+    cv2.imshow('initial image with detected pentagons', img_with_pentagons)
+    plt.show()
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
