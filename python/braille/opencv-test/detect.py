@@ -19,11 +19,11 @@ def find_pentagons(img):
     bigcontours = []
     displayed_pic = img.copy()
     for cnt in contours:
-        approx = cv2.approxPolyDP(cnt,0.01*cv2.arcLength(cnt,True),True)
+        approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt,True),True)
         area = cv2.contourArea(cnt)
         if len(approx) == 5 and area > 2000:  # pentagon
             bigcontours.append(cnt)
-            cv2.drawContours(displayed_pic,[cnt],0,255,-1)
+            cv2.drawContours(displayed_pic,[cnt], 0, 255,-1)
 
     return bigcontours, displayed_pic
 
@@ -75,8 +75,6 @@ def classify_dots(coord):
         row = 1
     else:
         row = 2
-    #print("col coord: "+ str(coord[0]) + ", col: " + str(col))
-    #print("row coord: "+ str(coord[1]) + ", row: " + str(row))
     return row + 3*col + 1  # dot number from 1 to 6
 
 
@@ -107,6 +105,14 @@ def brl_to_rus(brl: List[int]) -> str:
 if __name__ == "__main__":
     whole_img = cv2.imread('tiles2.JPG')
     pentagon_contours, img_with_pentagons = find_pentagons(whole_img)
+    '''
+    TODO
+    вместо следующего шага:
+    1. У каждого пентагона найти наибольшую сторону
+    2. Найти ограничивающую рамку и вырезать в полтора раза большую область
+    3. Повернуть изображение пентагона на угол, соответствующий углу поворота наибольшей стороны
+    4. Обрезать уже получившуюся фигуру
+    '''
     cropped_letters = crop_letters(whole_img, pentagon_contours)
     classified = []
     for i in range(len(cropped_letters)):

@@ -47,6 +47,8 @@ python/stu_labs/lab3blosum/alignments/**
 *.bcf
 *.run.xml
 *.toc
+*.lof
+*.lot
 
 #---C--- 
 

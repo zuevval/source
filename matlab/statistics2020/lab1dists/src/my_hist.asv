@@ -1,4 +1,0 @@
-function h = my_hist(x, max_height)
-h = histogram(x);
-h.values
-end
