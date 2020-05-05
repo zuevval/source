@@ -118,37 +118,168 @@ for k = 1:num_iter
 end
 
 % For mean, median, Z_r, Z_q and Z_tr calculate their means and variances
-display(mean(norm_means, 2), 'norm:mean:means')
-display(var(norm_medians, 0, 2), 'norm:mean:variances')
-display(mean(norm_medians, 2), 'norm:median:means')
-display(var(norm_means, 0, 2), 'norm:median:variances')
-display(mean(norm_ztrs, 2), 'norm:Ztr:means')
-display(var(norm_ztrs, 0, 2), 'norm:Ztr:variances')
+col1 = [10 100 1000]';
+normZrsM = mean(norm_zrs, 2);
+normZqsM = mean(norm_zqs, 2);
+normMeansM = mean(norm_means, 2);
+normMedsM = mean(norm_medians, 2);
+normZtrsM = mean(norm_ztrs, 2);
+norm_m = [col1 normZrsM normZqsM normMeansM normMedsM normZtrsM];
+norm_m_str = ' & $' + string(round(norm_m, 3)) + '$';
+writetable(array2table(norm_m_str), 'data/norm_m.txt', 'Delimiter', ' ');
+fid  = fopen('data/norm_m.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/norm_m.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
 
-display(mean(cauchy_means, 2), 'cauchy:mean:means')
-display(var(cauchy_medians, 0, 2), 'cauchy:mean:variances')
-display(mean(cauchy_medians, 2), 'cauchy:median:means')
-display(var(cauchy_means, 0, 2), 'cauchy:median:variances')
-display(mean(cauchy_ztrs, 2), 'cauchy:Ztr:means')
-display(var(cauchy_ztrs, 0, 2), 'cauchy:Ztr:variances')
+normMeansV = var(norm_means, 0, 2);
+normZrsV = var(norm_zrs, 0, 2);
+normZqsV = var(norm_zqs,0, 2);
+normMeansV = var(norm_means, 0, 2);
+normMedsV = var(norm_medians, 0, 2);
+normZtrsV = var(norm_ztrs, 0, 2);
+norm_v = [col1 normZrsV normZqsV normMeansV normMedsV normZtrsV];
+norm_v_str = ' & $' + string(round(norm_v, 3)) + '$';
+writetable(array2table(norm_v_str), 'data/norm_v.txt', 'Delimiter', ' ');
+fid  = fopen('data/norm_v.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/norm_v.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
 
-display(mean(laplace_means, 2), 'laplace:mean:means')
-display(var(laplace_medians, 0, 2), 'laplace:mean:variances')
-display(mean(laplace_medians, 2), 'laplace:median:means')
-display(var(laplace_means, 0, 2), 'laplace:median:variances')
-display(mean(laplace_ztrs, 2), 'laplace:Ztr:means')
-display(var(laplace_ztrs, 0, 2), 'laplace:Ztr:variances')
+cauchyZrsM = mean(cauchy_zrs, 2);
+cauchyZqsM = mean(cauchy_zqs, 2);
+cauchyMeansM = mean(cauchy_means, 2);
+cauchyMedsM = mean(cauchy_medians, 2);
+cauchyZtrsM = mean(cauchy_ztrs, 2);
+cauchy_m = [col1 cauchyZrsM cauchyZqsM cauchyMeansM cauchyMedsM cauchyZtrsM];
+cauchy_m_str = ' & $' + string(round(cauchy_m, 3)) + '$';
+writetable(array2table(cauchy_m_str), 'data/cauchy_m.txt', 'Delimiter', ' ');
+fid  = fopen('data/cauchy_m.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/cauchy_m.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
 
-display(mean(poisson_means, 2), 'poisson:mean:means')
-display(var(poisson_medians, 0, 2), 'poisson:mean:variances')
-display(mean(poisson_medians, 2), 'poisson:median:means')
-display(var(poisson_means, 0, 2), 'poisson:median:variances')
-display(mean(poisson_ztrs, 2), 'poisson:Ztr:means')
-display(var(poisson_ztrs, 0, 2), 'poisson:Ztr:variances')
+cauchyMeansV = var(cauchy_means, 0, 2);
+cauchyZrsV = var(cauchy_zrs, 0, 2);
+cauchyZqsV = var(cauchy_zqs,0, 2);
+cauchyMeansV = var(cauchy_means, 0, 2);
+cauchyMedsV = var(cauchy_medians, 0, 2);
+cauchyZtrsV = var(cauchy_ztrs, 0, 2);
+cauchy_v = [col1 cauchyZrsV cauchyZqsV cauchyMeansV cauchyMedsV cauchyZtrsV];
+cauchy_v_str = ' & $' + string(round(cauchy_v, 3)) + '$';
+writetable(array2table(cauchy_v_str), 'data/cauchy_v.txt', 'Delimiter', ' ');
+fid  = fopen('data/cauchy_v.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/cauchy_v.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
 
-display(mean(uniform_means, 2), 'uniform:mean:means')
-display(var(uniform_medians, 0, 2), 'uniform:mean:variances')
-display(mean(uniform_medians, 2), 'uniform:median:means')
-display(var(uniform_means, 0, 2), 'uniform:median:variances')
-display(mean(uniform_ztrs, 2), 'uniform:Ztr:means')
-display(var(uniform_ztrs, 0, 2), 'uniform:Ztr:variances')
+laplaceZrsM = mean(laplace_zrs, 2);
+laplaceZqsM = mean(laplace_zqs, 2);
+laplaceMeansM = mean(laplace_means, 2);
+laplaceMedsM = mean(laplace_medians, 2);
+laplaceZtrsM = mean(laplace_ztrs, 2);
+laplace_m = [col1 laplaceZrsM laplaceZqsM laplaceMeansM laplaceMedsM laplaceZtrsM];
+laplace_m_str = ' & $' + string(round(laplace_m, 3)) + '$';
+writetable(array2table(laplace_m_str), 'data/laplace_m.txt', 'Delimiter', ' ');
+fid  = fopen('data/laplace_m.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/laplace_m.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
+
+laplaceMeansV = var(laplace_means, 0, 2);
+laplaceZrsV = var(laplace_zrs, 0, 2);
+laplaceZqsV = var(laplace_zqs,0, 2);
+laplaceMeansV = var(laplace_means, 0, 2);
+laplaceMedsV = var(laplace_medians, 0, 2);
+laplaceZtrsV = var(laplace_ztrs, 0, 2);
+laplace_v = [col1 laplaceZrsV laplaceZqsV laplaceMeansV laplaceMedsV laplaceZtrsV];
+laplace_v_str = ' & $' + string(round(laplace_v, 3)) + '$';
+writetable(array2table(laplace_v_str), 'data/laplace_v.txt', 'Delimiter', ' ');
+fid  = fopen('data/laplace_v.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/laplace_v.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
+
+poissonZrsM = mean(poisson_zrs, 2);
+poissonZqsM = mean(poisson_zqs, 2);
+poissonMeansM = mean(poisson_means, 2);
+poissonMedsM = mean(poisson_medians, 2);
+poissonZtrsM = mean(poisson_ztrs, 2);
+poisson_m = [col1 poissonZrsM poissonZqsM poissonMeansM poissonMedsM poissonZtrsM];
+poisson_m_str = ' & $' + string(round(poisson_m, 3)) + '$';
+writetable(array2table(poisson_m_str), 'data/poisson_m.txt', 'Delimiter', ' ');
+fid  = fopen('data/poisson_m.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/poisson_m.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
+
+poissonMeansV = var(poisson_means, 0, 2);
+poissonZrsV = var(poisson_zrs, 0, 2);
+poissonZqsV = var(poisson_zqs,0, 2);
+poissonMeansV = var(poisson_means, 0, 2);
+poissonMedsV = var(poisson_medians, 0, 2);
+poissonZtrsV = var(poisson_ztrs, 0, 2);
+poisson_v = [col1 poissonZrsV poissonZqsV poissonMeansV poissonMedsV poissonZtrsV];
+poisson_v_str = ' & $' + string(round(poisson_v, 3)) + '$';
+writetable(array2table(poisson_v_str), 'data/poisson_v.txt', 'Delimiter', ' ');
+fid  = fopen('data/poisson_v.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/poisson_v.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
+
+uniformZrsM = mean(uniform_zrs, 2);
+uniformZqsM = mean(uniform_zqs, 2);
+uniformMeansM = mean(uniform_means, 2);
+uniformMedsM = mean(uniform_medians, 2);
+uniformZtrsM = mean(uniform_ztrs, 2);
+uniform_m = [col1 uniformZrsM uniformZqsM uniformMeansM uniformMedsM uniformZtrsM];
+uniform_m_str = ' & $' + string(round(uniform_m, 3)) + '$';
+writetable(array2table(uniform_m_str), 'data/uniform_m.txt', 'Delimiter', ' ');
+fid  = fopen('data/uniform_m.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/uniform_m.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
+
+uniformMeansV = var(uniform_means, 0, 2);
+uniformZrsV = var(uniform_zrs, 0, 2);
+uniformZqsV = var(uniform_zqs,0, 2);
+uniformMeansV = var(uniform_means, 0, 2);
+uniformMedsV = var(uniform_medians, 0, 2);
+uniformZtrsV = var(uniform_ztrs, 0, 2);
+uniform_v = [col1 uniformZrsV uniformZqsV uniformMeansV uniformMedsV uniformZtrsV];
+uniform_v_str = ' & $' + string(round(uniform_v, 3)) + '$';
+writetable(array2table(uniform_v_str), 'data/uniform_v.txt', 'Delimiter', ' ');
+fid  = fopen('data/uniform_v.txt','r');
+f=fread(fid,'*char')';
+fclose(fid);
+f = strrep(f,'"','');
+fid  = fopen('data/uniform_v.txt','w');
+fprintf(fid,'%s',f);
+fclose(fid);
