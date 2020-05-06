@@ -1,0 +1,58 @@
+%XeLaTeX+makeIndex+BibTeX OR LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} %русский язык, не менять
+\usepackage[T2A, T1]{fontenc} %русский язык, не менять
+\usepackage[english, russian]{babel} %русский язык, не менять
+\usepackage{fontspec} %различные шрифты
+\setmainfont{Times New Roman}
+\defaultfontfeatures{Ligatures={TeX},Renderer=Basic}
+\usepackage{pdfpages} % insert pdf pages, e.g. scans
+\usepackage{hyperref} %гиперссылки
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
+\usepackage{subfiles}%включение тех-текста
+\usepackage{graphicx} %изображения
+\usepackage{float}%картинки где угодно
+\usepackage{textcomp}
+\usepackage{fancyvrb} %fancy verbatim for \VerbatimInput
+\usepackage{dsfont}%мат. символы
+\usepackage{amssymb, amsmath} %common math symbols
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+\usepackage[linesnumbered, ruled]{algorithm2e}%pseudocode
+\usepackage{listings} %code formatting
+\lstset{language=matlab,
+	%keywordstyle=\color{blue},
+	%commentstyle=\color{},
+	%stringstyle=\color{red},
+	tabsize=1,
+	breaklines=true,
+	columns=fullflexible,
+	%numbers=left,
+	escapechar=@
+	%morekeywords={numpy, np}
+}
+
+\textwidth=16cm
+\oddsidemargin=0cm %поля (отступ слева)
+\topmargin=-1cm %поля (отступ сверху)
+\textheight=23cm
+
+%\newcommand{\myPictWidth}{.8\textwidth}
+%\graphicspath{{../../../../matlab/statistics2020/}}
+
+\begin{document}
+	\subfile{titlepage}
+	\tableofcontents \newpage
+	% \listoffigures \newpage
+	\listoftables \newpage
+	\subfile{body}
+	
+	\begin{thebibliography}{99}
+		\bibitem{maksimov} Максимов Ю.Д. Математическая статистика: опорный конспект. Учебное пособие. М.: Проспект, 2015. -- 102 с.
+	\end{thebibliography}
+\end{document}
