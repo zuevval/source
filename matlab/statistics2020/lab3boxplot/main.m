@@ -15,7 +15,7 @@ for k = 1:num_iter
         cauchy_data{i,k} = sort(trnd(1,volumes(i),1));
         uniform_data{i,k} = sort(2*sqrt(3).*((rand(volumes(i),1) - .5)));
         laplace_data{i,k} = sort(inv_laplace_cdf(rand(volumes(i),1)));
-        poisson_data{i} = sort(poissinv(rand(volumes(i),1),10));
+        poisson_data{i,k} = sort(poissinv(rand(volumes(i),1),10));
     end
 end
 
@@ -61,4 +61,4 @@ x1 = .5*(5*q1 - 3*q3);
 x2 = .5*(5*q3 - 3*q1);
 p1 = poisscdf(x1, lambda) - poisspdf(x1, lambda);
 p2 = poisscdf(x2, lambda);
-laplace_outl_expected =  1 - p2 + p1;
+poisson_outl_expected =  1 - p2 + p1;
