@@ -12,7 +12,11 @@
 \hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
 \usepackage{subfiles}%включение тех-текста
 \usepackage{graphicx} %изображения
+
 \usepackage{float}%картинки где угодно
+\floatstyle{plaintop} % force caption on top
+\restylefloat{table} % fix table positons with [H] option
+
 \usepackage{textcomp}
 \usepackage{fancyvrb} %fancy verbatim for \VerbatimInput
 \usepackage{dsfont}%мат. символы
@@ -42,17 +46,18 @@
 \topmargin=-1cm %поля (отступ сверху)
 \textheight=23cm
 
-%\newcommand{\myPictWidth}{.8\textwidth}
-%\graphicspath{{../../../../matlab/statistics2020/}}
+\newcommand{\myPictWidth}{.8\textwidth}
+\graphicspath{{../../../../matlab/statistics2020/lab3boxplot/img/}}
 
 \begin{document}
 	\subfile{titlepage}
 	\tableofcontents \newpage
-	% \listoffigures \newpage
+	\listoffigures \newpage
 	\listoftables \newpage
 	\subfile{body}
 	
 	\begin{thebibliography}{99}
 		\bibitem{maksimov} Максимов Ю.Д. Математическая статистика: опорный конспект. Учебное пособие. М.: Проспект, 2015. -- 102 с.
+		\bibitem{sevastianov} Севастьянов Б. А. Курс теории вероятностей и математической статистики. -- М.: Наука, Главная редакция физико-математической литературы, 1982. -- 256 с.
 	\end{thebibliography}
 \end{document}
