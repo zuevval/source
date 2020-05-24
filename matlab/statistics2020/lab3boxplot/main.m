@@ -38,11 +38,11 @@ for dist = dists_info
 end
 
 % outliers
-norm_outliers = average_outliers_frac(norm_data);
-cauchy_outliers = average_outliers_frac(cauchy_data);
-poisson_outliers = average_outliers_frac(poisson_data);
-laplace_outliers = average_outliers_frac(laplace_data);
-uniform_outliers = average_outliers_frac(uniform_data);
+[norm_outliers, norm_outl_var] = average_outliers_frac(norm_data);
+[cauchy_outliers, cauchy_outl_var] = average_outliers_frac(cauchy_data);
+[poisson_outliers, poisson_outl_var] = average_outliers_frac(poisson_data);
+[laplace_outliers, laplace_outl_var] = average_outliers_frac(laplace_data);
+[uniform_outliers, uniform_outl_var] = average_outliers_frac(uniform_data);
 
 % expected outliers - continuous distributions
 norm_outl_expected = outliers_probab(...
