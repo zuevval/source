@@ -1,5 +1,11 @@
 function kernel_density_estimate(data, data_title, data_pdf, discrete)
-x = -4:0.1:4;
+if discrete
+    x = 6:0.1:14;
+    data = data(data >= 6 & data <= 14);
+else
+    x = -4:0.1:4;
+    data = data(data >= -4 & data <= 4);
+end
 h_norm = std(data)*(4/3/numel(data))^(1/5); % optimal bandwidth
 bandwidths = [0.5*h_norm h_norm 2*h_norm];
 subplots = {};
@@ -13,9 +19,9 @@ for i = 1:size(bandwidths, 2)
     yyaxis right
     ylabel('PDF')
     if discrete
-        x = 1:20;
-        y = data_pdf(x);
-        plot(y, '*');
+        x_theory = 6:14;
+        y_theory = data_pdf(x_theory);
+        plot(x_theory, y_theory, '*');
     else
         fplot(data_pdf, 'r')
     end
