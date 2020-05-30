@@ -21,7 +21,7 @@ dists_info = {...
     {'Uniform distribution ($a=-\sqrt{3}, b=\sqrt{3}$)', uniform_data, @(x)(uniform_cdf(x))}...
     {'Gaussian distribution ($\mu=0, \sigma=1$)', norm_data, @(x)normcdf(x)}...
     {'Laplace distribution ($\mu = 0, b=\frac{1}{\sqrt{2}})$', laplace_data, @(x)laplace_cdf(x)}...
-    {'Poisson distribution ($\lambda=10$)', poisson_data, @(x)(poisscdf(x,10)), 'discrete'}};
+    {'Poisson distribution ($\lambda=10$)', poisson_data}};
 
 subplots = {};
 for dist = dists_info
@@ -35,7 +35,13 @@ for dist = dists_info
         ecdf(dist{1,1}{1,2}{1,i})
         ylabel('empirical CDF')
         yyaxis right
-        fplot(dist{1,1}{1,3}, 'r')
+        if numel(dist{1,1}) >= 3
+            fplot(dist{1,1}{1,3}, 'r')
+        else
+            x_poiss_cdf = 2:0.1:20;
+            y_poiss_cdf = poisscdf(x_poiss_cdf, 10);
+            plot(x_poiss_cdf, y_poiss_cdf, 'r');
+        end
         ylabel('CDF')
     end
 end
