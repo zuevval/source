@@ -1,0 +1,59 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+	
+\begin{table}[H]
+	\centering
+	\caption{Матожидание и дисперсия данных, выраженных в процентах}
+	\begin{tabular}{*3r}
+		\toprule
+		Параметр $x$ & $E(x)$ & $D(x)$\\
+		\midrule
+		Уровень занятости & $83.2$ & $0.01$ \\
+		Доля детей до 15 лет с наруш. зрения& $0.069$ & $0.001$ \\
+		Доля людей с наруш. зр., 15-49 лет& $0.157$ & $0.002$ \\
+		Доля людей с наруш. зр., 50 лет и более& $2$ & $5$ \\
+		\bottomrule
+	\end{tabular}
+	\label{table}
+\end{table}
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{blind_vi_log.jpg}
+	\caption{Зависимость числа незрячих от числа людей с нарушениями зрения}
+	\label{img:blind_vi}
+\end{figure}
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{pob_er_0_15.jpg}
+	\caption{Зависимость доли незрячих в возрасте до 15 лет среди всех детей от уровня занятости населения}
+	\label{img:pob_er_0_15}
+\end{figure}
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{pob_er_15_49.jpg}
+	\caption{Зависимость доли незрячих в возрасте от 15 до 50 лет  среди всех людей того же возраста от уровня занятости населения}
+	\label{img:pob_er_15_49}
+\end{figure}
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{pob_er_50_inf.jpg}
+	\caption{Зависимость доли незрячих старше 50 лет  среди всех людей того же возраста от уровня занятости населения}
+	\label{img:pob_er_50_inf}
+\end{figure}
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{blind_lfpr_0_15.jpg}
+	\caption{Зависимость числа незрячих в возрасте до 15 лет среди всех детей от общего числа занятых}
+	\label{img:blind_lfpr_0_15}
+\end{figure}
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{blind_lfpr_15_49.jpg}
+	\caption{Зависимость числа незрячих в возрасте от 15 до 50 лет  среди всех людей того же возраста от общего числа занятых}
+	\label{img:blind_lfpr_15_49}
+\end{figure}
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{blind_lfpr_50_inf.jpg}
+	\caption{Зависимость числа незрячих старше 50 лет  среди всех людей того же возраста от общего числа занятых}
+	\label{img:blind_lfpr_50_inf}
+\end{figure}
+
+	
+\end{document}

@@ -1,0 +1,58 @@
+% !TeX spellcheck = en_US
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} %русский язык, не менять
+\usepackage[T2A, T1]{fontenc} %русский язык, не менять
+\usepackage[english, russian]{babel} %русский язык, не менять
+\usepackage{fontspec} %различные шрифты
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}%мат. символы
+\usepackage{graphicx}
+\usepackage{float}%картинки где угодно
+\floatstyle{plaintop} % force caption on top
+\restylefloat{table} % fix table positons with [H] option
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\setlength{\heavyrulewidth}{1.5pt}
+\setlength{\abovetopsep}{4pt}
+
+\DeclareGraphicsExtensions{.pdf,.png,.jpg}
+\usepackage[linesnumbered, ruled]{algorithm2e}%pseudocode
+\usepackage{subfiles}
+\usepackage{hyperref} %гиперссылки
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true} %гиперссылки
+
+\newcommand{\myPictWidth}{.8\textwidth}
+\graphicspath{{../img/}}
+
+\begin{document}
+\subfile{titlepage}
+\listoftables
+\listoffigures \newpage
+
+\subfile{body}
+
+\newpage
+\section{Ссылки}
+\begin{enumerate}
+	\item Обработанные данные в сводной таблице в формате csv: \linebreak
+	\href{https://github.com/zuevval/source/tree/master/mixed/stats_term_work/data/postprocessed/overall-data.csv}{github.com/zuevval/source/tree/master/mixed/stats\_term\_work/data/\-post\-pro\-ces\-sed/overall-data.csv} \label{link:data}
+	
+	\item Исходный код программ, использовавшихся для обработки таблиц, построения аппроксимаций и иллюстраций: \linebreak \href{https://github.com/zuevval/source/tree/master/mixed/stats_term_work/src}{github.com/zuevval/source/tree/master/mixed/stats\_term\_work/src} \label{link:source}
+\end{enumerate}
+\begin{thebibliography}{99}
+	\bibitem{gdp} GDP by Country. Latest official GDP figures published by the World Bank [Электронный ресурс] // Worldometer, 2017. URL: \url{https://www.worldometers.info/gdp/gdp-by-country}
+	
+	\bibitem{productivity-loss} Smith, T. S. T. et al. Potential lost productivity resulting from the global burden of uncorrected refractive error [Электронный ресурс] // Bulletin of the World Health Organization, 2009 (87), pp. 431-437. URL: \url{https://www.who.int/bulletin/volumes/87/6/08-055673}
+	
+	\bibitem{who-health-life-estimates} Mathers, Colin D. et al. Estimates of healthy life expectancy
+	for 191 countries in the year 2000:
+	methods and results// Global Programme on Evidence for Health Policy Discussion, November 2001, paper No. 38. \url{https://www.who.int/healthinfo/paper38.pdf}
+	
+	\bibitem{who-vi-2002} Reshikoff, S. et al. Global data on visual impairment in the year 2002 [Электронный ресурс] // Bulletin of the World Health Organization, November 2004, 82 (11), pp. 844-851. URL: \url{https://www.who.int/bulletin/volumes/82/11/en/844.pdf}
+	
+	\bibitem{sevastianov} Севастьянов Б. А. Курс теории вероятностей и математической статистики. -- М.: Наука, Главная редакция физико-математической литературы, 1982. -- 256 с.
+\end{thebibliography}
+\end{document}
