@@ -1,11 +1,11 @@
-function [b, a, br, ar] = log_regression_fit(x, y, title_suffix)
+function [b, a, br, ar] = log_regression_fit(x, y, title_suffix, x_label, y_label)
     x = log(x);
     y = log(y);
     
-    [b, a, br, ar] = regression_fit(x, y, title_suffix);
+    [b, a, br, ar] = regression_fit(x, y, title_suffix, x_label, y_label);
     
-    xlabel('x, logarithmic scale')
-    ylabel('y, logarithmic scale')
+    xlabel([x_label ', logarithmic scale'])
+    ylabel([y_label ', logarithmic scale'])
     
     x_ticks = xticks;
     x_ticks = x_ticks(2:2:end);
