@@ -10,8 +10,8 @@ function [b, a, br, ar] = regression_fit(x, y, y_ideal, title_suffix)
     % least squares
     mx = mean(x);
     my = mean(y);
-    a = (mean(x.*y) - mx*my)/(mean(x.^2) - mx.^2);
-    b = my - a*mx;
+    b = (mean(x.*y) - mx*my)/(mean(x.^2) - mx.^2);
+    a = my - b*mx;
     y_least_sq = b*x + a;
     plot(x, y_least_sq, '--r')
 
