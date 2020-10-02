@@ -24,7 +24,7 @@ def calc_score(seq_top: str, seq_bottom: str, skip_char="-") -> int:
             assert top == skip_char or bot == skip_char, \
                 "invalid alignment: pair is neither in matrix nor contains missed acid"
             skipped_acids += 1
-    if skipped_acids > 0:  # if ended within a gap
+    if skipped_acids > 0:  # if alignment ended within a gap
         result -= gap_penalty(skipped_acids)
     return result
 
@@ -56,5 +56,5 @@ def human_to_nematode() -> int:
 if __name__ == "__main__":
     test_simple()
     test_with_gap()
-    print(str(human_to_lupin()) + ": human alpha globin aligned to lupin leghemoglobin")
-    print(str(human_to_nematode()) + ": human alpha globin aligned to nematode glutathione-s-transferase")
+    print(str(human_to_lupin()) + ": human alpha-globin aligned to lupin leghemoglobin")
+    print(str(human_to_nematode()) + ": human alpha-globin aligned to nematode glutathione-s-transferase")
