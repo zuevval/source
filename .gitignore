@@ -1,6 +1,9 @@
 #special
 python/stu_labs/lab3blosum/alignments/**
 
+# R
+.Rhistory
+
 # Python
 **/__pycache__/
 
@@ -102,3 +105,4 @@ dkms.conf
 *.war
 *.class
 
+.Rproj.user

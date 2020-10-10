@@ -1,0 +1,9 @@
+Package: lab1bayes
+Title: Naive Bayes classifier
+Version: 0.1
+Authors@R: person("Valerii", "Zuev", email = "valera.zuev.zva@gmail.com",
+                  role = c("aut", "cre"))
+Description: Training naive Bayes classifier
+Depends: R (>= 3.1.0)
+License: Apache 2.0
+LazyData: true
