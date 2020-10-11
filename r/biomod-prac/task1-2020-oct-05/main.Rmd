@@ -1,0 +1,66 @@
+---
+title: "Task 1. Valerii Zuev"
+output: html_notebook
+---
+First, we read data from input files: <br>
+data1 (rows - species, columns - features) <br>
+data2 (rows - SNPs, columns - species)
+```{r}
+data1 <- read.table("./test_data1.txt", header=TRUE)
+data2 <- read.csv("./test_data2.csv")
+
+data1
+data2
+```
+1. From each table we exclude species that are not present in the other.
+
+In the `data1` table species are in rows, whereas in the `data2` table species are in columns
+```{r}
+species_data1 <- unlist(as.list(data1["Sample"]), use.names=FALSE)
+species_data2 <- unlist(colnames(data2))
+common_species <- intersect(species_data1, species_data2)
+common_species
+data1_filtered <- subset(data1, Sample %in% common_species)
+data2_filtered <- data2[common_species]
+```
+2. (a) Excluding features which value is unknown for more than 80% of species:
+```{r}
+len_d1f <- nrow(data1_filtered)
+data1_filtered2 <- data1_filtered[apply(data1_filtered, 2, function(x){sum(is.na(x)) <= 0.8 * len_d1f})]
+```
+2. (b) Excluding species with one or more unknown feature(s):
+```{r}
+d1_row_filter <- apply(data1_filtered2, 1, function(x){sum(is.na(x)) == 0})
+filtered_species <- data1_filtered2[d1_row_filter, 1]
+snp <- data2[filtered_species]
+snp$ID <- unlist(data2[1])
+features <- data1_filtered2[d1_row_filter, ]
+
+features
+```
+3. Replacing unknown SNPs with zeros:
+```{r}
+snp[is.na(snp)] <- 0
+snp
+```
+4. Calculating means of features and medians of SNPs:
+```{r}
+only_numeric <- function(df){df[sapply(seq_len(ncol(df)), function(x){is.numeric(df[, x])})]}
+colMeans(only_numeric(features))
+apply(only_numeric(snp), 2, function(x){median(unlist(x))})
+```
+5. (a) These species are present in the first table, but not in the second:
+```{r}
+unique(c(setdiff(species_data1,species_data2)))
+```
+5. (b) These species are absent in the first table, but exist in the second:
+```{r}
+unique_data2 <- unique(c(setdiff(species_data2, species_data1)))
+unique_data2[sapply(unique_data2, function(x){substring(x, 1, 1) == "V"})]
+```
+6. Adding data to SNP table: chromosome index, SNP position on the chromosome
+```{r}
+snp$chromosome <- replicate(nrow(snp), NA)
+snp$position <- replicate(nrow(snp), NA)
+snp
+```
