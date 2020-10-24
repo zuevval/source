@@ -22,8 +22,8 @@ class Condition:
         return not (sv_truth_list[self.a_idx] and sv_truth_list[self.b_idx])
 
 
-def search_chromosome(sv_bounds: List[Tuple[int, int]], k_conditions_pairs: List[Tuple[int, int]],
-                      l_conditions_pairs: List[Tuple[int, int]]) -> int:
+def search_chr(sv_bounds: List[Tuple[int, int]], k_conditions_pairs: List[Tuple[int, int]],
+               l_conditions_pairs: List[Tuple[int, int]]) -> int:
     n_svs = len(sv_bounds)  # assuming that enumeration starts from 0
     n_chromosomes = max(interval[1] for interval in sv_bounds) + 1  # assuming that enumeration starts from 0
     conditions = [Condition(ConditionType.K, a_i, b_i) for a_i, b_i in k_conditions_pairs]
@@ -64,10 +64,25 @@ def search_chromosome(sv_bounds: List[Tuple[int, int]], k_conditions_pairs: List
     return -1
 
 
+def subtract_one(array: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    return [(pair[0] - 1, pair[1] - 1) for pair in array]
+
+
+def search_chromosome(sv_bounds: List[Tuple[int, int]], k_conditions_pairs: List[Tuple[int, int]],
+                      l_conditions_pairs: List[Tuple[int, int]]) -> int:
+    ans = search_chr(subtract_one(sv_bounds), subtract_one(k_conditions_pairs), subtract_one(l_conditions_pairs))
+    return ans + 1 if ans != -1 else ans
+
+
 def main():
     sv_bounds = [(0, 2), (1, 9), (2, 4), (7, 8)]
     k_conditions_pairs = [(0, 1), (2, 3)]
     l_conditions_pairs = [(0, 2)]
+    print(search_chr(sv_bounds, k_conditions_pairs, l_conditions_pairs))
+
+    sv_bounds = [(1, 3), (2, 10), (3, 5), (8, 9)]
+    k_conditions_pairs = [(1, 2), (3, 4)]
+    l_conditions_pairs = [(1, 3)]
     print(search_chromosome(sv_bounds, k_conditions_pairs, l_conditions_pairs))
 
 
