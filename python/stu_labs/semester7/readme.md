@@ -21,22 +21,23 @@
 Временная сложность проверок и изменений значений в булевом массиве - O(N), поэтому снова сложность O(K + L + N).
 
 # Реализация
+Алгоритм в файле [sv-search.py](https://github.com/zuevval/source/blob/master/python/stu_labs/semester7/sv_search.py)
 1. Составляем словарь:
     ```python
     sv_affects_conditions: DefaultDict[int, Set[int]] = defaultdict(set)
-        for cond_idx, cond in enumerate(conditions):
-            for sv_idx in [cond.a_idx, cond.b_idx]:
-                sv_affects_conditions[sv_idx].add(cond_idx)
+    for cond_idx, cond in enumerate(conditions):
+        for sv_idx in [cond.a_idx, cond.b_idx]:
+            sv_affects_conditions[sv_idx].add(cond_idx)
     ```
    Также создаём два словаря, в которых будем хранить соответствие индекса хромосомы и начинающихся/кончающихся на этом
    индексе интервалов СВ (это для того, чтобы можно было потом узнать по индексу хромосомы за O(1), какие СВ на ней
    начинаются и заканчиваются):
    ```python
     sv_starts: DefaultDict[int, List[int]] = defaultdict(list)
-        sv_stops: DefaultDict[int, List[int]] = defaultdict(list)
-        for sv_idx, sv_interval in enumerate(sv_bounds):
-            sv_starts[sv_interval[0]].append(sv_idx)
-            sv_stops[sv_interval[1] + 1].append(sv_idx)
+    sv_stops: DefaultDict[int, List[int]] = defaultdict(list)
+    for sv_idx, sv_interval in enumerate(sv_bounds):
+        sv_starts[sv_interval[0]].append(sv_idx)
+        sv_stops[sv_interval[1] + 1].append(sv_idx)
     ```
 1. Создаём массив булевых переменных, который будет меняться при итерировании по M хромосомам:
     ```python
