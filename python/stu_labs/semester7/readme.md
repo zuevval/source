@@ -75,3 +75,20 @@
     ```python
     return -1
     ``` 
+**Замечание.** Временную сложность последнего цикла в теории можно легко уменьшить с O(K + L + M + N) до O(K + L + M),
+если при инициализации словарей `sv_starts` и `sv_stops` включать только те СВ, которые на что-то влияют:
+```python
+used_svs: Set[int] = set() # init a set of SVs which affect some conditions
+for cond_idx, cond in enumerate(conditions):
+    for sv_idx in [cond.a_idx, cond.b_idx]:
+        sv_affects_conditions[sv_idx].add(cond_idx)
+        used_svs.add(sv_idx) # add this SV to our set
+sv_starts: DefaultDict[int, List[int]] = defaultdict(list)
+sv_stops: DefaultDict[int, List[int]] = defaultdict(list)
+for sv_idx, sv_interval in enumerate(sv_bounds):
+    if sv_idx not in used_svs: # filter SVs
+        break
+    sv_starts[sv_interval[0]].append(sv_idx)
+    sv_stops[sv_interval[1] + 1].append(sv_idx)
+```
+Впрочем, это несколько загромождает код, притом вряд ли даёт существенный выигрыш.
