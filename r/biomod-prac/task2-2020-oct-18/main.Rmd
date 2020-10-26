@@ -1,0 +1,35 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(types)
+library('data.table')
+# setwd("E:/Users/vzuev/github-zuevval/source/r/biomod-prac/task2-2020-oct-18")
+data1 <- fread("./test_data_01.csv")
+is_numeric_str <- function(x){
+  length(grep("^([0-9]|[-. ])+$", x)) > 0
+}
+fix_element <- function(x) {
+  if(is_numeric_str(x)){
+      return(gsub(' ', '', (x)))
+  }
+  return(x)
+}
+fix_data <- function(dm = ? data.frame){
+  apply(dm, c(1,2), fix_element)
+}
+col_to_numeric <- function(x) {
+  if(is_numeric_str(x)){
+    return (as.numeric(x))
+  }
+  return (x)
+}
+data1
+data1_str <- apply(data1, c(1,2), as.character)
+data1_fixed <- fix_data(data1_str)
+data1_fixed
+numeric_cols <- apply(data1_fixed, 2, is_numeric_str)
+d <- transform(data1_fixed, V1 = as.numeric(V1))
+```

@@ -1,0 +1,57 @@
+---
+title: "Homework 3 | Valerii Zuev"
+output: html_notebook
+---
+
+0. Preparing workplace
+
+```{r}
+library('types')
+library('data.table')
+library('ggplot2')
+library('dplyr')
+
+sales <- fread('./sales.csv', encoding="UTF-8")
+```
+
+1. Plotting data and fitting linear regression
+
+```{r}
+ggplot(sales, aes(x=sale,y=income, colour=shop)) +
+  geom_point(shape=1) +
+  geom_smooth(method=lm)
+```
+
+Displaying statistics by shop (separately for winter/summer)
+
+```{r}
+pd <- position_dodge(.1)
+
+ggplot(sales, aes(x=shop, y=income, colour=season)) + 
+  stat_summary(position=pd) +
+  ggtitle("Average sales by shop with confidence intervals")
+
+```
+
+Displaying statistic by year (separately for shop 1 / shop 2)
+
+```{r}
+half_interval <- function(x) {
+  1.96 * sd(x)/sqrt(length(x))
+}
+
+sales_grouped <- group_by(sales, shop, date)
+sales_summary <- summarise(sales_grouped, 
+                 sale_mean = mean(sale), 
+                 sale_max = mean(sale) + half_interval(sale),
+                 sale_min = mean(sale) - half_interval(sale))
+
+pd <- position_dodge(.3)
+ggplot(sales_summary, aes(x=date, y=sale_mean, colour=shop)) + 
+  geom_errorbar(aes(ymin=sale_min, ymax=sale_max), width=.2, position=pd) +
+  geom_line(position=pd) +
+  geom_point(position=pd) +
+  xlab("year") +
+  ylab("sales") +
+  ggtitle("Average sales by year with confidence intervals")
+```
