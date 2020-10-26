@@ -22,6 +22,7 @@ common_species <- intersect(species_data1, species_data2)
 common_species
 data1_filtered <- subset(data1, Sample %in% common_species)
 data2_filtered <- data2[common_species]
+data2_filtered$ID <- data2[1]
 ```
 2. (a) Excluding features which value is unknown for more than 80% of species:
 ```{r}
@@ -60,7 +61,7 @@ unique_data2[sapply(unique_data2, function(x){substring(x, 1, 1) == "V"})]
 ```
 6. Adding data to SNP table: chromosome index, SNP position on the chromosome
 ```{r}
-snp$chromosome <- replicate(nrow(snp), NA)
-snp$position <- replicate(nrow(snp), NA)
+snp$chromosome <- unlist(lapply(snp$ID, function(x){as.numeric(sub("C([0-9]+).*", "\\1", x))}))
+snp$position <- unlist(lapply(snp$ID, function(x){as.numeric(sub(".*:([0-9]+)", "\\1", x))}))
 snp
 ```
