@@ -1,5 +1,5 @@
 import pytest
-from .sv_search import search_chr, search_chromosome
+from stu_labs.semester7.sv_search import search_chr, search_chromosome
 from .testing_utils import Case, check, visualize
 
 SEARCH_CHR_TEST_CASES = [
@@ -53,4 +53,4 @@ def test_search_chr(case: Case) -> None:
 def test_search_chromosome(case: Case) -> None:
     answer = search_chromosome(case.sv_bounds, case.k_conditions_pairs, case.l_conditions_pairs)
     check(case, answer)
-    visualize(case, answer, "./out/test_search_chromosome.txt")
+    visualize(case, answer, "out/test_search_chromosome.txt")

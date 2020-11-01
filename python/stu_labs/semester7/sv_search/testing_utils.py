@@ -82,4 +82,4 @@ if __name__ == "__main__":
     visualize(Case(name="basic",
                    sv_bounds=[(1, 3), (2, 10), (3, 5), (8, 9)],
                    k_conditions_pairs=[(1, 2), (3, 4)],
-                   l_conditions_pairs=[(1, 3)]), answer=4, out_filename="./out/visualize_example.txt")
+                   l_conditions_pairs=[(1, 3)]), answer=4, out_filename="out/visualize_example.txt")
