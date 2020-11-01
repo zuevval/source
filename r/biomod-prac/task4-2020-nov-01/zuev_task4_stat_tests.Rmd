@@ -8,7 +8,9 @@ Preparing workspace
 df = read.table("E:/Users/vzuev/stu/mat-mod-bio/prac/task1-2020-oct-05/test_data1.txt", header=TRUE)
 df
 ```
-1. Let's test `GenBMatur` for normality.
+# Part 1. Statisitcal hypotheses for quantitative features
+
+Let's test `GenBMatur` for normality.
 ```{r}
 shapiro.test(df$GenmBMatur)
 ```
@@ -23,18 +25,22 @@ No, here we definitely reject the null hypothesis ("data is normally distributed
 Dividing data into subgroups by `GrowthType`:
 ```{r}
 df$NonZeroGrowthType <- df$GrowthType > 0
-shapiro.test(df[df$NonZeroGrowthType, ] $GenmBMatur)
-shapiro.test(df[!df$NonZeroGrowthType, ] $GenmBMatur)
-
-shapiro.test(df[df$NonZeroGrowthType, ] $GenmBMatur)
-shapiro.test(df[!df$NonZeroGrowthType, ] $GenmBMatur)
-
 df$NonZeroPolegaemost <- df$Polegaemost > 0
-shapiro.test(df[df$NonZeroPolegaemost, ] $Protein)
-shapiro.test(df[!df$NonZeroPolegaemost, ] $Protein)
-
-shapiro.test(df[df$NonZeroPolegaemost, ] $Protein)
-shapiro.test(df[!df$NonZeroPolegaemost, ] $Protein)
+l <- list(GenmBMatur_NonZeroGrowthType=df[df$NonZeroGrowthType, ] $GenmBMatur,
+         GenmBMatur_ZeroGrowthType=df[!df$NonZeroGrowthType, ] $GenmBMatur,
+         GenmBMatur_NonZeroPolegaemost=df[df$NonZeroPolegaemost, ] $GenmBMatur,
+         GenmBMatur_ZeroPolegaemost=df[!df$NonZeroPolegaemost, ] $GenmBMatur,
+         Protein_NonZeroGrowthType=df[df$NonZeroGrowthType, ] $Protein,
+         Protein_ZeroGrowthType=df[!df$NonZeroGrowthType, ] $Protein,
+         Protein_NonZeroPolegaemost=df[df$NonZeroPolegaemost, ] $Protein,
+         Protein_ZeroPolegaemost=df[!df$NonZeroPolegaemost, ] $Protein
+         )
+lapply(names(l), function(name){
+  x <- unlist(l[name])
+  hist(x, col="gray", border="white", main=name)
+  print(name)
+  print(shapiro.test(x)) # with `print` the output is printed twice, without - in the wrong place. Don't know how to fix
+})
 ```
 Seems that `Protein` does depends neither on `GrowthType` nor on `Polegaemost`.
 
@@ -60,4 +66,36 @@ t.test(Protein ~ NonZeroPolegaemost, df)
 my.t_test(df$Protein, df$NonZeroPolegaemost)
 
 ```
+# Part 2. Chi-squared goodness-of-fit test
+Computing a built-in Chi-squared test:
+```{r echo=FALSE}
+ch_test <- chisq.test(table(df$NonZeroGrowthType, df$NonZeroPolegaemost))
+cat("\n")
+print(ch_test$statistic)
+```
+Computing manually:
+```{r}
+chisq_value <- sum((ch_test$expected - ch_test$observed)^2/ch_test$expected)
+print(chisq_value)
+```
+Now plotting a distribution:
+```{r}
 
+# degrees of freedom df=4
+dof = 4
+curve(dchisq(x, df = dof), from = 0, to = 30,
+main = 'Chi-Square Distribution (degrees of freedom: 4)',
+ylab = 'Density',
+lwd = 2)
+
+# with df=4, the 95th percentile ~ 9.48773
+max_accept_x <- 9.5
+x_samples <- seq(0, max_accept_x, by=0.1)
+p_samples <- dchisq(x_samples, df = dof)
+polygon(c(x_samples, rev(x_samples)), c(p_samples, rep(0, length(p_samples))), col = adjustcolor('red', alpha=0.3), border = NA)
+abline(v = max_accept_x, col="blue", lwd=3, lty=2)
+text(c(max_accept_x + 1), c(0.1), c("maximum value (alpha=0.05)"), pos=3,srt = 90, col="red")
+
+abline(v = chisq_value, col="blue", lwd=3, lty=2)
+text(c(chisq_value + 1), c(0.1), c("measured value"), pos=3, srt=90, col="red")
+```
