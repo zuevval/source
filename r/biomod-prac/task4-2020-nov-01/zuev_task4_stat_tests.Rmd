@@ -4,7 +4,7 @@ output: html_notebook
 ---
 Preparing workspace
 
-```{r echo=FALSE}
+```{r}
 df = read.table("E:/Users/vzuev/stu/mat-mod-bio/prac/task1-2020-oct-05/test_data1.txt", header=TRUE)
 df
 ```

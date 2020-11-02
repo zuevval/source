@@ -1,0 +1,52 @@
+% compile with XeLaTeX or LuaLaTeX
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+
+\begin{document}
+	\subfile{titlepage}
+	
+	\section{Выбор гена}
+	Для исследования был выбран ген белка ATP13A2.
+	\section{Результат обращения к GenBank}
+	В результате поиска в базе данных GenBank выбран транскрипт мРНК \href{https://www.ncbi.nlm.nih.gov/nuccore/NM_022089.4}{NM\_022089.4} исследуемого гена и соответствующая аминокислотная последовательность \href{https://www.ncbi.nlm.nih.gov/protein/13435129}{NP\_071372.1}, полученная \textit{in silico}.
+	\section{Поиск гомологов гена при помощи BLAST (tblastn)}
+	По белковой последовательности проведены поиски гомологов для восьми организмов в базе данных последовательностей нуклеотидов с использованием веб-инструмента tblastn. Ниже приведена информация о видах и соответствующих транскриптах, которые были отобраны инструментом tblastn как наиболее похожие на белок человека:
+	\begin{enumerate}
+		\item Pan troglodytes -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_016954962.2}{XM\_016954962.2} 
+		\item Pan paniscus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_034956516.1}{XM\_034956516.1} 
+		\item Macaca mulatta -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_001087655.4}{XM\_001087655.4}
+		\item Mus musculus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/NM_029097.3}{NM\_029097.3}
+		\item Rattus norvegicus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_006239246.3}{XM\_006239246.3}
+		\item Canis familiaris -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_005617949.3}{XM\_005617949.3}
+		\item Felis catus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_023258195.1}{XM\_023258195.1}
+		\item Bos taurus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/NM_001192271.3}{NM\_001192271.3}
+	\end{enumerate}
+	\section{Построение множественного выравнивания}
+	При помощи утилиты CLUSTALW составлено множественное выравнивание найденных девяти нуклеотидных и соответствующих аминокислотных последовательностей. Затем средствами модуля SeqIO программнгого пакета BioPython выравнивания переведены в формат .fasta.
+	\section{Анализ консервативных участков и структурных вариаций}
+	Как в случае нуклеотидного, так и в случае аминокислотного мультивыравнивания найдены обширные консервативные участки длиной до 26 нуклеотидов / 33 аминокислот. Тем не менее, заметно большое количество однонуклеотидных полиморфизмов, а на правом конце выравнивания присутствуют инсерции/делеции. Не удалось вручную выявить участки транслокаций или инверсий, поэтому возможности улучшить выравнивание не найдены.
+	
+	\section{Вариабельные блоки}
+	Оба выравнивания в FASTA-формате прилагаются к отчёту в отдельных файлах. Также прилагаются в отдельных .fasta-файлах избранные участки последовательностей нуклеотидов и аминокислот, содержащие вариации.
+	\section{Описание исследуемого гена}
+	Белок ATP13A2 (Probable cation-transporting ATPase), синтезируемый соответствующим геном, несёт транспортную функцию в клетках - переносит неорганические катионы (металлов) через клеточные мембраны; был обнаружен, к примеру, во внутриклеточных структурах нейронов \cite{omim}.
+	\begin{thebibliography}{99}
+		\bibitem{omim} ATPase, TYPE 13A2; ATP13A2 [Электронный ресурс] // Online Mendelian Inheritance in Man, 2020. URL: \url{https://www.omim.org/entry/610513}
+	\end{thebibliography}
+		
+		
+\end{document}
