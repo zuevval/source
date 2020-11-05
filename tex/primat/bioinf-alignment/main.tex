@@ -15,6 +15,14 @@
 \usepackage{subfiles}
 \usepackage{hyperref}
 \hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
 
 \begin{document}
 	\subfile{titlepage}
@@ -31,22 +39,25 @@
 		\item Macaca mulatta -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_001087655.4}{XM\_001087655.4}
 		\item Mus musculus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/NM_029097.3}{NM\_029097.3}
 		\item Rattus norvegicus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_006239246.3}{XM\_006239246.3}
-		\item Canis familiaris -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_005617949.3}{XM\_005617949.3}
+		\item Canis lupus familiaris -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_005617949.3}{XM\_005617949.3}
 		\item Felis catus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/XM_023258195.1}{XM\_023258195.1}
 		\item Bos taurus -- \href{https://www.ncbi.nlm.nih.gov/nuccore/NM_001192271.3}{NM\_001192271.3}
 	\end{enumerate}
 	\section{Построение множественного выравнивания}
-	При помощи утилиты CLUSTALW составлено множественное выравнивание найденных девяти нуклеотидных и соответствующих аминокислотных последовательностей. Затем средствами модуля SeqIO программнгого пакета BioPython выравнивания переведены в формат .fasta.
+	При помощи утилиты CLUSTALW и графической оболочки MEGA составлено множественное выравнивание найденных девяти нуклеотидных последовательностей и соответствующих триплетов аминокислотных последовательностей.
 	\section{Анализ консервативных участков и структурных вариаций}
-	Как в случае нуклеотидного, так и в случае аминокислотного мультивыравнивания найдены обширные консервативные участки длиной до 26 нуклеотидов / 33 аминокислот. Тем не менее, заметно большое количество однонуклеотидных полиморфизмов, а на правом конце выравнивания присутствуют инсерции/делеции. Не удалось вручную выявить участки транслокаций или инверсий, поэтому возможности улучшить выравнивание не найдены.
+	Выравнивание аминокислотных последовательностей, полученное при помощи CLUSTALW, содержит пробелы в середине, которых не было в аминокислотном выравнивании. При трансляции нуклеотидного выравнивания в белковое видно, что это приводит к очевидно сдвинутым последовательностям (примеры приведены в приложении, см. рисунки \ref{fig:defect1} и \ref{fig:defect2}). Это было исправлено добавлением вручную пробелов в аминокислотное выравнивание.
 	
 	\section{Вариабельные блоки}
-	Оба выравнивания в FASTA-формате прилагаются к отчёту в отдельных файлах. Также прилагаются в отдельных .fasta-файлах избранные участки последовательностей нуклеотидов и аминокислот, содержащие вариации.
+	Написан скрипт для выбора из выравнивания участков заданной длины и в каждом выравнивании выбраны по три блока из 30 символов, содержащие полиморфизмы. Код \href{https://github.com/zuevval/source/blob/master/python/bioinf_practice/needles/random_subalignment.py}{доступен на GitHub}.\\
+	Полученные участки последовательностей нуклеотидов и аминокислот, содержащие вариации, прилагаются к отчёту в .fas-файлах. Также к отчёту прилагаются полные выравнивания, как аминокислотное, так и исправленное нуклеотидное.
 	\section{Описание исследуемого гена}
 	Белок ATP13A2 (Probable cation-transporting ATPase), синтезируемый соответствующим геном, несёт транспортную функцию в клетках - переносит неорганические катионы (металлов) через клеточные мембраны; был обнаружен, к примеру, во внутриклеточных структурах нейронов \cite{omim}.
 	\begin{thebibliography}{99}
 		\bibitem{omim} ATPase, TYPE 13A2; ATP13A2 [Электронный ресурс] // Online Mendelian Inheritance in Man, 2020. URL: \url{https://www.omim.org/entry/610513}
 	\end{thebibliography}
-		
+
+	\newpage
+	\subfile{appendix}		
 		
 \end{document}
