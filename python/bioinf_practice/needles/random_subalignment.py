@@ -19,12 +19,20 @@ def random_sub_alignment(lines: List[str], length: int) -> Tuple[List[str], List
     return result, sub_alignment
 
 
+def is_good_variational(sub_aln: List[str]) -> bool:
+    for idx in [0, -1]:
+        aln_slice = [s[idx] for s in sub_aln]
+        if aln_slice.count(aln_slice[0]) == len(aln_slice):
+            return False
+    return True
+
+
 def parse_fasta(input_filename: str, output_filename: str, length: int = 30) -> None:
     with open(input_filename) as infile:
         lines = [line.strip() for line in infile.readlines()]
         result, sub_aln = random_sub_alignment(lines, length)
         pprint(sub_aln)
-        while input("accept? y/n\n").strip().lower() != "y":
+        while not is_good_variational(sub_aln) or input("accept? y/n\n").strip().lower() != "y":
             result, sub_aln = random_sub_alignment(lines, length)
             pprint(sub_aln)
     result = [line + "\n" for line in result]
@@ -36,8 +44,8 @@ def parse_fasta(input_filename: str, output_filename: str, length: int = 30) -> 
 
 def main():
     for file_idx in range(1, 4):
-        parse_fasta("data/proteins-aligned.fas", "data/out/proteins-aligned-" + str(file_idx) + ".fas")
-        parse_fasta("data/seq-aligned-fixed.fas", "data/out/seq-aligned-" + str(file_idx) + ".fas")
+        parse_fasta("data/proteins-aligned_outgroup.fas", "data/out/proteins-aligned_outgroup-" + str(file_idx) + ".fas")
+        parse_fasta("data/seq-aligned_outgroup_fixed.fas", "data/out/seq-aligned_outgroup-" + str(file_idx) + ".fas")
 
 
 if __name__ == "__main__":
