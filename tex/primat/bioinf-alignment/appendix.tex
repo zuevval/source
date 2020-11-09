@@ -1,6 +1,7 @@
 \documentclass[main.tex]{subfiles}
 \begin{document}
-	\section{Приложение: добавление пропусков в нуклеотидное мультивыравнивание}
+	\section{Приложения}
+	\subsection{Добавление пропусков в нуклеотидное мультивыравнивание}
 	На рис. \ref{fig:1} приведены примеры исправления аминокислотного мультивыравнивания.
 	\begin{figure}[H]
 		\centering
@@ -32,4 +33,26 @@
 		\caption{Участки аминокислотного мультивыравнивания (вверху каждого изображения) и транслированного аминокислотного (внизу). Строка из пропусков служит для визуального разделения}
 		\label{fig:1}
 	\end{figure}
+
+	\newpage
+	\subsection{Танглограммы}
+	Приведены построенные танглограммы: для аминокислотных (рис. \ref{fig:tanglegram_dna1}, \ref{fig:tanglegram_dna2}, \ref{fig:tanglegram_dna3}) и белковых выравниваний (рис. \ref{fig:tanglegram_protein1}, \ref{fig:tanglegram_protein2}, \ref{fig:tanglegram_protein3})
+	
+	\newcommand{\mypicture}[2]{
+		\begin{figure}[H]
+			\centering \includegraphics[width=\myPictWidth]{#1}
+			\caption{#2}
+			\label{fig:#1}
+		\end{figure}
+	}
+
+	\mypicture{tanglegram_dna1}{Танглограмма для нуклеотидных последовательностей. Слева: дерево, построенное по подвыравниванию длины 30 оснований, справа: дерево, построенное по полному выравниванию.}
+	\mypicture{tanglegram_dna2}{Ещё одна танглограмма для нуклеотидных выравниваний}
+	\mypicture{tanglegram_dna3}{Ещё одна танглограмма для нуклеотидных выравниваний}
+	\mypicture{tanglegram_protein1}{Пример танглограммы для белковых последовательностей. Слева: дерево, построенное по подвыравниванию длины 30 аминокислотных остатков, справа: дерево, построенное по полному выравниванию.}
+	\mypicture{tanglegram_protein2}{Ещё одна танглограмма для аминокислотных выравниваний}
+	\mypicture{tanglegram_protein3}{Ещё одна танглограмма для аминокислотных выравниваний}
+	
+
+	
 \end{document}
