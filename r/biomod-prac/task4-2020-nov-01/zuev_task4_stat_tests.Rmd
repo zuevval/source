@@ -2,70 +2,125 @@
 title: "Statistical Tests | Zuev"
 output: html_notebook
 ---
-Preparing workspace
+Preparing workspace:
 
-```{r}
-df = read.table("E:/Users/vzuev/stu/mat-mod-bio/prac/task1-2020-oct-05/test_data1.txt", header=TRUE)
+```{r results=FALSE, message=FALSE, warning=FALSE}
+library(here) # for relative paths
+library(tidyverse) # dplyr + ggplot2 + much more
+data_path <- "r/biomod-prac/task4-2020-nov-01/"
+df <- read.table(here(paste0(data_path, "nut.csv")), sep = ",", header = TRUE)
 df
 ```
 # Part 1. Statisitcal hypotheses for quantitative features
 
-Let's test `GenBMatur` for normality.
+Testing `Germ` for normality:
 ```{r}
-shapiro.test(df$GenmBMatur)
+shapiro.test(df$Germ)
 ```
-such a good p-value!
+Here
+$$ W = \frac{\sum^n_{i=1} a_i \cdot x_{(i)}}{\sum^n_{i=1} (x_i - \overline{x})^2} $$
+where $x=df$Germ$ and $a_i$ are constant for given $n$.
 
-What about `Protein`?
+p-value less than 0.05 tells us that we should reject the null hypothesis (the sample comes from a normally distributed population) for significance level $\alpha=0.05$.
+
+What about `NoPodsWeight`?
 ```{r}
-shapiro.test(na.omit(df$Protein))
+shapiro.test(df$NoPodsWeight)
 ```
-No, here we definitely reject the null hypothesis ("data is normally distributed") for $\alpha$-level 0.05 ($p-value > \alpha$).
+As we see, for $p-value > \alpha$ for $\alpha=0.05$, so we cannot reject the null hypothesis.
 
-Dividing data into subgroups by `GrowthType`:
+Dividing data into subgroups by `BushShape` and `StemBr2ord`:
 ```{r}
-df$NonZeroGrowthType <- df$GrowthType > 0
-df$NonZeroPolegaemost <- df$Polegaemost > 0
-l <- list(GenmBMatur_NonZeroGrowthType=df[df$NonZeroGrowthType, ] $GenmBMatur,
-         GenmBMatur_ZeroGrowthType=df[!df$NonZeroGrowthType, ] $GenmBMatur,
-         GenmBMatur_NonZeroPolegaemost=df[df$NonZeroPolegaemost, ] $GenmBMatur,
-         GenmBMatur_ZeroPolegaemost=df[!df$NonZeroPolegaemost, ] $GenmBMatur,
-         Protein_NonZeroGrowthType=df[df$NonZeroGrowthType, ] $Protein,
-         Protein_ZeroGrowthType=df[!df$NonZeroGrowthType, ] $Protein,
-         Protein_NonZeroPolegaemost=df[df$NonZeroPolegaemost, ] $Protein,
-         Protein_ZeroPolegaemost=df[!df$NonZeroPolegaemost, ] $Protein
-         )
-lapply(names(l), function(name){
-  x <- unlist(l[name])
-  hist(x, col="gray", border="white", main=name)
+l <- list(
+  germ_bush_shape0 = filter(df, BushShape == 0)$Germ,
+  germ_bush_shape1 = filter(df, BushShape == 1)$Germ,
+  nopw_bush_shape0 = filter(df, BushShape == 0)$NoPodsWeight,
+  nopw_bush_shape1 = filter(df, BushShape == 1)$NoPodsWeight,
+  germ_stem0 = filter(df, StemBr2ord == 0)$Germ,
+  germ_stem1 = filter(df, StemBr2ord == 1)$Germ,
+  nopw_stem0 = filter(df, StemBr2ord == 0)$NoPodsWeight,
+  nopw_stem1 = filter(df, StemBr2ord == 1)$NoPodsWeight
+)
+titles <- list(
+  germ_bush_shape0 = "Germ (BushShape=0)",
+  germ_bush_shape1 = "Germ (BushShape=1)",
+  nopw_bush_shape0 = "NoPodsWeight (BushShape=0)",
+  nopw_bush_shape1 = "NoPodsWeight (BushShape=1)",
+  germ_stem0 = "Germ (StemBr2ord=0)",
+  germ_stem1 = "Germ (StemBr2ord=1)",
+  nopw_stem0 = "NoPodsWeight (StemBr2ord=0)",
+  nopw_stem1 = "NoPodsWeight (StemBr2ord=1)"
+)
+
+lapply(names(l), function(name) {
+  x <- na.omit(unlist(l[name]))
+  h <- hist(x, col = "gray", border = "white",
+            main = paste0(titles[name], "\n blue: estimated Gaussian distribution density (not to scale)"))
+  print(min(na.omit(x)))
+  print(max(x))
+  x_range <- seq(min(x), max(x), by = .1)
+  y_range <- dnorm(x_range, mean = mean(x), sd = sd(x)) *
+    diff(h$mids[1:2]) *
+    length(x) *
+    .9
+  lines(x_range, y_range, col = "blue", lwd = 2)
+  print(mean(x))
   print(name)
   print(shapiro.test(x)) # with `print` the output is printed twice, without - in the wrong place. Don't know how to fix
 })
 ```
-Seems that `Protein` does depends neither on `GrowthType` nor on `Polegaemost`.
+What do we see here?
 
-Performing T-test:
+1. `Germ`, of course, cannot be distributed normally in any subgroup of our data, since it takes only 3 values.
+2. `NoPodsWeight` distribution is more biased for those plants where `BushShape` is 0 and more symmetric for plants with `BushShape` = 1. And we can see that in the first case Shapiro-Wilk test shows a p-value $\approx 0.04$, which means that we reject the hypothesis of normality. The `StemBr2ord` type seems to have little effect on `NoPodsWeight`, but the distribution of `NoPodsWeight` is slightly less normal for `StemBr2ord`=0
+
+Let's perform several *F-tests* which may tell us whether two subgroups come from the same distribution by comparing their variances:
 ```{r}
-my.t_test <- function(x, criterion){
+var.test(NoPodsWeight ~ BushShape, data = df)
+var.test(NoPodsWeight ~ StemBr2ord, data = df)
+```
+As p-values tell us, it's likely that `NoPodsWeight` has the same distribution across plants with different `BushShape` types and `StemBr2ord` not. But here we compare only variances which do not define distributions completely (and in both cases we do not reject the null hypothesis - data comes from distributions with the same variances - for significance level 0.05).
+
+Now we perform T-test to find out whether each pair of subgroups comes from distributions with the same mean:
+```{r}
+my.t_test <- function(x, criterion) {
   x1 <- na.omit(x[!criterion])
   x2 <- na.omit(x[criterion])
-  denominator = (4 * sqrt(sd(x1)^2/(length(x1)* (length(x1)-1)) + sd(x2)^2/(length(x2)* (length(x2)-1))))
-  print("Home-brewed T-test")
-  print((mean(x1) - mean(x2)) / denominator)
+  s1sq <- sd(x1)^2
+  s2sq <- sd(x2)^2
+  sn1 <- s1sq / length(x1)
+  sn2 <- s2sq / length(x2)
+  denominator <- sqrt(sn1 + sn2)
+  t_value <- (mean(x1) - mean(x2)) / denominator
+  print(noquote("Home-brewed T-test"))
+  print(t_value)
+
+  # plot Student distribution density
+  t_df <- (sn1 + sn2)^2 / (sn1^2 / (length(x1) - 1) + sn2^2 / (length(x2) - 1))
+  x_dt <- seq(- 5.5, 5.5, by = 0.01)
+  y_dt <- dt(x_dt, df = t_df)
+  plot(x_dt, y_dt, type = "l", main = paste("t-distribution density: df=", format(t_df, digits=4), "\n measured T value:", format(t_value, digits=2), "(blue line)"), las=1)
+  lines(t_value, dt(t_value, df = t_df), type="h", lwd=3, col="blue")
+  points(t_value, dt(t_value, df = t_df), lwd=2, col="blue")
 }
-t.test(GenmBMatur ~ NonZeroGrowthType, df)
-my.t_test(df$GenmBMatur, df$NonZeroGrowthType)
 
-t.test(GenmBMatur ~ NonZeroPolegaemost, df)
-my.t_test(df$GenmBMatur, df$NonZeroPolegaemost)
+t.test(Germ ~ StemBr2ord, data = df)
+my.t_test(df$Germ, df$StemBr2ord == 1)
 
-t.test(Protein ~ NonZeroGrowthType, df)
-my.t_test(df$Protein, df$NonZeroGrowthType)
+t.test(Germ ~ BushShape, data = df)
+my.t_test(df$Germ, df$BushShape == 1)
 
-t.test(Protein ~ NonZeroPolegaemost, df)
-my.t_test(df$Protein, df$NonZeroPolegaemost)
+t.test(NoPodsWeight ~ StemBr2ord, data = df)
+my.t_test(df$NoPodsWeight, df$StemBr2ord == 1)
+
+t.test(NoPodsWeight ~ BushShape, data = df)
+my.t_test(df$NoPodsWeight, df$BushShape == 1)
 
 ```
+As p-values suggest, the T-test failed for all pairs (for significance level $\alpha=0.05$), except for distribution of `Germ` by `StemBr2ord` type.
+
+TODO fix the code below
+
 # Part 2. Chi-squared goodness-of-fit test
 Computing a built-in Chi-squared test:
 ```{r echo=FALSE}
@@ -75,7 +130,7 @@ print(ch_test$statistic)
 ```
 Computing manually:
 ```{r}
-chisq_value <- sum((ch_test$expected - ch_test$observed)^2/ch_test$expected)
+chisq_value <- sum((ch_test$expected - ch_test$observed)^2 / ch_test$expected)
 print(chisq_value)
 ```
 Now plotting a distribution:
@@ -84,18 +139,18 @@ Now plotting a distribution:
 # degrees of freedom df=4
 dof = 4
 curve(dchisq(x, df = dof), from = 0, to = 30,
-main = 'Chi-Square Distribution (degrees of freedom: 4)',
-ylab = 'Density',
-lwd = 2)
+      main = 'Chi-Square Distribution (degrees of freedom: 4)',
+      ylab = 'Density',
+      lwd = 2)
 
 # with df=4, the 95th percentile ~ 9.48773
 max_accept_x <- 9.5
-x_samples <- seq(0, max_accept_x, by=0.1)
+x_samples <- seq(0, max_accept_x, by = 0.1)
 p_samples <- dchisq(x_samples, df = dof)
-polygon(c(x_samples, rev(x_samples)), c(p_samples, rep(0, length(p_samples))), col = adjustcolor('red', alpha=0.3), border = NA)
-abline(v = max_accept_x, col="blue", lwd=3, lty=2)
-text(c(max_accept_x + 1), c(0.1), c("maximum value (alpha=0.05)"), pos=3,srt = 90, col="red")
+polygon(c(x_samples, rev(x_samples)), c(p_samples, rep(0, length(p_samples))), col = adjustcolor('red', alpha = 0.3), border = NA)
+abline(v = max_accept_x, col = "blue", lwd = 3, lty = 2)
+text(c(max_accept_x + 1), c(0.1), c("maximum value (alpha=0.05)"), pos = 3, srt = 90, col = "red")
 
-abline(v = chisq_value, col="blue", lwd=3, lty=2)
-text(c(chisq_value + 1), c(0.1), c("measured value"), pos=3, srt=90, col="red")
+abline(v = chisq_value, col = "blue", lwd = 3, lty = 2)
+text(c(chisq_value + 1), c(0.1), c("measured value"), pos = 3, srt = 90, col = "red")
 ```
