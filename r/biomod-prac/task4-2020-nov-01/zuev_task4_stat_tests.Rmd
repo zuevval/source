@@ -6,12 +6,12 @@ Preparing workspace:
 
 ```{r results=FALSE, message=FALSE, warning=FALSE}
 library(here) # for relative paths
-library(tidyverse) # dplyr + ggplot2 + much more
+library(tidyverse) # dplyr, ggplot2, and more
 data_path <- "r/biomod-prac/task4-2020-nov-01/"
 df <- read.table(here(paste0(data_path, "nut.csv")), sep = ",", header = TRUE)
 df
 ```
-# Part 1. Statisitcal hypotheses for quantitative features
+# Part 1. Statistical hypotheses for quantitative values
 
 Testing `Germ` for normality:
 ```{r}
@@ -19,15 +19,15 @@ shapiro.test(df$Germ)
 ```
 Here
 $$ W = \frac{\sum^n_{i=1} a_i \cdot x_{(i)}}{\sum^n_{i=1} (x_i - \overline{x})^2} $$
-where $x=df$Germ$ and $a_i$ are constant for given $n$.
+where $x=df\$Germ$ and $a_i$ are constant for fixed $n$.
 
-p-value less than 0.05 tells us that we should reject the null hypothesis (the sample comes from a normally distributed population) for significance level $\alpha=0.05$.
+p-value less than $0.05$ tells us that we should reject the null hypothesis (the sample comes from a normally distributed population) for significance level $\alpha=0.05$.
 
 What about `NoPodsWeight`?
 ```{r}
 shapiro.test(df$NoPodsWeight)
 ```
-As we see, for $p-value > \alpha$ for $\alpha=0.05$, so we cannot reject the null hypothesis.
+As we see, $p-value > \alpha$ for $\alpha=0.05$, so we cannot reject the null hypothesis.
 
 Dividing data into subgroups by `BushShape` and `StemBr2ord`:
 ```{r}
@@ -56,16 +56,13 @@ lapply(names(l), function(name) {
   x <- na.omit(unlist(l[name]))
   h <- hist(x, col = "gray", border = "white",
             main = paste0(titles[name], "\n blue: estimated Gaussian distribution density (not to scale)"))
-  print(min(na.omit(x)))
-  print(max(x))
   x_range <- seq(min(x), max(x), by = .1)
   y_range <- dnorm(x_range, mean = mean(x), sd = sd(x)) *
     diff(h$mids[1:2]) *
     length(x) *
     .9
   lines(x_range, y_range, col = "blue", lwd = 2)
-  print(mean(x))
-  print(name)
+  cat(noquote(paste0(unlist(titles[name]), "\n")))
   print(shapiro.test(x)) # with `print` the output is printed twice, without - in the wrong place. Don't know how to fix
 })
 ```
@@ -79,9 +76,18 @@ Let's perform several *F-tests* which may tell us whether two subgroups come fro
 var.test(NoPodsWeight ~ BushShape, data = df)
 var.test(NoPodsWeight ~ StemBr2ord, data = df)
 ```
-As p-values tell us, it's likely that `NoPodsWeight` has the same distribution across plants with different `BushShape` types and `StemBr2ord` not. But here we compare only variances which do not define distributions completely (and in both cases we do not reject the null hypothesis - data comes from distributions with the same variances - for significance level 0.05).
+As p-values tell us, it's likely that `NoPodsWeight` has the same distribution across plants with different `BushShape` types and `StemBr2ord` not. But here we compare only variances which do not define distributions completely (and in both cases we do not reject the null hypothesis - data comes from distributions with the same variances - for significance level $0.05$).
 
-Now we perform T-test to find out whether each pair of subgroups comes from distributions with the same mean:
+We will use *T-test* to find out whether each pair of subgroups comes from distributions with the same mean.
+T-test statistic for two data sets $X_1$ and $X_2$ can be computed as follows:
+
+$$ t = \frac{\overline{X}_1 - \overline{X}_2}{\sqrt{\frac{s_1^2}{n_1} + \frac{s_2^2}{n_2}}} $$
+
+where $n_1$, $n_2$ are sizes of data sets and $s_i^2$ is an estimate of the variance of $X_i$.
+
+If the null hypothesis is true (data sets are independent), this statistic has a t-distribution.
+
+Performing both built-in and manually constructed T-test:
 ```{r}
 my.t_test <- function(x, criterion) {
   x1 <- na.omit(x[!criterion])
@@ -92,16 +98,15 @@ my.t_test <- function(x, criterion) {
   sn2 <- s2sq / length(x2)
   denominator <- sqrt(sn1 + sn2)
   t_value <- (mean(x1) - mean(x2)) / denominator
-  print(noquote("Home-brewed T-test"))
-  print(t_value)
+  cat(noquote(paste("Home-brewed T-test\n", t_value)))
 
   # plot Student distribution density
   t_df <- (sn1 + sn2)^2 / (sn1^2 / (length(x1) - 1) + sn2^2 / (length(x2) - 1))
-  x_dt <- seq(- 5.5, 5.5, by = 0.01)
+  x_dt <- seq(-5.5, 5.5, by = 0.01)
   y_dt <- dt(x_dt, df = t_df)
-  plot(x_dt, y_dt, type = "l", main = paste("t-distribution density: df=", format(t_df, digits=4), "\n measured T value:", format(t_value, digits=2), "(blue line)"), las=1)
-  lines(t_value, dt(t_value, df = t_df), type="h", lwd=3, col="blue")
-  points(t_value, dt(t_value, df = t_df), lwd=2, col="blue")
+  plot(x_dt, y_dt, type = "l", main = paste("t-distribution density: df=", format(t_df, digits = 4), "\n measured T value:", format(t_value, digits = 2), "(blue line)"), las = 1)
+  lines(t_value, dt(t_value, df = t_df), type = "h", lwd = 3, col = "blue")
+  points(t_value, dt(t_value, df = t_df), lwd = 2, col = "blue")
 }
 
 t.test(Germ ~ StemBr2ord, data = df)
@@ -119,26 +124,48 @@ my.t_test(df$NoPodsWeight, df$BushShape == 1)
 ```
 As p-values suggest, the T-test failed for all pairs (for significance level $\alpha=0.05$), except for distribution of `Germ` by `StemBr2ord` type.
 
-TODO fix the code below
+# Part 2. Pearson's Chi-square test for qualitative values
+Chi-square test is used for evaluating the independence of two variables using *bivariate table*. The statistic is
 
-# Part 2. Chi-squared goodness-of-fit test
-Computing a built-in Chi-squared test:
+$$ \chi^2 = \sum_i \frac{(x^{(i)}_{observed}-x^{(i)}_{expected})^2}{x^{(i)}_{expected}} $$
+
+where $x^{(i)}_{observed}$ - observed cases of event "first variable takes value A, second variable takes value B", A and B in possible values of first and second variables, respectively;  $x^{(i)}_{expected}$ - expected (under the assumption of independence of these two variables) cases.
+
+Here we compute a built-in Chi-square test for `BushShape` and `StemBr2ord`:
 ```{r echo=FALSE}
-ch_test <- chisq.test(table(df$NonZeroGrowthType, df$NonZeroPolegaemost))
+ch_test <- chisq.test(table(df$BushShape, df$StemBr2ord))
 cat("\n")
 print(ch_test$statistic)
+cat(noquote(paste("Chi-square test p-value:\n", format(ch_test$p.value, digits = 3))))
 ```
+We do not reject the null hypothesis (`BushShape` and `StemBr2ord` are independent) for $\alpha=0.05$
+
 Computing manually:
 ```{r}
-chisq_value <- sum((ch_test$expected - ch_test$observed)^2 / ch_test$expected)
-print(chisq_value)
+a_data <- df$BushShape
+b_data <- df$StemBr2ord
+n_a0 <- sum(1 - a_data)
+n_a1 <- sum(a_data)
+n_b0 <- sum(1 - b_data)
+n_b1 <- sum(b_data)
+n_all <- length(a_data)
+
+col1 <- c(n_a0 * n_b0, n_a1 * n_b0)
+col2 <- c(n_a0 * n_b1, n_a1 * n_b1)
+expected <- as.table(as.matrix(data.frame(col1, col2))) / n_all
+observed <- table(a_data, b_data)
+
+chisq_value <- sum((expected - observed)^2 / expected)
+cat(paste("home-brewed Pearson chi-square test result:\n", chisq_value))
 ```
-Now plotting a distribution:
+Built-in chi-square test returned slightly different value... But we were warned that it may give incorrect approximation.
+
+Now plotting a $\chi^2$ distribution with degrees of freedom equal to 4 (= number of cells in `expected` or `observed`):
 ```{r}
 
 # degrees of freedom df=4
-dof = 4
-curve(dchisq(x, df = dof), from = 0, to = 30,
+chi_df <- 4
+curve(dchisq(x, df = chi_df), from = 0, to = 16,
       main = 'Chi-Square Distribution (degrees of freedom: 4)',
       ylab = 'Density',
       lwd = 2)
@@ -146,11 +173,11 @@ curve(dchisq(x, df = dof), from = 0, to = 30,
 # with df=4, the 95th percentile ~ 9.48773
 max_accept_x <- 9.5
 x_samples <- seq(0, max_accept_x, by = 0.1)
-p_samples <- dchisq(x_samples, df = dof)
+p_samples <- dchisq(x_samples, df = chi_df)
 polygon(c(x_samples, rev(x_samples)), c(p_samples, rep(0, length(p_samples))), col = adjustcolor('red', alpha = 0.3), border = NA)
 abline(v = max_accept_x, col = "blue", lwd = 3, lty = 2)
-text(c(max_accept_x + 1), c(0.1), c("maximum value (alpha=0.05)"), pos = 3, srt = 90, col = "red")
+text(max_accept_x + 0.3, 0.1, "maximum value (alpha=0.05)", srt = 90, col = "red")
 
 abline(v = chisq_value, col = "blue", lwd = 3, lty = 2)
-text(c(chisq_value + 1), c(0.1), c("measured value"), pos = 3, srt = 90, col = "red")
+text(chisq_value + 0.3, 0.1, "measured value", srt = 90, col = "red")
 ```
