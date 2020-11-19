@@ -1,0 +1,67 @@
+---
+title: "Principal Component Analysis"
+author: Valerii Zuev
+date: 11/19/2020
+output: html_notebook
+---
+
+Preparing workspace:
+
+```{r message = F, warning = F}
+library(here) # for relative paths
+library(types) # type hints
+library(tidyverse) # dplyr, ggplot2, ...
+library(pca3d) # Principal Component Analysis
+
+df <- here("r/biomod-prac/task4-2020-nov-01/nut.csv") %>%
+  read.csv(header = T) %>%
+  na.omit
+```
+
+Computing principal components:
+
+```{r}
+pca <- df %>% prcomp(center = TRUE, scale <- TRUE)
+```
+
+Reducing dimensions to leave only 75% of variances:
+
+```{r}
+n_main_components <- function(variances = ? numeric, keep_variance = .75) {
+  total_var <- sum(variances)
+  retained_var <- 0
+  for (i in seq_along(variances)) {
+    retained_var <- retained_var + variances[i]
+    print(retained_var / total_var)
+    if (retained_var / total_var >= keep_variance) {
+      return(i)
+    }
+  }
+  return(-1) # error, could not keep the specified amount of variance
+}
+
+pca_data <- data.frame(var = pca$sdev^2)
+n_comp <- n_main_components(pca_data$var)
+main_components <- pca$x[, 1:n_comp]
+```
+
+Plotting the explained variation:
+```{r message = F, warning = F}
+sum_var <- sum(pca_data$var)
+ggplot(data = pca_data, aes(x = seq_along(var), y = cumsum(var) / sum_var)) +
+  ylim(.7, NA) +
+  geom_line() +
+  geom_point() +
+  geom_hline(yintercept = .75, colour = "red") +
+  xlab("number of components") +
+  ylab("retained variance") +
+  ggtitle("Proportion of explained variation (acceptable threshold marked with red)") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+Custom implementation of PCA (using built-in singular value decomposition):
+```{r}
+s <- svd(df)
+# TODO
+```
+
