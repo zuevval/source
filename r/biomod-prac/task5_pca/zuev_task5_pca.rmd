@@ -12,6 +12,7 @@ library(here) # for relative paths
 library(types) # type hints
 library(tidyverse) # dplyr, ggplot2, ...
 library(pca3d) # Principal Component Analysis
+library(factoextra) # for `fviz_contrib`
 
 df <- here("r/biomod-prac/task4-2020-nov-01/nut.csv") %>%
   read.csv(header = T) %>%
@@ -29,9 +30,19 @@ Custom implementation of PCA (using a built-in singular value decomposition):
 ```{r}
 df_scaled <- df %>% scale %>% t %>% as.data.frame
 s <- svd(df_scaled)
-my.pca_x <- df_scaled * s$v # components
+my.pca_x <- s$v # principal components
 my.pca_data <- data.frame(var = s$d^2 / length(df_scaled)) # variance
 ```
+
+*Explanation*. Let $X \in \mathbb{R}^{n\times m}$ denote our data (columns = features, rows = samples) <br>
+Computing a *singular value decomposition* of $X$:
+$$X = U \times D \times V^T$$
+where
+$$U: U^T U=1, \hspace{5pt} U \in \mathbb{R}^{n\times m} \\
+V: V^T = V^{-1}, \hspace{5pt} V \in \mathbb{R}^{m \times m} \\
+D = diag(\sigma_1, ..., \sigma_m)$$
+
+Then $V$ is a matrix of principal components and $D^2 /n$ is a matrix which main diagonal contains new variances for each component.
 
 Reducing dimensions to leave only 75% of variances:
 
@@ -51,8 +62,8 @@ n_main_components <- function(variances = ? numeric, keep_variance = .75) {
 my.n_comp <- n_main_components(my.pca_data$var)
 lib.n_comp <- n_main_components(lib.pca_data$var)
 cat(paste("number of components to keep: ", my.n_comp, "(custom implementation), ", lib.n_comp, "(library implementation)"))
-my.main_components <- my.pca_x[, 1:my.n_comp]
-lib.main_components <- lib.pca$x[, 1:lib.n_comp]
+my.main_components <- my.pca_x[, 1:my.n_comp] %>% t %>% as.data.frame
+lib.main_components <- lib.pca$x[, 1:lib.n_comp] %>% t %>% as.data.frame
 ```
 
 Plotting the explained variation:
@@ -72,6 +83,35 @@ plot_explained_var <- function(pca_data = ? data.frame, title = ? character) {
 plot_explained_var(lib.pca_data, "(library implementation)")
 plot_explained_var(my.pca_data, "(custom implementation)")
 ```
+Which feature has the most effect on the first component?
+```{r}
+fviz_contrib(lib.pca, choice = "var", axes = 1) +
+  labs(title = "Contributions to Dim 1")
+```
+We see that it is `NoPodsWeight`
 
+Plotting data on the plane of two first principal components:
 
+```{r}
+most_contrib_idx <- match("NoPodsWeight", colnames(df))
+
+plot_two_main <- function(main_components = ? data.frame, title = ? character) {
+  two_comp <- data.frame(PC1 = main_components[, 1],
+                         PC2 = main_components[, 2],
+                         color = integer(nrow(main_components)),
+                         size = integer(nrow(main_components)) + 1
+  )
+  two_comp$color[most_contrib_idx] <- 1
+  two_comp$size[most_contrib_idx] <- 2
+  ggplot(data = two_comp, aes(x = PC1, y = PC2, col = color, size = size)) +
+    geom_point() +
+    xlab("principal component #1") +
+    ylab("principal component #2") +
+    ggtitle(paste0("Two first principal components
+    (blue point - feature with the highest contribution to pr. comp. 1)\n", title)) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
+}
+plot_two_main(lib.main_components, "(library implementation)")
+plot_two_main(my.main_components, "(custom implementation)")
+```
 
