@@ -18,10 +18,19 @@ df <- here("r/biomod-prac/task4-2020-nov-01/nut.csv") %>%
   na.omit
 ```
 
-Computing principal components:
+Computing principal components using a library method:
 
 ```{r}
-pca <- df %>% prcomp(center = TRUE, scale <- TRUE)
+lib.pca <- df %>% prcomp(center = TRUE, scale = TRUE)
+lib.pca_data <- data.frame(var = lib.pca$sdev^2) # variances
+```
+
+Custom implementation of PCA (using a built-in singular value decomposition):
+```{r}
+df_scaled <- df %>% scale %>% t %>% as.data.frame
+s <- svd(df_scaled)
+my.pca_x <- df_scaled * s$v # components
+my.pca_data <- data.frame(var = s$d^2 / length(df_scaled)) # variance
 ```
 
 Reducing dimensions to leave only 75% of variances:
@@ -32,7 +41,6 @@ n_main_components <- function(variances = ? numeric, keep_variance = .75) {
   retained_var <- 0
   for (i in seq_along(variances)) {
     retained_var <- retained_var + variances[i]
-    print(retained_var / total_var)
     if (retained_var / total_var >= keep_variance) {
       return(i)
     }
@@ -40,28 +48,30 @@ n_main_components <- function(variances = ? numeric, keep_variance = .75) {
   return(-1) # error, could not keep the specified amount of variance
 }
 
-pca_data <- data.frame(var = pca$sdev^2)
-n_comp <- n_main_components(pca_data$var)
-main_components <- pca$x[, 1:n_comp]
+my.n_comp <- n_main_components(my.pca_data$var)
+lib.n_comp <- n_main_components(lib.pca_data$var)
+cat(paste("number of components to keep: ", my.n_comp, "(custom implementation), ", lib.n_comp, "(library implementation)"))
+my.main_components <- my.pca_x[, 1:my.n_comp]
+lib.main_components <- lib.pca$x[, 1:lib.n_comp]
 ```
 
 Plotting the explained variation:
 ```{r message = F, warning = F}
-sum_var <- sum(pca_data$var)
-ggplot(data = pca_data, aes(x = seq_along(var), y = cumsum(var) / sum_var)) +
-  ylim(.7, NA) +
-  geom_line() +
-  geom_point() +
-  geom_hline(yintercept = .75, colour = "red") +
-  xlab("number of components") +
-  ylab("retained variance") +
-  ggtitle("Proportion of explained variation (acceptable threshold marked with red)") +
-  theme(plot.title = element_text(hjust = 0.5))
+plot_explained_var <- function(pca_data = ? data.frame, title = ? character) {
+  sum_var <- sum(pca_data$var)
+  ggplot(data = pca_data, aes(x = seq_along(var), y = cumsum(var) / sum_var)) +
+    geom_line() +
+    geom_point() +
+    geom_hline(yintercept = .75, colour = "red") +
+    xlab("number of components") +
+    ylab("retained variance") +
+    ggtitle(paste0("Proportion of explained variation (acceptable threshold marked with red)\n", title)) +
+    theme(plot.title = element_text(hjust = 0.5))
+}
+
+plot_explained_var(lib.pca_data, "(library implementation)")
+plot_explained_var(my.pca_data, "(custom implementation)")
 ```
 
-Custom implementation of PCA (using built-in singular value decomposition):
-```{r}
-s <- svd(df)
-# TODO
-```
+
 
