@@ -1,0 +1,42 @@
+---
+title: "Structural equation modelling"
+author: Valerii Zuev
+date: 11/28/2020
+output: html_notebook
+---
+Preparing workspace:
+```{r warning = F, message = F}
+library(here) # for relative paths
+library(tidyverse) # dplyr, ggplot2, ...
+library(lavaan) # confirmary factor analysis
+library(ggcorrplot) # special extension methods for ggplot2
+
+df <- here("r/biomod-prac/task4-2020-nov-01/nut.csv") %>%
+  read.csv(header = T) %>%
+  select(PodWidth, PodLength, SeedsWeight, SeedsNumber, PodsNumber, PodsWeight, BegFEndF, EndFBegM) %>%
+  na.omit
+
+df
+```
+
+Finding dependent pairs of variables by their correlations:
+
+```{r}
+df %>% cor %>% ggcorrplot
+```
+We see that all variables form three clusters, within each of which variables are strongly correlated:
+
+1. PodLength, PodWidth
+2. PodsWeight, PodsNumber, SeedsNumber, SeedsWeight
+3. EndFBegM, BegFEndF
+
+
+Building a model of equations:
+```{r}
+HS.model <- " PodsDimension =~ PodLength + PodWidth
+              NumbersAndWeights =~ PodsWeight + PodsNumber + SeedsNumber + SeedsWeight
+              EndF =~ EndFBegM + BegFEndF"
+
+fit <- cfa(HS.model, data = df)
+summary(fit, fit.measures = TRUE)
+```
