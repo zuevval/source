@@ -11,6 +11,7 @@ library(tidyverse) # dplyr, ggplot2, ...
 library(lavaan) # confirmary factor analysis
 library(ggcorrplot) # special extension methods for ggplot2
 
+source(here("r/biomod-prac/task6_sem/ggsem.R"))
 df <- here("r/biomod-prac/task4-2020-nov-01/nut.csv") %>%
   read.csv(header = T) %>%
   select(PodWidth, PodLength, SeedsWeight, SeedsNumber, PodsNumber, PodsWeight, BegFEndF, EndFBegM) %>%
@@ -39,4 +40,17 @@ HS.model <- " PodsDimension =~ PodLength + PodWidth
 
 fit <- cfa(HS.model, data = df)
 summary(fit, fit.measures = TRUE)
+```
+
+RMSEA = 0.290 > 0.06, which is not perfect.
+
+The chi-squared test p-value is equal to zero (accurate to 3 decimal places).
+
+All this indicates that the model should not be accepted. Nevertheless, we will plot the results:
+
+```{r message = F, warning = F, r, fig.width=10, fig.height=7}
+ggsem(fit) +
+  ggtitle("Nut dataset: structural equation model
+  (for selected features)") +
+  theme(plot.title = element_text(hjust = 0.5))
 ```
