@@ -64,7 +64,6 @@ titles <- c("Spam classifier", "Tic-Tac-Toe classifier")
 filenames <- c("spam_stats.png", "tttoe_stats.png")
 for (bayes_fun_idx in seq_along(functions)) {
   bayes_fun <- functions[bayes_fun_idx][[1]]
-  # print(names(functions)[bayes_fun_idx])
   stats_df <- data.frame(matrix(ncol = length(stats_names), nrow = 0, dimnames = list(NULL, stats_names)))
   for (fraction in c(0.5, 0.6, 0.7, 0.8, 0.9)) {
     per_seed_stats <- bayes_try_fraction(fraction, bayes_fun)
