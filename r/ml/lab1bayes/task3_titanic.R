@@ -10,13 +10,13 @@ library(glmnet) # LASSO for feature selections
 library(plotly) # 3D-plot
 
 set.seed(0) # for reproducibility
+data_subfolder <- "r/ml/lab1bayes/data"
 read_table <- function(rel_path = ? character) {
-  here("r/ml/lab1bayes/data", rel_path) %>% # files were preprocessed (quotation marks & some commas removed)
+  here(data_subfolder, rel_path) %>% # files were preprocessed (quotation marks & some commas removed)
     read.csv(stringsAsFactors = TRUE) %>%
-    select_if(is.numeric) %>%
-    na.omit
+    select_if(is.numeric)
 }
-titanic_train <- read_table("titanic_train.csv")
+titanic_train <- read_table("titanic_train.csv") %>% na.omit
 titanic_test <- read_table("titanic_test.csv")
 
 # feature selection. Credit: https://rstatisticsblog.com/data-science-in-action/machine-learning/lasso-regression/
@@ -36,10 +36,9 @@ features_selected <- rownames(features_coef)[features_order][2:4] # select top-3
 selected_train <- titanic_train %>%
   select(features_selected, "Survived") %>%
   mutate(Survived = as.factor(Survived))
-selected_test <- titanic_test %>% select(features_selected)
 
 classifier <- naiveBayes(Survived ~ ., data = selected_train) # building a hypothesis
-selected_test$predicted <- predict(classifier, selected_test)
+titanic_test$Survived <- predict(classifier, titanic_test)
 
 plot_ly(x = selected_train$Parch,
         y = selected_train$Pclass,
@@ -49,12 +48,16 @@ plot_ly(x = selected_train$Parch,
         color = selected_train$Survived,
         symbols = selected_train$Survived)
 
-plot_ly(x = selected_test$Parch,
-        y = selected_test$Pclass,
-        z = selected_test$predicted,
+plot_ly(x = titanic_test$Parch,
+        y = titanic_test$Pclass,
+        z = titanic_test$Survived,
         type = "scatter3d",
         mode = "markers",
-        color = selected_test$predicted,
-        symbols = selected_test$predicted)
+        color = titanic_test$Survived,
+        symbols = titanic_test$Survived)
+
+titanic_test %>%
+  select(PassengerId, Survived) %>%
+  write.csv(here(data_subfolder, "result.csv"), row.names = F)
 
 
