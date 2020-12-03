@@ -1,0 +1,135 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+
+% styling
+\usepackage{indentfirst} % indent first line of section
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Влияние объёма обучающей выборки на качество обучения}
+\subsection{Задание}
+Исследуйте, как объём обучающей выборки и количество тестовых данных влияет на точность классификации / вероятность ошибочной классификации в примере крестики-нолики и примере о спаме e-mail сообщений.
+
+\subsection{Реализация}
+Составлены две подпрограммы -- для данных об игре в крестики нолики и о спаме.
+Каждая из них псевдослучайным образом разделяет данные на тестовую и тренировочную часть, обучает классификатор на тестовой части и выдаёт результат тестирования в виде \textit{таблицы сопряжённости} (confusion matrix). 
+В подпрограмме можно регулировать долю элементов в обучающей выборке $\lambda \in [0;1]$. Каждая программа была вызвана 30 раз: по 6 раз (с шестью различными \textit{сидами}, т. е. числами, которые служат источниками неопределённости для генератора псевдослучайных чисел) для каждого значения $\lambda \in \{0.5, 0.6, 0.7, 0.8, 0.9\}$. 
+Данные были усреднены по сидам, рассчитаны выборочные дисперсии. Результаты приведены на рис. \ref{fig:spam} для данных о спаме и рис. \ref{fig:ttoe} для данных об игре в крестики-нолики. На графиках показано количество верно угаданных положительных, верно угаданных отрицательных, ложно положительных и ложно отрицательных примеров из тестовой выборки, отнесённые к числу всех элементов в выборке (т. о. все четыре значения в каждой точке в сумме равны единице). Отмечены доверительные интервалы для уровня значимости 0.05 (в предположении, что значения статистик в зависимости от сида распределены по нормальному закону). Код программы \href{https://github.com/zuevval/source/blob/master/r/ml/lab1bayes/task1_spam_tictactoe.R}{доступен в GitHub}.
+
+Видно, что значения статистик, характеризующих качество обучения, остаются на примерно одинаковом уровне при всех $\lambda$ из рассмотренного диапазона (но разброс заметно возрастает при уменьшении числа элементов в тестовой выборке).
+Это означает, что в каждом из случаев половины всего набора, по-видимому, достаточно для обучения классификатора, и увеличение тренировочной выборки не ведёт к существенному улучшению показателей.
+
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{spam_stats.png}
+	\caption{Результат обучения классификатора на данных о спаме (в каждой точке - среднее по 6 случайным разбиениям на тренировочные и тестовые данные)}
+	\label{fig:spam}
+\end{figure}
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{tttoe_stats.png}
+	\caption{Результат обучения классификатора на данных об игре в крестики-нолики}
+	\label{fig:ttoe}
+\end{figure}
+
+\section{Обучение классификатора на искусственных данных}
+\subsection{Задание}
+Сгенерировать 100 точек с тремя характеристиками -- $X_1$, $X_2$, $class$; в половине случаев $class=-1$, $X_1 \sim N(10,4)$, $X_2 \sim N(14,4)$, в другой половине $class=1$, $X_1 \sim N(20,3)$, $X_2 \sim N(18,3)$.
+Построить диаграммы, иллюстрирующие данные. Построить байесовский классификатор и оценить качество классификации.
+
+\subsection{Реализация}
+
+Псевдослучайным образом были сгенерированы 100 точек (рис. \ref{fig:art_data}). Затем (псевдослучайным образом) выборка была разделена на 80 тренировочных экземпляров и 20 тестовых, после чего с помощью библиотеки e1071 обучен и проверен на тестовых данных наивный байесовский классификатор. Кроме того, сгенерирована сетка из 900 точек, с равным шагом расположенных в квадрате $1 \le X_1, X_2 \le 30$, в которых найдены значения функции, задаваемой обученным классификатором. Результат изображён на рис. \ref{fig:art_classifier}. Этот квадрат содержит все сгенерированные точки, которые также показаны на рисунке.
+
+Можно заметить, что классификатор формирует нелинейную границу принятия решения, которая проходит так, что подавляющее большинство точек из сгенерированных данных попадают в правильный класс. Результат тестирования также оказался удовлетворительным: 18 правильно распознанных примеров против двух неверно распознанных.
+
+Исходный код \href{https://github.com/zuevval/source/blob/master/r/ml/lab1bayes/task2_artificial_data.R}{доступен в GitHub}.
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{generated_data.png}
+	\caption{Сгенерированные данные на плоскости $(X_1;X_2)$}
+	\label{fig:art_data}
+\end{figure}
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{classifier.png}
+	\caption{Сгенерированные данные (крупные точки) и ответ классификатора на сетке значений (маленькие точки)}
+	\label{fig:art_classifier}
+\end{figure}
+
+
+\section{Разработка классификатора для данных о пассажирах парохода <<Титаник>>}
+\subsection{Задание}
+Разработать байесовский классификатор для \href{https://www.kaggle.com/c/titanic}{данных <<Титаник>>}
+
+\subsection{Реализация}
+
+Для классификации были использованы все признаки (в том числе поле Pas\-sen\-ger\-Id, которое теоретически не должно влиять на результат распознавания). Идея -- добавление размерностей, как интуитивно кажется, не должно ухудшить результат классификации.
+
+Результат на Kaggle - 0.763 (т. е. 76\% тестовых данных были классифицированы верно).
+
+
+Для данных и модели построена визуализация. С помощью метода LASSO, реализованного в пакете glmnet, были отобраны три наиболее значимых количественных признака: Pclass (коэффициент в модели регрессии $\approx 0.22$) Parch ($0.03$), SibSp ($0.03$). Затем в пространстве этих трёх признаков были изображены точки исходных данных (рис. \ref{fig:titanic_all} - \ref{fig:titanic_survived}) и тестовые данные с метками классов, присвоенными обученной моделью (рис. \ref{fig:titanic_test}).
+
+На изображениях видно, что по тренировочным данным в пространстве трёх выбранных переменных (класс каюты, число родителей/детей на борту, число братьев/сестёр + жена/муж на борту) сложно провести границу между классами - они во многом перекрываются. Тем не менее, можно заметить, что в каютах более высоких классов (переменная $x$) больше утонувших, чем спасшихся. Наличие родственников на борту, видимо, несколько понижает шансы на выживание (эту тенденцию можно заметить как в тренировочных данных, так и в ответах классификатора).
+
+Исходный код \href{https://github.com/zuevval/source/blob/master/r/ml/lab1bayes/task3_titanic.R}{доступен в GitHub}
+
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=\myPictWidth]{titanic_all}
+		\caption{Полный набор}
+		\label{fig:titanic_all}
+	\end{subfigure}%
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=\myPictWidth]{titanic_dead}
+		\caption{Погибшие}
+		\label{fig:titanic_survived}
+	\end{subfigure}%
+	\begin{subfigure}{.3\textwidth}
+		\centering
+		\includegraphics[width=\myPictWidth]{titanic_survived}
+		\caption{Выжившие}
+		\label{fig:titanic_dead}
+	\end{subfigure}
+	\caption{Данные о пассажирах в пространстве признаков x=Parch (число родителей/детей на борту), y=Pclass (класс каюты), z=SibSp (число братьев, сестёр и/или муж/жена на борту)}
+\end{figure}
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\myPictWidth]{titanic_test}
+	\caption{Данные о пассажирах. Ответ классификатора (тестовая выборка)}
+	\label{fig:titanic_test}
+\end{figure}
+	
+	
+\end{document}
