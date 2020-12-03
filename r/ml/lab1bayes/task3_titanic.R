@@ -13,16 +13,18 @@ set.seed(0) # for reproducibility
 data_subfolder <- "r/ml/lab1bayes/data"
 read_table <- function(rel_path = ? character) {
   here(data_subfolder, rel_path) %>% # files were preprocessed (quotation marks & some commas removed)
-    read.csv(stringsAsFactors = TRUE) %>%
-    select_if(is.numeric)
+    read.csv(stringsAsFactors = TRUE)
 }
-titanic_train <- read_table("titanic_train.csv") %>% na.omit
+titanic_train <- read_table("titanic_train.csv")
+titanic_train_glm <- titanic_train %>%
+  select_if(is.numeric) %>%
+  na.omit
 titanic_test <- read_table("titanic_test.csv")
 
 # feature selection. Credit: https://rstatisticsblog.com/data-science-in-action/machine-learning/lasso-regression/
 lambda_seq <- 10^seq(2, -2, by = -.1)
-x_vars <- model.matrix(Survived ~ ., titanic_train)[, -1]
-y_var <- titanic_train$Survived
+x_vars <- model.matrix(Survived ~ ., titanic_train_glm)[, -1]
+y_var <- titanic_train_glm$Survived
 cv_output <- cv.glmnet(x_vars, y_var,
                        alpha = 1, lambda = lambda_seq,
                        nfolds = 5)
@@ -37,7 +39,7 @@ selected_train <- titanic_train %>%
   select(features_selected, "Survived") %>%
   mutate(Survived = as.factor(Survived))
 
-classifier <- naiveBayes(Survived ~ ., data = selected_train) # building a hypothesis
+classifier <- naiveBayes(Survived ~ ., data = titanic_train %>% mutate(Survived = as.factor(Survived)))
 titanic_test$Survived <- predict(classifier, titanic_test)
 
 plot_ly(x = selected_train$Parch,
@@ -50,7 +52,7 @@ plot_ly(x = selected_train$Parch,
 
 plot_ly(x = titanic_test$Parch,
         y = titanic_test$Pclass,
-        z = titanic_test$Survived,
+        z = titanic_test$SibSp,
         type = "scatter3d",
         mode = "markers",
         color = titanic_test$Survived,
