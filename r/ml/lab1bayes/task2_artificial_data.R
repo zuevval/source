@@ -2,7 +2,6 @@
 # Created by: Valerii Zuev
 # Created on: 12/2/2020
 
-library(types) # type annotations
 library(here) # relative paths
 library(ggplot2) # visualization
 library(e1071) # Bayesian classifier
@@ -23,6 +22,7 @@ generated_data <- data.frame(
 
 ggplot(data = generated_data) +
   geom_point(mapping = aes(x = x1, y = x2, color = class_label, shape = class_label)) +
+  coord_fixed() +
   xlab("x1") +
   ylab("x2") +
   ggtitle("Generated data (two classes)") +
@@ -38,3 +38,18 @@ data_test <- shuffled_data[(n_train + 1):n_samples,]
 classifier <- naiveBayes(class_label ~ ., data = data_train) # building a hypothesis
 predicted <- predict(classifier, data_test) # evaluating the hypothesis
 table(predicted, data_test$class_label)
+
+range_start <- 2
+range_stop <- 30
+data_grid <- data.frame(
+  x1 = rep(range_start:range_stop, range_stop),
+  x2 = unlist(lapply(range_start:range_stop, function(x) rep(x, range_stop)))
+)
+data_grid$predicted <- predict(classifier, data_grid)
+ggplot() +
+  geom_point(data = data_grid, mapping = aes(x = x1, y = x2, color = predicted, shape = predicted)) +
+  geom_point(data = generated_data, mapping = aes(x = x1, y = x2, color = class_label, shape = class_label, size = 5)) +
+  scale_color_manual(values = c("#ffd000", "#000000")) +
+  coord_fixed() +
+  theme(plot.title = element_text(hjust = 0.5), legend.position = "none")
+ggsave(abs_path("classifier.png"), scale = .3)

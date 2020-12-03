@@ -12,7 +12,7 @@ library(kernlab) # spam dataset
 
 # preparing tic-tac-toe data
 
-data_subfolder <- "r/ml/lab1bayes" # relative path to the Git root
+data_subfolder <- "r/ml/lab1bayes/data" # relative path to the Git root
 # A contains 10 columns (9 features: V1-V9 + class: V10) = design matrix & vector of labels. All data is of type Factor
 A_raw <- read.table(here(data_subfolder, "tic_tac_toe_data.txt"), sep = ",", stringsAsFactors = TRUE)
 n_tttoe <- dim(A_raw)[1] # number of rows in A = number of data samples
