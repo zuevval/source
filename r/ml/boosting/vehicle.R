@@ -25,44 +25,7 @@ Vehicle.rpart.error
 Vehicle.adaboost.pred$error
 
 # building AdaBoost for kNN
-library(boostr)
-library(types)
-library(dplyr)
-
-knn_decorator <- function(k = ? integer, learning_set = ? data.frame) {
-  print(learning_set)
-  learning_input <- learning_set %>% select(-Type)
-  learning_responce <- learning_set[, "Type"]
-  function(newdata = ? data.frame) {
-    class::knn(train = learning_input,
-               cl = learning_responce,
-               k = k,
-               test = newdata)
-  }
-}
-
-kNN_Estimator <- knn_decorator(5, Glass[, 10:1])
-kNN_Estimator(Glass[1:10, 9:1])
-
-boostr::boostWithArcX4(x = knn_decorator,
-                       B = 3,
-                       data = Glass,
-                       metadata = list(learningSet = "learning_set"),
-                       .procArgs = list(k = 5),
-                       .boostBackendArgs = list(
-                         .subsetFormula = formula(Type ~ .))
-)
-
-knn_decorator <- function(k = ? integer, learning_set = ? data.frame) {
-  print(learning_set)
-  learning_input <- learning_set %>% select(-Type)
-  learning_responce <- learning_set[, "Type"]
-  function(newdata = ? data.frame) {
-    class::knn(train = learning_input,
-               cl = learning_responce,
-               k = k,
-               test = newdata)
-  }
-}
-
+library(here)
+source(here("r/ml/boosting", "knn_adaboost.R"))
+# TODO
 
