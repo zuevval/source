@@ -6,16 +6,14 @@ library(types) # type hints
 library(dplyr) # working with dataframes
 library(pryr) # for `partial` (~ functools.partial in Python)
 
-#' Weighted k nearest neighbors two-class classifier
+#' Weighted k nearest neighbors multiclass classifier
 #' @param x input point (a list of real numbers)
 #' @param train_data data.frame with train samples:
 #' train_data.x - input vectors (each is a list of the same length as `x`)
-#' train_data.y - class labels ( each is an integer equal to either -1 or 1)
+#' train_data.y - class labels ( each is a factor)
 #' train_data.w - weights (each is a real number, typically between 0 and 1)
 #' @param k tuning parameter (number of nearest points to take into account)
-#' @returns A result of a weighted kNN classifier - a class label for `x` (-1 or 1)
-#'
-#' @details This could be relatively easily generalized in case of multi-class classification, but I do not need it
+#' @returns A result of a weighted kNN classifier - a class label for `x`
 #' @examples
 #' knn_w(
 #'    x = c(0, 1),
@@ -29,17 +27,21 @@ knn_w <- function(x = ? list, train_data = ? data.frame, k = ? integer) {
   train_data$remoteness <- train_data$x %>% # `remoteness` = eucledian distance from `x`
     lapply(function(x1 = ? list) dist(rbind(x1, x))[[1]]) %>%
     unlist
-  train_data %>%
-    slice_min(remoteness, n = k) %>% # select `k` rows with lowest `remoteness`
-    transmute(contrib = y * w) %>% # contribution = class label (-1 or 1) * weight
-    sum %>% # summarize all contributions
-    sign # return signum (-1 or 1)
+  closest_points <- train_data %>% slice_min(remoteness, n = k) # select `k` rows with lowest `remoteness`
+  possible_classes <- unique(closest_points$y)
+  classes_probabilities <- lapply(possible_classes, function(class) {
+    closest_points %>%
+      filter(y == class) %>%
+      select(w) %>%
+      sum # summarize all contributions of all points with appropriate class label
+  })
+  return(possible_classes[which.max(classes_probabilities)])
 }
 
-#' AdaBoost M1 for k nearest neighbors (two-class classification)
+#' AdaBoost M1 for k nearest neighbors (multi-class classification)
 #' @param train_data data.frame with samples:
 #' train_data.x - each cell is a list (feature vector)
-#' train_data.y - corresponding class labels (-1 or 1)
+#' train_data.y - corresponding class labels (factors)
 #' @param k tuning parameter for kNN (see reference for `knn_w`)
 #' @param m tuning parameter for AdaBoost (number of iterations)
 #' @returns function(x = ? list) - a trained classifier. `x` is a vector of the same length as each of `train_data.x`
@@ -57,23 +59,26 @@ knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer
     alpha <- log((1 - err) / err)
 
     classifiers <- classifiers %>% append(weak_classifier)
-    if (err < err_threshold) {
+    if (err < err_threshold) { # this is good
       classifiers_weights <- classifiers_weights %>% append(10000) # use a big weight & stop process
       break
     }
-    if (err > 1 - err_threshold) {
+    if (err > 1 - err_threshold) { # this is strange
       classifiers_weights <- classifiers_weights %>% append(0) # do not use this classifier & stop process
       break
     }
-    classifiers_weights <- classifiers_weights %>% append(alpha) # if |alpha| is too high, use a fixed number instead
+    classifiers_weights <- classifiers_weights %>% append(alpha)
     train_data <- train_data %>% mutate(w = w * exp(alpha * (y != prediction))) # recalculating data weights
     train_data <- train_data %>% mutate(w = w / sum(w))
   }
+  classifiers <- unlist(classifiers)
+  classifiers_weights <- unlist(classifiers_weights)
   function(x = ? list) {
-    result <- 0
-    for (i in seq_along(classifiers)) {
-      result <- result + classifiers[[i]](x) * classifiers_weights[[i]]
-    }
-    return(sign(result))
+    classifiers_answers <- lapply(classifiers, function(classifier) classifier(x))
+    classes <- unique(classifiers_answers)
+    classes_weights <- lapply(classes, function(class) {
+      classifiers_weights[classifiers_answers == class] %>% sum
+    })
+    return(classifiers_answers[[which.max(classes_weights)]])
   }
 }
