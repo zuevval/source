@@ -63,7 +63,7 @@ knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer
     err <- sum(train_data$contrib) / sum(train_data$w)
     alpha <- log((1 - err) / err)
 
-    classifiers_params[[paste0("w=", round(alpha,2))]] <- train_data$w # remember weights for extended_return
+    classifiers_params[[paste0("w=", round(alpha, 2))]] <- train_data$w # remember weights for extended_return
     classifiers_params[[paste0("ans_c", i)]] <- as.factor(train_data$prediction) # remember predictions for extended_return
 
     classifiers <- classifiers %>% append(weak_classifier)

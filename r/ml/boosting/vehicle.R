@@ -11,7 +11,7 @@ library(tidyverse) # tidyr, dplyr, ggplot2, ...
 source(here("r/ml/boosting/knn_adaboost.R"))
 
 data(Vehicle)
-set.seed(1) # for reproducibility
+set.seed(2) # for reproducibility
 n_samples <- nrow(Vehicle)
 train_indices <- sample(1:n_samples, .7 * n_samples)
 test_indices <- -train_indices
@@ -29,6 +29,7 @@ Vehicle.rpart.error
 
 adaboost_errors <- data.frame(n_trees = numeric(0), error_train = numeric(0), error_test = numeric(0))
 for (max_iter in seq(from = 1, to = 301, by = 10)) {
+  print(max_iter)
   Vehicle.adaboost <- boosting(Class ~ ., data = Vehicle[train_indices,], mfinal = max_iter, maxdepth = max_tree_depth)
   pred_test <- predict.boosting(Vehicle.adaboost, newdata = Vehicle[test_indices,])
   pred_train <- predict.boosting(Vehicle.adaboost, newdata = Vehicle[train_indices,])
@@ -38,11 +39,10 @@ ggplot(data = adaboost_errors) +
   geom_line(mapping = aes(x = n_trees, y = error_train, color = "blue")) +
   geom_line(mapping = aes(x = n_trees, y = error_test, color = "red")) +
   scale_color_discrete(name = "error", labels = c("train", "test")) +
-  ggtitle("AdaBoost.M1 for decision trees performance") +
+  ggtitle("AdaBoost.M1 performance (decision trees as weak learners)") +
   ylab("error (share of the dataset size)") +
   xlab("number of trees") +
-  theme(plot.background = element_rect(fill = "white"),
-        plot.title = element_text(hjust = 0.5))
+  theme_bw()
 
 
 # building AdaBoost for kNN
@@ -66,7 +66,7 @@ tb_knn_adaboost <- table(Vehicle.knn_adaboost.pred, Vehicle.test_y)
 Vehicle.knn_adaboost.error <- 1 - sum(diag(tb_knn_adaboost)) / sum(tb_knn_adaboost)
 
 vehicle_train$w <- 1 / nrow(vehicle_train)
-Vehicle.knn <- purrr::partial(knn_w, train_data = vehicle_train, k = 100)
+Vehicle.knn <- purrr::partial(knn_w, train_data = vehicle_train, k = 300)
 Vehicle.knn.pred <- lapply(vehicle_test, function(x) Vehicle.knn(unlist(x))) %>% unlist
 
 tb_knn <- table(Vehicle.knn.pred, Vehicle.test_y)
@@ -74,5 +74,4 @@ Vehicle.knn.error <- 1 - sum(diag(tb_knn)) / sum(tb_knn)
 
 Vehicle.knn_adaboost.error
 Vehicle.knn.error
-Vehicle.adaboost.pred$error
 Vehicle.rpart.error

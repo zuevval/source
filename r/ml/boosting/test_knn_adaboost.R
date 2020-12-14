@@ -97,15 +97,23 @@ test_that("AdaBoost, three_samples_to_visualize", {
       annotate("text", x = x_offset, y = -2.3, label = colnames(data_weights)[7], color = "#993333", size = 10) +
       geom_point(mapping = aes(x = x, y = -3, size = data_weights[[9]], shape = class, color = as.factor(data_weights[[10]]))) +
       annotate("text", x = x_offset, y = -3.3, label = colnames(data_weights)[9], color = "#993333", size = 10) +
-      scale_size(range = c(3, 20))
-    theme(axis.ticks.y = element_blank(),
-          axis.text.y = element_blank(),
-          axis.title.y = element_blank(),
-          plot.background = element_rect(fill = "white"))
+      scale_size(range = c(3, 20)) +
+      ggtitle(paste0("AdaBoost.M1 with kNN as weak learner (k =", k, ")")) +
+      theme(axis.ticks.y = element_blank(),
+            axis.text.y = element_blank(),
+            axis.title.y = element_blank(),
+            plot.background = element_rect(fill = "white"),
+            plot.title = element_text(hjust = 0.5))
     print(p)
     print(data_weights)
   }
   plot(2, train_data)
   plot(3, train_data)
   plot(5, train_data)
+
+  train_data <- data.frame(
+    x = c(1, 2, 3, 4, 5, 6),
+    y = c(1, -1, 1, -1, 1, -1)
+  )
+  plot(2, train_data)
 })
