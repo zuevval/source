@@ -44,11 +44,16 @@ knn_w <- function(x = ? list, train_data = ? data.frame, k = ? integer) {
 #' train_data.y - corresponding class labels (factors)
 #' @param k tuning parameter for kNN (see reference for `knn_w`)
 #' @param m tuning parameter for AdaBoost (number of iterations)
-#' @returns function(x = ? list) - a trained classifier. `x` is a vector of the same length as each of `train_data.x`
-knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer) {
+#' @param extended_return if TRUE, returns not a function, but
+#' a data.frame with dataset + weights of points for each classifier
+#' @returns if `extended_return` == FALSE:
+#' function(x = ? list) - a trained classifier. `x` is a vector of the same length as each of `train_data.x`
+#' otherwise: a data.frame
+knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer, extended_return = F) {
   train_data$w <- 1 / nrow(train_data) # initialize weights
   classifiers <- list()
   classifiers_weights <- list()
+  classifiers_params <- train_data
   err_threshold <- 1e-5
   for (i in 1:m) {
     weak_classifier <- partial(knn_w, train_data = train_data, k = k, .lazy = F)
@@ -57,6 +62,9 @@ knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer
       mutate(contrib = (y != prediction) * w)
     err <- sum(train_data$contrib) / sum(train_data$w)
     alpha <- log((1 - err) / err)
+
+    classifiers_params[[paste0("w=", round(alpha,2))]] <- train_data$w # remember weights for extended_return
+    classifiers_params[[paste0("ans_c", i)]] <- as.factor(train_data$prediction) # remember predictions for extended_return
 
     classifiers <- classifiers %>% append(weak_classifier)
     if (err < err_threshold) { # this is good
@@ -73,7 +81,8 @@ knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer
   }
   classifiers <- unlist(classifiers)
   classifiers_weights <- unlist(classifiers_weights)
-  function(x = ? list) {
+
+  classifier_strong <- function(x = ? list) {
     classifiers_answers <- lapply(classifiers, function(classifier) classifier(x))
     classes <- unique(classifiers_answers)
     classes_weights <- lapply(classes, function(class) {
@@ -81,4 +90,6 @@ knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer
     })
     return(classifiers_answers[[which.max(classes_weights)]])
   }
+  if (!extended_return) return(classifier_strong)
+  return(classifiers_params)
 }
