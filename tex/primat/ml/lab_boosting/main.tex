@@ -19,6 +19,25 @@
 \usepackage{graphicx}
 \usepackage{caption}
 \usepackage{subcaption} % captions for subfigures
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
 
 % styling
 \usepackage{indentfirst} % indent first line of section
@@ -108,6 +127,85 @@
 	\caption{Boosting + kNN. Попадание в стационарную точку}
 	\label{fig:boosting_stuck}
 \end{figure}
+
+\newpage
+\subsection{Код программы, реализующей бустинг с методом k ближайших соседей}
+\begin{lstlisting}
+	library(types) # type hints
+	library(dplyr) # working with dataframes
+	library(pryr) # for `partial` (~ functools.partial in Python)
+	
+	#' Weighted k nearest neighbors multiclass classifier
+	#' @param x input point (a list of real numbers)
+	#' @param train_data data.frame with train samples:
+	#' train_data.x - input vectors (each is a list of the same length as `x`)
+	#' train_data.y - class labels ( each is a factor)
+	#' train_data.w - weights (each is a real number, typically between 0 and 1)
+	#' @param k tuning parameter (number of nearest points to take into account)
+	#' @returns A result of a weighted kNN classifier - a class label for `x`
+	#' @examples
+	#' knn_w(
+	#'    x = c(0, 1),
+	#'    train_data = data.frame(
+	#'      x = I(list(c(-1, 1), c(1, 1))),
+	#'      y = c(-1, 1),
+	#'      w = c(.5, .5)),
+	#'    k = 2
+	#' )
+	knn_w <- function(x = ? list, train_data = ? data.frame, k = ? integer) {
+		train_data$remoteness <- train_data$x %>% # `remoteness` = eucledian distance from `x`
+		lapply(function(x1 = ? list) dist(rbind(x1, x))[[1]]) %>%
+		unlist
+		closest_points <- train_data %>% slice_min(remoteness, n = k) # select `k` rows with lowest `remoteness`
+		possible_classes <- unique(closest_points$y)
+		classes_probabilities <- lapply(possible_classes, function(class) {
+			closest_points %>%
+			filter(y == class) %>%
+			select(w) %>%
+			sum # summarize all contributions of all points with appropriate class label
+		})
+		return(possible_classes[which.max(classes_probabilities)])
+	}
+	
+	#' AdaBoost M1 for k nearest neighbors (multi-class classification)
+	#' @param train_data data.frame with samples:
+	#' train_data.x - each cell is a list (feature vector)
+	#' train_data.y - corresponding class labels (factors)
+	#' @param k tuning parameter for kNN (see reference for `knn_w`)
+	#' @param m tuning parameter for AdaBoost (number of iterations)
+	#' @returns function(x = ? list) - a trained classifier. `x` is a vector of the same length as each of `train_data.x`
+	knn_adaboost <- function(train_data = ? data.frame, k = ? integer, m = ? integer, extended_return = F) {
+		train_data$w <- 1 / nrow(train_data) # initialize weights
+		classifiers <- list()
+		classifiers_weights <- list()
+		classifiers_params <- train_data
+		err_threshold <- 1e-5
+		for (i in 1:m) {
+			weak_classifier <- partial(knn_w, train_data = train_data, k = k, .lazy = F)
+			train_data$prediction <- lapply(seq_len(nrow(train_data)), function(i) weak_classifier(unlist(train_data$x[i]))) %>% unlist
+			train_data <- train_data %>%
+			mutate(contrib = (y != prediction) * w)
+			err <- sum(train_data$contrib) / sum(train_data$w)
+			alpha <- log((1 - err) / err)
+			
+			classifiers <- classifiers %>% append(weak_classifier)
+			classifiers_weights <- classifiers_weights %>% append(alpha)
+			train_data <- train_data %>% mutate(w = w * exp(alpha * (y != prediction))) # recalculating data weights
+			train_data <- train_data %>% mutate(w = w / sum(w))
+		}
+		classifiers <- unlist(classifiers)
+		classifiers_weights <- unlist(classifiers_weights)
+		
+		function(x = ? list) {
+			classifiers_answers <- lapply(classifiers, function(classifier) classifier(x))
+			classes <- unique(classifiers_answers)
+			classes_weights <- lapply(classes, function(class) {
+				classifiers_weights[classifiers_answers == class] %>% sum
+			})
+			return(classifiers_answers[[which.max(classes_weights)]])
+		}
+	}
+\end{lstlisting}
 
 \section{Заключение}
 Алгоритмы композиции могут строить хорошие, устойчивые к переобучению классификаторы для табличных данных. Впрочем, обучение и вычисление результата обученного классификатора занимает много времени.
