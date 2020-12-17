@@ -1,0 +1,42 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+
+\begin{document}
+
+\section{11. Эвристические методы выравнивания; 12. Алгоритмы попарного выравнивания, основанные на эвристическом подходе. 13. Поиск по банку, хэширование}
+\href{https://vk.com/doc155237002_518129852?hash=c14fcc0da730fc8e60}{Книга -- Durbin et al:} Pairwise alignment / Heuristic alignment algorithms: \textsection 2.5, page 32 \\
+\href{https://vk.com/doc155237002_518129974?hash=8b75ee93da5460098c}{Перевод -- Дурбин Р. и другие:} Выравнивание двух последовательностей / Эвристические алгоритмы выравниваний: \textsection 2.5, стр. 57 \\
+YouTube: \href{https://youtu.be/gGoYQBBEX8M?t=689}{Лекция 2; 0:11:29 -- 0:16:48} \\
+Презентации в ВК: \href{https://vk.com/doc155237002_519204981?hash=9c4f1a66b95c4fd7fa}{lecture3.pdf}
+\hrule
+Алгоритмы динамического программирования гарантируют нахождение оптимального выравнивания, но работают долго. Если задача -- выровнять последовательность относительно последовательностей из базы (например, GenBank), мы умрём искать!
+
+\begin{itemize}
+	\item Динамическое программирование - $O(mn)$
+	\item Эвристики: жертвуем чувствительностью ради быстроты (можем не найти выравнивание с наибольшей стоимостью)
+\end{itemize}
+Основная идея: в сходных последовательностях обязательно найдутся короткие почти идентичные участки. Ищем их, а затем расширяем выравнивание в обе стороны (\textit{seed-and-extend approach}).
+
+Базы данных хэшированы, т. е. составлены таблицы: ключ -- \textit{l-tuple} (l-грамм), значение -- список последовательностей с указанием мест, где этот l-tuple встречается. Например, 3-tuple AGT встречается в TAAGTC. 
+
+Поиск последовательности (query) в базе начинается с нахождения всевозможных l-tuple в хэш-таблице. Пара совпадающих l-tuples -- \textit{seed}, <<затравка>> -- начало, от которого будем пытаться расширить выравнивание. 
+
+
+
+	
+\end{document}
