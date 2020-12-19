@@ -21,8 +21,7 @@ def viterbi(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ViterbiM
              key, value in
              a.items()}
 
-    dummy_symbol = "!"
-    x = dummy_symbol + x  # indexing from 1
+    x = "-" + x  # indexing from 1, e. g. x="AGC" -> "-AGC" => x[1]="A"
 
     n_x, n_hmm = len(x), len(a[m_m])
     vd: List[list] = [[None] * n_hmm for _ in range(n_x)]  # Viterbi variables for deletion
@@ -31,15 +30,13 @@ def viterbi(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ViterbiM
     vm[0][0] = 0
     vi[0][0] = vd[0][0] = -float("inf")
     for i in range(1, n_x):
-        vm[i][0] = -float("inf")
-        vd[i][0] = -float("inf")
+        vm[i][0] = vd[i][0] = -float("inf")
 
     for j in range(1, n_hmm):
-        vm[0][j] = -float("inf")
-        vi[0][j] = -float("inf")
+        vm[0][j] = vi[0][j] = -float("inf")
 
-    for i in range(0, n_x):
-        for j in range(0, n_hmm):
+    for i in range(n_x):
+        for j in range(n_hmm):
             if j != 0:
                 vd_new = max(
                     vm[i][j - 1] + a_log[m_d][j - 1],
