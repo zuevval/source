@@ -1,166 +1,139 @@
-# TODO not working, fix wrong calculations & implement for sequnces with length > length of lists in dictionaries
-
+import copy
+import math
 from dataclasses import dataclass
 from pprint import pprint
-from typing import Dict, List, Optional
-from numpy.ma import log
+from typing import List, Sequence
+
+m_m, m_i, m_d, i_m, i_i, i_d, d_m, d_i, d_d = "M-M", "M-I", "M-D", "I-M", "I-I", "I-D", "D-M", "D-I", "D-D"
 
 
 @dataclass
-class VMatchParams:
-    e_Mj_Xi: float
-    q_Xi: float
-    v_Mj1_i1: float  # v^M_{j-1}(i-1)
-    v_Ij1_i1: float  # v^I_{j-1}(i-1)
-    v_Dj1_i1: float  # v^D_{j-1}(i-1)
-    a_Mj1Mj: float  # a_{M_{j-1} M_j}
-    a_Ij1Mj: float  # a_{I_{j-1} M_j}
-    a_Dj1Mj: float  # a_{D_{j-1} M_j}
+class ViterbiMatrices:
+    vm: Sequence[Sequence[float]]
+    vi: Sequence[Sequence[float]]
+    vd: Sequence[Sequence[float]]
 
 
-def v_match(p: VMatchParams) -> float:
-    return log(p.e_Mj_Xi / p.q_Xi) + max(p.v_Mj1_i1 + log(p.a_Mj1Mj),
-                                         p.v_Ij1_i1 + log(p.a_Dj1Mj),
-                                         p.v_Dj1_i1 + log(p.a_Ij1Mj))
+def viterbi(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ViterbiMatrices:
+    precision = 3  # keep 3 decimals
+
+    a_log = {key: [round(math.log(elem), precision) if elem is not None else -float("inf") for elem in value] for
+             key, value in
+             a.items()}
+
+    dummy_symbol = "!"
+    x = dummy_symbol + x  # indexing from 1
+
+    n_x, n_hmm = len(x), len(a[m_m])
+    vd: List[list] = [[None] * n_hmm for _ in range(n_x)]  # Viterbi variables for deletion
+    vi, vm = copy.deepcopy(vd), copy.deepcopy(vd)  # Viterbi variables for insertion and match
+
+    vm[0][0] = 0
+    vi[0][0] = vd[0][0] = -float("inf")
+    for i in range(1, n_x):
+        vm[i][0] = -float("inf")
+        vd[i][0] = -float("inf")
+
+    for j in range(1, n_hmm):
+        vm[0][j] = -float("inf")
+        vi[0][j] = -float("inf")
+
+    for i in range(0, n_x):
+        for j in range(0, n_hmm):
+            if j != 0:
+                vd_new = max(
+                    vm[i][j - 1] + a_log[m_d][j - 1],
+                    vi[i][j - 1] + a_log[i_d][j - 1],
+                    vd[i][j - 1] + a_log[d_d][j - 1],
+                )
+                vd[i][j] = round(vd_new, precision)
+
+            if i != 0:
+                vi_new = math.log(e_insert[x[i]][j] / q[x[i]]) + max(
+                    vm[i - 1][j] + a_log[m_i][j],
+                    vi[i - 1][j] + a_log[i_i][j],
+                    vd[i - 1][j] + a_log[d_i][j],
+                )
+                vi[i][j] = round(vi_new, precision)
+
+            if i != 0 and j != 0:
+                vm_new = math.log(e_match[x[i]][j] / q[x[i]]) + max(
+                    vm[i - 1][j - 1] + a_log[m_m][j - 1],
+                    vi[i - 1][j - 1] + a_log[i_m][j - 1],
+                    vd[i - 1][j - 1] + a_log[d_m][j - 1],
+                )
+                vm[i][j] = round(vm_new, precision)
+
+    return ViterbiMatrices(vm=vm, vi=vi, vd=vd)
 
 
-@dataclass
-class VInsertionParams:
-    e_Ij_Xi: float
-    q_Xi: float
-    v_Mj_i1: float  # v^M_j(i-1)
-    v_Ij_i1: float  # v^I_j(i-1)
-    v_Dj_i1: float  # v^D_j(i-1)
-    a_MjIj: float  # a_{M_j I_j}
-    a_IjIj: float  # a_{I_j I_j}
-    a_DjIj: float  # a_{D_j I_j}
-
-
-def v_insertion(p: VInsertionParams) -> float:
-    return log(p.e_Ij_Xi / p.q_Xi) + max(p.v_Mj_i1 + log(p.a_MjIj),
-                                         p.v_Ij_i1 + log(p.a_IjIj),
-                                         p.v_Dj_i1 + log(p.a_DjIj))
-
-
-@dataclass
-class VDeletionParams:
-    v_Mj1_i: float  # v^M_{j-1}(i)
-    v_Ij1_i: float  # v^I_{j-1}(i)
-    v_Dj1_i: float  # v^D_{j-1}(i)
-    a_Mj1Dj: float  # a_{M_{j-1} D_j}
-    a_Ij1Dj: float  # a_{I_{j-1} D_j}
-    a_Dj1Dj: float  # a_{D_{j-1} D_j}
-
-
-def v_deletion(p: VDeletionParams) -> float:
-    if p.a_Mj1Dj == p.a_Dj1Dj == p.a_Ij1Dj == 0:
-        return -float("inf")
-    return max(p.v_Mj1_i + log(p.a_Mj1Dj),
-               p.v_Ij1_i + log(p.a_Ij1Dj),
-               p.v_Dj1_i + log(p.a_Dj1Dj))
-
-
-def compact(matrix: List[List[float]]):
-    return [["{:.3f}".format(x) for x in row] for row in matrix]
-
-
-def viterbi(x: str, q: Dict[str, float], a: Dict[str, List[float]], e_match, e_insert):
-    # initialization
-    n = len(x)
-    v_m = [[0] + [-float("inf")] * (n - 1)] + [[-float("inf")] + [None] * (n - 1) for _ in range(n - 1)]
-    v_i = [[-float("inf")] + [None] * (n - 1)] + [[0] + [None] * (n - 1) for _ in range(n - 1)]
-    v_d: List[List[Optional[float]]] = [[-float("inf")] + [0] * (n - 1)] + [[None] * n for _ in range(n - 1)]
-    x = "_" + x  # dummy zeroth value
-    pprint(v_m)
-    pprint(v_i)
-    pprint(v_d)
-    pprint(x)
-
-    for i in range(1, n):
-        xi = x[i]
-        vi_params = VInsertionParams(e_Ij_Xi=e_insert[xi][0],
-                                     q_Xi=q[xi],
-                                     v_Mj_i1=v_m[0][i - 1],
-                                     v_Ij_i1=v_i[0][i - 1],
-                                     v_Dj_i1=v_d[0][i - 1],
-                                     a_MjIj=a["MiIi"][0],
-                                     a_IjIj=a["IiIi"][0],
-                                     a_DjIj=a["DiIi"][0])
-        v_i[0][i] = v_insertion(vi_params)
-    pprint(v_i)
-    for j in range(1, n):
-        vd_params = VDeletionParams(v_Mj1_i=v_m[j - 1][0],
-                                    v_Ij1_i=v_i[j - 1][0],
-                                    v_Dj1_i=v_d[j - 1][0],
-                                    a_Mj1Dj=a["MiDi1"][j - 1],
-                                    a_Ij1Dj=a["IiDi1"][j - 1],
-                                    a_Dj1Dj=a["DiDi1"][j - 1])
-        v_d[j][0] = v_deletion(vd_params)
-    pprint(v_d)
-
-    for i in range(1, n):
-        xi = x[i]
-        for j in range(1, n):
-            vi_params = VInsertionParams(e_Ij_Xi=e_insert[xi][j],
-                                         q_Xi=q[xi],
-                                         v_Mj_i1=v_m[j][i - 1],
-                                         v_Ij_i1=v_i[j][i - 1],
-                                         v_Dj_i1=v_d[j][i - 1],
-                                         a_MjIj=a["MiIi"][j],
-                                         a_IjIj=a["IiIi"][j],
-                                         a_DjIj=a["DiIi"][j])
-            pprint(vi_params)
-            v_i[j][i] = v_insertion(vi_params)
-            vd_params = VDeletionParams(v_Mj1_i=v_m[j - 1][i],
-                                        v_Ij1_i=v_i[j - 1][i],
-                                        v_Dj1_i=v_d[j - 1][i],
-                                        a_Mj1Dj=a["MiDi1"][j - 1],
-                                        a_Ij1Dj=a["IiDi1"][j - 1],
-                                        a_Dj1Dj=a["DiDi1"][j - 1])
-            v_d[j][i] = v_deletion(vd_params)
-            vm_params = VMatchParams(e_Mj_Xi=e_match[xi][j],
-                                     q_Xi=q[xi],
-                                     a_Mj1Mj=a["MiMi1"][j - 1],
-                                     a_Ij1Mj=a["IiMi1"][j - 1],
-                                     a_Dj1Mj=a["DiMi1"][j - 1],
-                                     v_Mj1_i1=v_m[j - 1][i - 1],
-                                     v_Ij1_i1=v_i[j - 1][i - 1],
-                                     v_Dj1_i1=v_d[j - 1][i - 1])
-            v_m[j][i] = v_match(vm_params)
-
-    pprint(compact(v_m))
-    pprint(compact(v_d))
-    pprint(compact(v_i))
-
-
-def main():
-    x = "GCCA"
+def test_viterbi_borodovskiy():
+    x = "GCCAG"
     q = {"A": 0.3, "T": 0.3, "C": 0.2, "G": 0.2}
     a = {
-        "MiIi": [1 / 11, 3 / 11, 1 / 10, 1 / 10],  # M_i -> I_{i+1}
-        "MiDi1": [1 / 11, 2 / 11, 1 / 10, 0],  # M_i -> D_{i+1}
-        "MiMi1": [9 / 11, 6 / 11, 8 / 10, 9 / 10],  # M_i -> M_{i+1}
-        "IiIi": [1 / 3, 1 / 5, 1 / 3, 1 / 2],  # I_i -> I_i
-        "IiMi1": [1 / 3, 3 / 5, 1 / 3, 1 / 2],
-        "IiDi1": [1 / 3, 1 / 5, 1 / 3, 0],
-        "DiDi1": [0, 1 / 3, 1 / 4, 0],
-        "DiMi1": [0, 1 / 3, 1 / 2, 1 / 2],
-        "DiIi": [0, 1 / 3, 1 / 4, 1 / 2],
+        m_m: [.82, .55, .8, .9],
+        m_d: [.09, .18, .1, None],
+        m_i: [.09, .27, .1, .1],
+
+        i_m: [.33, .6, .33, .5],
+        i_d: [.33, .2, .33, None],
+        i_i: [.33, .2, .33, .5],
+
+        d_m: [None, .33, .5, .5],
+        d_d: [None, .33, .25, None],
+        d_i: [None, .33, .25, .5],
     }
     e_match = {
-        "A": [0, 1 / 4, 6 / 11, 1 / 12],
-        "C": [0, 1 / 12, 1 / 11, 1 / 3],
-        "G": [0, 7 / 12, 2 / 11, 1 / 2],
-        "T": [0, 1 / 12, 2 / 11, 1 / 12],
+        "A": [None, .25, .55, .08],
+        "C": [None, .08, .09, .33],
+        "G": [None, .58, .18, .5],
+        "T": [None, .08, .18, .08],
     }
     e_insert = {
-        "A": [1 / 4, 1 / 6, 1 / 4, 1 / 4],
-        "C": [1 / 4, 3 / 6, 1 / 4, 1 / 4],
-        "G": [1 / 4, 1 / 6, 1 / 4, 1 / 4],
-        "T": [1 / 4, 1 / 6, 1 / 4, 1 / 4],
+        "A": [.25, .17, .25, .25],
+        "C": [.25, .5, .25, .25],
+        "G": [.25, .17, .25, .25],
+        "T": [.25, .17, .25, .25],
     }
-    viterbi(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert)
+    result = viterbi(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert)
 
+    print("vm")
+    pprint(result.vm)
+    print("vd")
+    pprint(result.vd)
+    print("vi")
+    pprint(result.vi)
 
-if __name__ == "__main__":
-    main()
+    expected = ViterbiMatrices(
+        vm=[
+            [0, None, None, None],
+            [None, +0.866, -3.662, -3.291],
+            [None, -4.210, -0.530, -1.041],
+            [None, -5.095, -0.836, -0.252],
+            [None, -5.247, -0.125, -2.381],
+            [None, -5.291, -3.014, +0.569]
+        ],
+        vd=[
+            [None, None, None, None],
+            [None, -3.293, -0.849, -2.235],
+            [None, -4.179, -1.136, -2.523],
+            [None, -5.065, -1.829, -3.139],
+            [None, -6.355, -4.007, -2.427],
+            [None, -7.241, -5.779, -3.313]
+        ],
+        vi=[
+            [None, None, None, None],
+            [-2.185, -3.679, -4.680, -5.373],
+            [-3.070, +0.473, -2.012, -2.705],
+            [-3.956, -0.220, -2.299, -2.993],
+            [-5.247, -2.397, -3.321, -2.737],
+            [-6.132, -4.169, -2.204, -2.897]
+        ]
+    )
+    acceptable_err = 5 * 1e-2
+
+    for i in range(len(expected.vm)):
+        for j in range(len(expected.vm[0])):
+            for mtx, expected_mtx in ((result.vm, expected.vm), (result.vd, expected.vd), (result.vi, expected.vi)):
+                if expected_mtx[i][j] is not None:
+                    assert abs(expected_mtx[i][j] - mtx[i][j]) < acceptable_err
