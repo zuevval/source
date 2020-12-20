@@ -1,0 +1,47 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+\begin{document}
+
+\section{63. Алгоритм Витерби для парных HMM}
+
+Начало: \\
+$v^M(0,0)=1$. Все остальные $v^\centerdot(i,0), v^\centerdot(0,j)$ полагаются равными $0$. \\
+Рекурсия: $i=1, ..., n, j=1, ..., m$;
+
+\begin{multline*}
+	\cr	v^M(i,j) = p_{x_i,y_j} \max \left\{
+	\begin{array}{ll}
+		(1 - 2 \delta - \tau) \cdot v^M(i-1,j-1)\\
+		(1 - \varepsilon - \tau) \cdot v^X(i-1,j-1)\\
+		(1 - \varepsilon - \tau) \cdot v^Y(i-1,j-1)
+	\end{array}
+	\right. \\
+	\cr	v^X(i,j) = q_{x_i} \max \left\{
+	\begin{array}{ll}
+		\delta \cdot v^M(i-1,j)\\
+		\varepsilon \cdot v^X(i-1,j)
+	\end{array}
+	\right. \\
+	\cr	v^Y(i,j) = q_{y_j} \max \left\{
+	\begin{array}{ll}
+		\delta \cdot v^M(i,j-1)\\
+		\varepsilon \cdot v^Y(i,j-1)
+	\end{array}
+	\right. \\
+\end{multline*}
+
+Завершение:
+$$v^\varepsilon = \tau \cdot max(v^M(n,m), v^X(n,m), v^Y(n,m))$$
+\end{document}
