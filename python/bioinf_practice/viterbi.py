@@ -13,6 +13,14 @@ class ViterbiMatrices:
     vi: Sequence[Sequence[float]]
     vd: Sequence[Sequence[float]]
 
+    def print(self):
+        print("vm")
+        pprint(self.vm)
+        print("vd")
+        pprint(self.vd)
+        print("vi")
+        pprint(self.vi)
+
 
 def viterbi(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ViterbiMatrices:
     precision = 3  # keep 3 decimals
@@ -64,6 +72,18 @@ def viterbi(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ViterbiM
     return ViterbiMatrices(vm=vm, vi=vi, vd=vd)
 
 
+# ---------------
+# --- Testing ---
+# ---------------
+
+def check_matrices(expected: ViterbiMatrices, actual: ViterbiMatrices, acceptable_err: float):
+    for i in range(len(expected.vm)):
+        for j in range(len(expected.vm[0])):
+            for mtx, expected_mtx in ((actual.vm, expected.vm), (actual.vd, expected.vd), (actual.vi, expected.vi)):
+                if expected_mtx[i][j] is not None:
+                    assert abs(expected_mtx[i][j] - mtx[i][j]) < acceptable_err
+
+
 def test_viterbi_borodovskiy():
     x = "GCCAG"
     q = {"A": 0.3, "T": 0.3, "C": 0.2, "G": 0.2}
@@ -93,44 +113,96 @@ def test_viterbi_borodovskiy():
         "T": [.25, .17, .25, .25],
     }
     result = viterbi(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert)
-
-    print("vm")
-    pprint(result.vm)
-    print("vd")
-    pprint(result.vd)
-    print("vi")
-    pprint(result.vi)
+    result.print()
 
     expected = ViterbiMatrices(
         vm=[
-            [0, None, None, None],
-            [None, +0.866, -3.662, -3.291],
-            [None, -4.210, -0.530, -1.041],
-            [None, -5.095, -0.836, -0.252],
-            [None, -5.247, -0.125, -2.381],
-            [None, -5.291, -3.014, +0.569]
+            [0, None, None, None],  # 0
+            [None, +0.866, -3.662, -3.291],  # G
+            [None, -4.210, -0.530, -1.041],  # C
+            [None, -5.095, -0.836, -0.252],  # C
+            [None, -5.247, -0.125, -2.381],  # A
+            [None, -5.291, -3.014, +0.569],  # G
         ],
         vd=[
-            [None, None, None, None],
-            [None, -3.293, -0.849, -2.235],
-            [None, -4.179, -1.136, -2.523],
-            [None, -5.065, -1.829, -3.139],
-            [None, -6.355, -4.007, -2.427],
-            [None, -7.241, -5.779, -3.313]
+            [None, -2.408, -3.517, -4.903],  # 0
+            [None, -3.293, -0.849, -2.235],  # G
+            [None, -4.179, -1.136, -2.523],  # C
+            [None, -5.065, -1.829, -3.139],  # C
+            [None, -6.355, -4.007, -2.427],  # A
+            [None, -7.241, -5.779, -3.313],  # G
         ],
         vi=[
-            [None, None, None, None],
-            [-2.185, -3.679, -4.680, -5.373],
-            [-3.070, +0.473, -2.012, -2.705],
-            [-3.956, -0.220, -2.299, -2.993],
-            [-5.247, -2.397, -3.321, -2.737],
-            [-6.132, -4.169, -2.204, -2.897]
+            [None, None, None, None],  # 0
+            [-2.185, -3.679, -4.680, -5.373],  # G
+            [-3.070, +0.473, -2.012, -2.705],  # C
+            [-3.956, -0.220, -2.299, -2.993],  # C
+            [-5.247, -2.397, -3.321, -2.737],  # A
+            [-6.132, -4.169, -2.204, -2.897],  # G
         ]
     )
-    acceptable_err = 5 * 1e-2
+    check_matrices(expected=expected, actual=result, acceptable_err=5 * 1e-2)
 
-    for i in range(len(expected.vm)):
-        for j in range(len(expected.vm[0])):
-            for mtx, expected_mtx in ((result.vm, expected.vm), (result.vd, expected.vd), (result.vi, expected.vi)):
-                if expected_mtx[i][j] is not None:
-                    assert abs(expected_mtx[i][j] - mtx[i][j]) < acceptable_err
+
+def test_forward():
+    x = "GAGGT"
+    q = {"A": 0.3, "T": 0.3, "C": 0.2, "G": 0.2}
+    a = {
+        m_i: [.1, .1, 3 / 9, 1 / 9],
+        m_d: [.1, .2, 1 / 9, None],
+        m_m: [.8, .7, 5 / 9, 8 / 9],
+
+        i_i: [1 / 3, 1 / 3, .2, .5],
+        i_m: [1 / 3, 1 / 3, .6, .5],
+        i_d: [1 / 3, 1 / 3, .2, None],
+
+        d_d: [None, 1 / 3, .25, None],
+        d_m: [None, 1 / 3, .50, .5],
+        d_i: [None, 1 / 3, .25, .5],
+    }
+    e_match = {
+        "A": [None, 1 / 11, .5, 1 / 11],
+        "C": [None, 4 / 11, .1, 1 / 11],
+        "G": [None, 5 / 11, .1, 4 / 11],
+        "T": [None, 1 / 11, .3, 5 / 11],
+    }
+    e_insert = {
+        "A": [.25, .25, 1 / 6, .25],
+        "C": [.25, .25, 2 / 6, .25],
+        "G": [.25, .25, 2 / 6, .25],
+        "T": [.25, .25, 1 / 6, .25],
+    }
+    result = viterbi(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert)
+    probability = math.exp(result.vm[-1][-1] + result.vd[-1][-1] + result.vi[-1][-1])
+
+    result.print()
+    print("probability:", probability)
+
+    expected = ViterbiMatrices(
+        vm=[
+            [0, None, None, None],  # 0
+            [None, +0.598, -4.094, -3.497],  # C
+            [None, -4.372, +0.752, -2.899],  # A
+            [None, -3.638, -3.679, +0.762],  # G
+            [None, -4.513, -4.554, +0.251],  # G
+            [None, -7.404, -4.737, -1.030],  # T
+        ],
+        vd=[
+            [None, -2.303, -3.401, -4.787],  # 0
+            [None, -3.178, -1.012, -2.398],  # C
+            [None, -4.459, -2.986, -1.445],  # A
+            [None, -5.334, -3.861, -1.445],  # G
+            [None, -6.210, -4.737, -2.544],  # G
+            [None, -7.491, -6.018, -4.741],  # T
+        ],
+        vi=[
+            [None, None, None, None],  # 0
+            [-2.079, -3.178, -4.277, -5.257],  # C
+            [-3.360, -1.887, -2.986, -3.273],  # A
+            [-4.236, -2.763, +0.164, -1.915],  # G
+            [-5.111, -3.638, -0.934, -1.212],  # G
+            [-6.392, -4.919, -3.132, -2.088],  # T
+        ]
+    )
+    check_matrices(expected=expected, actual=result, acceptable_err=5 * 1e-2)
+    assert abs(probability - 0.000386) < 1e-5
