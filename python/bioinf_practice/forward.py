@@ -16,6 +16,15 @@ class ForwardMatrices:
     fd: Sequence[Sequence[float]]
     probability: float
 
+    def print(self):
+        print("\nfm")
+        pprint(self.fm)
+        print("fd")
+        pprint(self.fd)
+        print("fi")
+        pprint(self.fi)
+        print("probability:", self.probability)
+
 
 def forward(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ForwardMatrices:
     precision = 3  # keep 3 decimals
@@ -69,7 +78,7 @@ def forward(x: str, q: dict, a: dict, e_match: dict, e_insert: dict) -> ForwardM
     return ForwardMatrices(fm=fm, fi=fi, fd=fd, probability=probability)
 
 
-def test_forward():
+def test_forward():  # test 3 (modification 5)
     x = "GTAC"
     q = {"A": 0.3, "T": 0.3, "C": 0.2, "G": 0.2}
     a = {
@@ -97,15 +106,7 @@ def test_forward():
         "C": [.25, .25, .20, .25, .25],
         "A": [.25, .25, .40, .25, .25],
     }
-    result = forward(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert)
-
-    print("\nfm")
-    pprint(result.fm)
-    print("fd")
-    pprint(result.fd)
-    print("fi")
-    pprint(result.fi)
-    print("probability:", result.probability)
+    forward(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert).print()
 
 
 def test_probability():
@@ -136,8 +137,4 @@ def test_probability():
         "G": [.25, .25, 2 / 6, .25],
         "T": [.25, .25, 1 / 6, .25],
     }
-    result = forward(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert)
-
-    print("probability:", result.probability)
-
-    assert abs(result.probability - 0.000386) < 1e-3
+    forward(x=x, q=q, a=a, e_match=e_match, e_insert=e_insert).print()
