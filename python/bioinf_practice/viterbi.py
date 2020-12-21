@@ -144,7 +144,7 @@ def test_viterbi_borodovskiy():
     check_matrices(expected=expected, actual=result, acceptable_err=5 * 1e-2)
 
 
-def test_forward():
+def test_probability():
     x = "GAGGT"
     q = {"A": 0.3, "T": 0.3, "C": 0.2, "G": 0.2}
     a = {
