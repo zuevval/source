@@ -69,7 +69,7 @@ kernels <- c("rectangular", "triangular", "epanechnikov", "biweight", "triweight
 error_rates <- data.frame(test_part = 1:19 / 20)
 
 for (kernel in kernels) {
-  error_rates[, kernel] <- eval_knn(data = glass, data.test_parts = test_parts, kernel = kernel, distance = 1)
+  error_rates[, kernel] <- eval_knn(data = glass, data.test_parts = error_rates$test_part, kernel = kernel, distance = 1)
 }
 
 plot_error_rates <- function(error_rates_molten) {
@@ -92,3 +92,51 @@ error_rates_molten %>%
   filter(kernel %in% c("rectangular", "gaussian")) %>%
   plot_error_rates
 ggsave(abs_path("glass_err_rate_filtered.png"), scale = .3)
+
+# how `distance` affects the error rate?
+error_rates <- data.frame(distance = rep(1:16, 10)) # 10 measures for each distance
+error_rates$value <- 0
+for (i_row in seq_along(error_rates[, 1])) {
+  error_rates$value[i_row] <- eval_knn(data = glass, data.test_parts = 0.5, distance = error_rates$distance[i_row])
+}
+error_rates %>%
+  group_by(distance) %>%
+  summarise(mean = mean(value), sd = sd(value)) %>%
+  ggplot(aes(x = distance, y = mean)) +
+  geom_line() +
+  geom_point() +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = .2) +
+  ggtitle("kNN for \` Glass \` dataset with different distances") +
+  ylab("error rate on test data") +
+  xlab("parameter of Mikiwski distance") +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+ggsave(abs_path("glass_err_rate_diff_distances.png"), scale = .3)
+
+# so we choose parameters values as follows: kernel = "rectangular", distance = 1
+glass.knn <- function(test) kknn(formula = type ~ ., train = glass, test = test, distance = 1, kernel = "rectangular") %>% fitted
+# now evaluating a new sample
+new_glass_sample <- data.frame(RI = 1.516, Na = 11.7, Mg = 1.01, Al = 1.19, Si = 72.59, K = 0.43, Ca = 11.44, Ba = 0.02, Fe = 0.1)
+glass.knn(test = new_glass_sample) # the answer is 5
+
+# which feature affects the error most of all?
+features <- colnames(glass)
+features <- features[features != "type"] # remove "type"
+error_rates <- data.frame(feature = rep(features, 5))
+error_rates$value <- 0
+for (i_row in seq_along(error_rates$feature)) {
+  error_rates$value[i_row] <- eval_knn(data = glass %>% modify_at(error_rates$feature[i_row], ~NULL), data.test_parts = 0.5, distance = 1)
+}
+
+error_rates %>%
+  group_by(feature) %>%
+  summarise(mean = mean(value), sd = sd(value)) %>%
+  ggplot(aes(x = feature, y = mean)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = .2) +
+  ggtitle("kNN for \` Glass \` dataset with a single feature excluded") +
+  ylab("error rate on test data") +
+  xlab("excluded feature") +
+  theme_bw() +
+  theme(legend.position = "none", plot.title = element_text(hjust = 0.5))
+ggsave(abs_path("glass_err_rate_features_excluded.png"), scale = .3)
