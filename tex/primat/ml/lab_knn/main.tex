@@ -1,0 +1,196 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Задание}
+Используя в качестве классификатора алгоритм $k$ ближайших соседей, провести следующие вычислительные эксперименты:
+\begin{enumerate}[noitemsep]
+    \item Исследовать зависимость доли ошибочных ответов от доли тренировочных экземпляров для набора данных <<Крестики-нолики>> и данных о спаме в электронных письмах.
+    \item Разработать классификатор для набора данных "Glass". Построить графики зависимости ошибок классификации от значения параметра $k$ и типа ядра. Исследовать влияние типа метрики (значение параметра $dis\-tance$) на точность классификации. Определить признак, который оказывает наибольшее влияние на ответ, путём последовательного исключения признаков. Определить класс экземпляра с характеристиками: \\
+    $RI=1.516$, $Na=11.7$, $Mg=1.01$, $Al=1.19$, $Si=72.59$, $K=0.43$, $Ca=11.44$, $Ba=0.02$, $Fe=0.1$
+    \item Построить и оценить классификатор, используя двумерные наборы данных из файлов "svmdata4.txt"\hspace{0pt} и "svmdata4test.txt"\hspace{0pt}. Найти оптимальное значение $k$. Визуализировать тренировочные данные на плоскости.
+    \item Разработать классификатор для данных <<Титаник>>.
+\end{enumerate}
+
+\section{Теория}
+Пусть дан набор обучающих данных $\tilde D = \{(\vec{x}_i, y_i)\}$, $y_i \in Y$, $Y$ -- дискретное множество меток классов. Зададим метрику
+\begin{equation}\label{eq:metric}
+    d(\vec x_i, \vec x_j) = \left( \sum_{s=1}^p |x_{is} - x_{js}|^p \right)^{\frac{1}{p}}
+\end{equation}
+где $ p \ge 1 $ -- параметр.
+
+Метод $k$ ближайших соседей (kNN) предсказывает класс $\hat y$ нового экземпляра данных $ \vec x $ по формуле
+\begin{equation}\label{eq:knn}
+    \hat y = \arg \max_{r \in Y} \left(\sum_{i=1}^{k}K(D_{(i)}) I(y_{(i)} = r)\right) \\
+\end{equation}
+где $\{(x_{(i)}, y_{(i)})\}$ -- экземпляры из $\tilde D$, ближайшие к $\vec x$ в смысле расстояния \eqref{eq:metric}, $D_{(i)} = D(x, x_{(i)}) = \frac{d(x, x_{(i)})}{d(x, x_{(k + 1)})} $. Функция $I(x = y)$ принимает значение $1$, если $x=y$, и $0$ в противном случае.  Функция $K(d)$ -- \textit{ядро} -- также является параметром и может быть, к примеру, одной из следующих:
+\begin{enumerate}
+    \item $K(d) = \frac{1}{d} I(|d| \le 1)$ -- прямоугольное ядро
+    \item $K(d) = (1 - |d|) \cdot I(|d| \le 1) $ -- треугольное ядро
+    \item $K(d) = \frac{3}{4} (1 - d^2) \cdot I(|d| \le 1) $ -- ядро Епанечникова
+    \item $K(d) = \frac{15}{16}(1-d^2)^2 \cdot I(|d| \le 1) $ -- двумерное ядро
+    \item $K(d) = \frac{35}{32} (1-d^2)^3 \cdot I(|d| \le 1) $ -- трёхмерное ядро
+    \item $K(d) = \frac{\pi}{4} \cos(\frac{\pi}{2}d) \cdot I(|d| \le 1) $ -- ядро
+    \item $K(d) = \frac{1}{\sqrt{2\pi} e^{-\frac{d^2}{2}}} $ -- ядро Гаусса
+    \item $K(d) = \frac{1}{|d|} $ -- инверсионное ядро
+\end{enumerate}
+
+Как видно, метод $k$ ближайших соседей -- простой в реализации и гибкий инструмент, который позволяет строить классификаторы со сложными границами принятия решений. Недостатки метода -- низкая скорость вычислений и большой объём памяти (необходимо хранить все тренировочные экземпляры).
+
+\section{Реализация}
+
+При построении классификаторов использована библиотека \texttt{kknn} \cite{kknn}.
+Для численных экспериментов было использовано прямоугольное ядро (то есть стандартный метод ближайших соседей без использования весов), лишь при исследовании зависимости результата от используемого ядра были испробованы прочие формулы. Значение $k$ всюду положено равным значению по умолчанию ($k = 7$), кроме классификатора для данных о спаме, где $k$ подобрано в результате вычислительного эксперимента.
+
+\newpage
+\section{Результаты и выводы}
+
+\subsection{Классификаторы для данных 'Tic-Tac-Toe' и 'spam'}
+
+На рисунках \ref{fig:ttoe} и \ref{fig:spam} изображены зависимости доли ошибок на тестовых данных от доли данных в тестовой выборке. Видно, что при уменьшении числа элементов в тренировочных данных ошибка возрастает (приблизительно до $0.3$ и $0.175$ соответственно при сохранении $\frac{1}{20}$ всего набора в тестовой выборке), однако всё ещё остаётся довольно небольшой (даже малого набора достаточно для получения неплохих результатов).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{tic-tac-toe_err_rate}
+    \caption{Зависимость ошибки от объёма тренировочной выборки для данных <<Крестики-нолики>>}
+    \label{fig:ttoe}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{spam_err_rate}
+    \caption{Зависимость ошибки от объёма тренировочной выборки для данных о спаме}
+    \label{fig:spam}
+\end{figure}
+
+\newpage
+
+\subsection{Классификатор для данных 'Glass'}
+
+Проведено исследование зависимости доли ошибки на тестовых данных от размера тестовой выборки для алгоритмов с различными ядрами. Как видно на рис. \ref{fig:glass_err_rate_all}, когда данных мало, прямоугольное ядро показывает плохой результат (остальные ядра, которые учитывают не только число точек вокруг, но и вес, имеют меньшую, но сравнимую ошибку). В целом, однако, сложно выделить какое-либо ядро, которое было бы существенно лучше других. На рис. \ref{fig:glass_err_rate_filtered} показаны отдельно результаты для прямоугольного и гауссова ядра; видно, что ломаные схожи.
+
+\begin{figure}[h!]
+    \centering \includegraphics[width=\myPictWidth]{glass_err_rate_all}
+    \caption{Зависимость ошибки от объёма тренировочной выборки для данных о стекле при использовании различных ядер}
+    \label{fig:glass_err_rate_all}
+\end{figure}
+
+\begin{figure}[h!]
+    \centering \includegraphics[width=\myPictWidth]{glass_err_rate_filtered}
+    \caption{Зависимость ошибки от объёма тренировочной выборки для данных о стекле при использовании прямоугольного и гауссова ядра}
+    \label{fig:glass_err_rate_filtered}
+\end{figure}
+
+Для прямоугольного ядра вычислено оптимальное значение параметра $p$ из набора $p \in \{1;16\}$ для расстояния Минковского \eqref{eq:metric}, которое даёт наименьшую ошибку: $p=1$, то есть расстояние Хэмминга (рис. \ref{fig:glass_err_rate_distances}). Выборочные дисперсии, отмеченные на рисунке \ref{fig:glass_err_rate_distances}, получены путём десятикратного повторения вычислений, причём всякий раз тестовые данные были заново выбраны псевдослучайным способом.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{glass_err_rate_diff_distances}
+    \caption{Зависимость ошибки kNN на тестовых данных о стекле от параметра расстояния Минковского (отмечены диапазоы, соответствующие выборочным дисперсиям)}
+    \label{fig:glass_err_rate_distances}
+\end{figure}
+
+Помимо того, в данных из набора 'Glass' был определён признак, который вносит наибольший вклад в ответ -- показатель преломления $RI$ (рис. \ref{fig:glass_err_rate_features}).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{glass_err_rate_features_excluded}
+    \caption{Значения ошибки при исключении одного признака из набора данных о стекле }
+    \label{fig:glass_err_rate_features}
+\end{figure}
+
+Нужно отметить, что поиск наиболее значимого признака путём исключения по одному предполагает независимость признаков, что может, строго говоря, не выполняться.
+Например, процентное содержание семи металлов однозначно определяет значение для восьмого.
+
+\newpage
+\subsection{Классификатор для двумерных данных}
+
+Рисунок \ref{fig:svm_err_rate} демонстрирует зависимость ошибки на тестовых данных в наборе 'svmdata4' от значения параметра $k$ в формуле \eqref{eq:knn} с прямоугольным ядром.
+Видно, что в определённый момент с ростом $k$ ошибка резко возрастает практически до $0.5$; потеря чувствительности может объясняться тем, что при большом значении $k$ может оказаться, что для любой точки, находящейся близко к основной области, где сосредоточены точки тренировочного набора, классификатор всегда даёт один ответ.
+При малых $k$ доля неверных ответов мала, но стоит отметить, что в данных нет очевидных выбросов; возможно, если бы они присутствовали, слишком малые значения $ k $ приводили бы к плохим результатам из-за переобучения.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{svm_err_rate}
+    \caption{Зависимость ошибки от параметра $k$ для набора данных 'svmdata4'}
+    \label{fig:svm_err_rate}
+\end{figure}
+
+На рис. \ref{fig:svm_voronoi} представлены точки тренировочного набора. Линии -- диаграмма Вороного \cite{murphy}, построенная по этим точкам. Ячейка этой диаграммы соответствует области, в которой соответствующая точка будет определять результат классификации в kNN при $k=1$ с прямоугольным ядром.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{svm_voronoi}
+    \caption{Данные 'svmdata4' на плоскости. Линиями изображена диаграмма Вороного}
+    \label{fig:svm_voronoi}
+\end{figure}
+
+\subsection{Классификатор для данных <<Титаник>>}
+
+Для классификации данных о пассажирах парохода <<Титаник>> были выбраны признаки $Pclass$ (класс обслуживания пассажира); $Sex$ (пол); $Age$ (возраст); $SibSp$, $Parch$ (данные о родственниках); $Fare$ (плата за билет). Недостающие значения заменены нулями.
+Порт отправления, номер билета и номер каюты были отброшены (номер билета является уникальным; номер каюты также редко бывает одинаковый, и у этого признака много пропущенных значений; порт отправления, как можно предположить, не оказывает существенного влияния на результат).
+
+Параметры алгоритма: $ k = 7 $, гауссово ядро, $distance = 2$.
+
+Результат на Kaggle: доля верных ответов -- $0.732$
+
+\newpage
+\section{Заключение}
+
+В работе исследовано поведение алгоритма $k$ ближайших соседей на разных наборах данных в некотором диапазоне параметров.
+Было показано, что использование различных ядер не ухудшает, но и не улучшает значительно долю верных ответов. Значение параметра $k$ можно выбирать малым и даже равным единице (по крайней мере, это разумно для данных без существенных выбросов при использовании прямоугольного ядра).
+Параметр метрики Минковского, по-видимому, разумно принимать равным $1$ или $2$.
+
+Код программ \href{https://github.com/zuevval/source/tree/master/r/ml/knn}{доступен в GitHub-репозитории}.
+
+
+\begin{thebibliography}{99}
+    \bibitem{kknn} Hechenbichler K. and Schliep K.P. (2004) Weighted k-Nearest-Neighbor Techniques and Ordinal Classification, Discussion Paper 399, SFB 386, Ludwig-Maximilians University Munich.
+    \bibitem{murphy} Murphy, Kevin P. Machine learning: a probabilistic perspective.: Kevin P. Murphy. -- Cambridge, Massachusetts: The MIT Press, 2012.
+\end{thebibliography}
+
+\end{document}
