@@ -22,7 +22,7 @@ svm_data_dir <- "r/ml/svm/data"
 svm.train <- read_table(svm_data_dir, "svmdata4.txt", sep = "\t")
 svm.test <- read_table(svm_data_dir, "svmdata4test.txt", sep = "\t")
 svm.knn_err_rate <- function(k) {
-  tbl <- kknn(Colors ~ ., train = svm.train, test = svm.test, k = k) %>%
+  tbl <- kknn(Colors ~ ., train = svm.train, test = svm.test, k = k, kernel = "rectangular") %>%
     fitted %>%
     table(svm.test$Colors)
   1 - sum(diag(tbl)) / sum(tbl)
@@ -60,7 +60,7 @@ titanic.train <- read_table(titanic_data_dir,"titanic_train.csv") %>%
   na.omit %>%
   mutate(Survived = as.factor(Survived))
 titanic.test <- read_table(titanic_data_dir,"titanic_test.csv") %>% replace_na(list(Fare = 0, Age = 0))
-titanic.test$Survived <- kknn(Survived ~ ., train = titanic.train, test = titanic.test) %>% fitted
+titanic.test$Survived <- kknn(Survived ~ ., train = titanic.train, test = titanic.test, kernel = "gaussian") %>% fitted
 
 titanic.test %>%
   select(PassengerId, Survived) %>%

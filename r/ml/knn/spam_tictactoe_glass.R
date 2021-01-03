@@ -30,7 +30,7 @@ eval_knn <- function(data = ? data.frame, data.test_parts = ? numeric, kernel = 
     data.train <- data[-test_indices,]
     data.test <- data[test_indices,]
 
-    data.kknn <- kknn(type ~ ., data.train, data.test, distance = distance, kernel = "triangular")
+    data.kknn <- kknn(type ~ ., data.train, data.test, distance = distance, kernel = kernel)
     data.contingency_table <- table(data.test$type, fitted(data.kknn))
     data.test_err_rates[i] <- 1 - sum(diag(data.contingency_table)) / sum(data.contingency_table)
   }
@@ -39,7 +39,7 @@ eval_knn <- function(data = ? data.frame, data.test_parts = ? numeric, kernel = 
 
 mapply(function(data.name, data) {
   data.test_parts <- 1:19 / 20
-  data.test_err_rates <- eval_knn(data = data, data.test_parts = data.test_parts, kernel = "triangular", distance = 1)
+  data.test_err_rates <- eval_knn(data = data, data.test_parts = data.test_parts, kernel = "rectangular", distance = 1)
   data.results <- data.frame(test_parts = data.test_parts,
                              test_err_rates = data.test_err_rates)
 
@@ -122,10 +122,10 @@ glass.knn(test = new_glass_sample) # the answer is 5
 # which feature affects the error most of all?
 features <- colnames(glass)
 features <- features[features != "type"] # remove "type"
-error_rates <- data.frame(feature = rep(features, 5))
+error_rates <- data.frame(feature = rep(features, 10))
 error_rates$value <- 0
 for (i_row in seq_along(error_rates$feature)) {
-  error_rates$value[i_row] <- eval_knn(data = glass %>% modify_at(error_rates$feature[i_row], ~NULL), data.test_parts = 0.5, distance = 1)
+  error_rates$value[i_row] <- eval_knn(data = glass %>% modify_at(error_rates$feature[i_row], ~NULL), data.test_parts = 0.5, kernel = "rectangular", distance = 1)
 }
 
 error_rates %>%
