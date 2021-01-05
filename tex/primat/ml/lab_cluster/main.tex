@@ -1,0 +1,181 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Задание}
+
+\begin{enumerate}[noitemsep]
+    \item Методом $k$ средних разбить множестов объектов из набора \texttt{pluton} (пакет \texttt{cluster}) на 3 класса.
+    Сравнить качество разбиения в зависимости от максимального числа итераций алгоритма.
+    \item Сгенерировать двумерный набор данных, состоящий из трёх кластеров, каждый из которых значительно <<вытянут>> вдоль одной оси.
+    Исследовать качество кластеризации методом $k$ медоидов в зависимости от
+    \begin{enumerate}[noitemsep]
+        \item использования стандартизации
+        \item типа метрики.
+    \end{enumerate}
+    Объяснить полученные результаты.
+    \item Построить дендрограмму по данным \texttt{votes.repub} (пакет \texttt{cluster}). Дать интерпретацию результату.
+    \item Построить дендрограмму для данных \texttt{animals (пакет \texttt{cluster})}. Проинтерпретировать результат.
+    \item Исследовать данные из набора \texttt{seeds\_dataset}, содержащий описания наборов трёх сортов пшеницы: Kama, Rosa и Canadian.
+\end{enumerate}
+
+\newpage
+\section{Реализация}
+
+\subsection{Классификация данных об изотопах плутона}
+
+Методом $k$ средних, реализованном в функции \texttt{kmeans} из пакета \texttt{cluster}, данные об изотопах были разделены на три кластера. Установлено, что после двух итераций алгоритм сходится, после чего принадлежность точек кластерам не меняется (рис. \ref{fig:pluton_max_iter_2}).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{pluton_max_iter_2}
+    \caption{Данные о плутоне в проекциях на плоскости пар признаков}
+    \label{fig:pluton_max_iter_2}
+\end{figure}
+
+\newpage
+\subsection{Классификация сгенерированных данных}
+
+С помощью функции \texttt{rnorm} сгенерированы $ 3 $ кластера по $ 35 $ точек, сэмплированных из двумерного нормального распределения (рис. \ref{fig:art_data}). Каждому кластеру соответствует распределение с одной и той же матрицей ковариации
+$$ \sigma =
+\begin{pmatrix}
+    0.2 & 0.0 \\
+    0.0 & 1.0 \end{pmatrix} $$
+  и различными значениями матожидания:
+$$ \mu_1 = \begin{pmatrix} 0.0 \\ 0.5 \end{pmatrix}, \thickspace
+  \mu_2 = \begin{pmatrix} \phm 1.0 \\ -0.5 \end{pmatrix}, \thickspace
+  \mu_3 = \begin{pmatrix} 2.0 \\ 0.5 \end{pmatrix} $$
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{art_data}
+    \caption{Точки, сгенерированные псевдослучайным образом}
+    \label{fig:art_data}
+\end{figure}
+
+Полученные точки были распределены по трём кластерам методом $ k $ медоидов, реализованном в функции \texttt{clara} из пакета \texttt{cluster}. При этом были последовательно использованы различные меры близости точек (расстояние Евклида, манхэттенское расстояние и индекс Жаккара) как с применением стандартизации данных, так и без.
+
+На диаграмме \ref{fig:art_data_err} показано число точек, попавших в иной кластер, чем в исходном распределении. Видно, что наиболее аккуратное разбиение получается при использовании манхэттенской метрики, что, по-видимому, обусловлено внутренней структурой данных, которые вытянуты вдоль одной из осей. Впрочем, для правильной работы манхэттенской и евклидовой метрики важна стандартизация данных (что понятно: точки внутри кластеров рассредоточены вдоль вертикальной оси, при их сжатии попарные расстояния между точками становятся ближе к расстояниям между кластерам). Пересчёт медоидов на основе индекса Жаккара практически не зависит от стандартизации.
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{art_data_err}
+    \caption{Измерения, полученные в результате применения алгоритма $ k $ медоидов к сгенерированным данным: доля точек, кластер которых был предсказан неверно, в зависимости от параметров метода.}
+    \label{fig:art_data_err}
+\end{figure}
+
+\newpage
+\subsection{Дендрограмма для данных о выборах}
+
+По данным о выборах с помощью функции \texttt{agnes} из пакета \texttt{cluster} было построено дерево методом UPGMA (рис.  \ref{fig:dnd_votes}). Видно, что несколько <<республиканских>> южных и центральных штатов, такие как Алабама, Джорджия и Техас, выделяются в отдельную кладу. Штаты, которые исконно считаются <<демократическими>> (например, Калифорния, Орегон и Вашингтон), также расположены близко.
+
+Вермонт, явно выделяющийся в отдельный кластер, можно интерпретировать как выброс (в этом штате почти никто не живёт, и любые статистические показатели имеют малую значимость).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{dnd_votes}
+    \caption{Дерево, построенное по данным о голосах, отданных в поддержку республиканской партии на протяжении двух десятилетий}
+    \label{fig:dnd_votes}
+\end{figure}
+
+\subsection{Дендрограмма для данных о животных}
+
+Дерево UPGMA, построенное по данным о животных (рис. \ref{fig:dnd_animals}) в целом отражает их эволюционное сходство, и эксперт наверняка сможет дать имя многим образовавшимся узлам. Например, ящерица и саламандра вместе образуют группу, которую можно назвать <<земноводные>>; пчела и муха -- <<крылатые насекомые>>; шимпанзе и человек -- <<приматы>>.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\textwidth]{dnd_animals}
+    \caption{Дерево, построенное по данным о фенотипах животных}
+    \label{fig:dnd_animals}
+\end{figure}
+
+\newpage
+\subsection{Кластеризация данных о семенах}
+
+Данные о семенах пшеницы были сгруппированы двумя способами:
+\begin{enumerate}
+    \item Построено дерево UPGMA (рис. \ref{fig:dnd_seeds}), на котором явно видны три клады. По цветам листьев, которыми обозначено исходное разбиение на классы, видно, что эти клады в целом соответствуют видам семян, но некоторые экземпляры были отнесены к <<чужой>> группе.
+    \item Методом $ k $ средних предсказано разбиение на $ 3 $ кластера. При этом десятая часть точек попала не в тот кластер, в который была определена большая часть семян соответствующего вида. На рис. \ref{fig:seeds_pca} показана визуализация этого разбиения с помощью функции \texttt{clusplot}, которая строит изображение кластеров в на плоскости первых двух главных компонент (в данном случае удаётся сохранить $ 86\% $ дисперсии) и эллипсы рассеяния вокруг предсказанных кластеров. Видно, что и в реальном, и в предсказанном разбиении кластеры перекрываются.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\textwidth]{dnd_seeds}
+    \caption{Дерево UPGMA. Цветами отмечены виды семян}
+    \label{fig:dnd_seeds}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\textwidth]{seeds_clusplot3}
+    \caption{Кластеризация данных о семенах методом $k$ средних при $k=3$ (визуализация методом PCA). Различные цвета -- разные классы в исходных данных, различная форма -- различные классы согласно предсказанию метода}
+    \label{fig:seeds_pca}
+\end{figure}
+
+\newpage
+Рисунок \ref{fig:seeds_pairs} демонстрирует диаграммы рассеяния для этого набора данных. Цветами обозначено разбиение согласно таблице. Видно, что нет ни одной пары признаков, которые бы давали проекцию данных, при которой которые кластеры не перекрываются. Также некоторые признаки сильно коррелированы (например, площадь и периметр семени).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\textwidth]{seeds_pairs}
+    \caption{Проекции данных о семенах. Цветами отмечена видовая принадлежность экземпляров}
+    \label{fig:seeds_pairs}
+\end{figure}
+
+\newpage
+\section{Заключение}
+
+Табличные данные невысокой размерности на практике могут быть эффективно разделены на классы итерационными алгоритмами $ k $ средних или $ k $ медоидов. Можно повысить точность расчётов, предварительно проведя стандартизацию признаков.
+
+Если число кластеров заранее неизвестно, можно построить филогенетическое дерево, например, алгоритмом UPGMA, и визуально оценить возможные варианты разбиений. Деревья, притом, позволяют наглядно представить надёжность разбиения (степень выраженности отдельных групп). \\
+
+Код программы, которая осуществляет расчёты и построение изображений, \href{https://github.com/zuevval/source/tree/master/r/ml/clustering}{доступен в GitHub-репозитории}.
+
+
+%\begin{thebibliography}{99}
+%    \bibitem{murphy} Murphy, Kevin P. Machine learning: a probabilistic perspective.: Kevin P. Murphy. -- Cambridge, Massachusetts: The MIT Press, 2012.
+%\end{thebibliography}
+
+\end{document}
