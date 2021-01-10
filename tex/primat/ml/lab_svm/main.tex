@@ -1,0 +1,360 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{array} % utils for tables
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Задание}
+
+Для каждого пункта $i$ предусмотрен отдельный набор данных $svmdata[i]$.
+
+\begin{enumerate}[noitemsep]
+    \item Используя линейное ядро, построить алгоритм типа <<C-classification>> с параметром регуляризации (штрафа за нарушение ограничений) $ C=1 $.
+    Визуализировать разбиение пространства признаков на области с различными предсказаниями модели.
+    Вывести число опорных векторов, а также ошибку классификации на обучающей и тестовой выборке.
+    \item Используя алгоритм типа <<C-classification>> с линейным ядром, добиться варьированием параметра $ C $ нулевой ошибки на обучающей, а затем на тестовой выборке.
+    Выбрать оптимальное значение $ C $ и объяснить выбор.
+    \item Среди ядер <<polynomial>>, <<radial>>, <<sigmoid>> найти то, которое даёт наименьшую ошибку на тестовом наборе.
+    Для ядра <<polynomial>> проверить различное значение степени (параметр \texttt{degree}).
+    \item Среди ядер <<polynomial>>, <<radial>>, <<sigmoid>> выбрать оптимальное в смысле числа ошибочных ответов на тестовой выборке.
+    \item Среди ядер <<polynomial>>, <<radial>>, <<sigmoid>> выбрать оптимальное в смысле ошибки на тестовой выборке.
+    Продемонстрировать эффект переобучения, варьируя параметр \texttt{gamma} (выполнить при этом визуализацию разбиения пространства признаков на области).
+    \item Построить алгоритм метода опорных векторов типа <<eps-regression>> (положить параметр $ C=1 $).
+    Изобразить на графике зависимость среднеквадратичной ошибки от значения параметра \texttt{epsilon}.
+    Объяснить результат.
+\end{enumerate}
+
+\newpage
+\section{Теория}
+
+\textit{Метод опорных векторов} (Support Vector Machine, SVM) решает задачу бинарной классификации путём построения в спрямлённом пространстве параметров разделяющей гиперплоскости, которая максимально удалена от обоих множеств точек, представленных в выборке.
+Для построения этой плоскости используется не вся выборка, а лишь часть точек, называемых \textit{опорными векторами}, что достигается путём использования специального эмпирического функционала риска \cite{murphy}.
+Под спрямлённым пространством параметров подразумевается отображение исходного пространства параметров в некоторое новое, где, как ожидается, классы будут линейно разделимы (или почти линейно разделимы).
+
+Отображение удобно задавать не в явном виде, а с помощью функции-ядра $K(w, x) $ (вектор $ w $ относится к тренировочным параметрам). Часто используются ядра следующего вида:
+
+\begin{align*}
+    & K(w, x) = w^Tx \text{ -- линейное} \\ % \label{eq:kernel_lin}
+    & K(w, x) = (\gamma w^Tx + c_0)^d \text{ -- полиномиальное} \\
+    & K(w, x) = \exp(-\gamma (w-x)^2) \text{ -- радиальное} \\
+    & K(w, x) = \tanh(\gamma w^Tx + c_0) \text{ -- сигмоидальное} \\
+\end{align*}
+
+SVM применим также к задачам регрессии \cite{vapnik}.
+Для этих целей были разработаны особые функционалы риска, которые также опираются не на всю выборку, а лишь на часть её.
+Алгоритм строит регрессию, подобную гребневой, но точки, лежащие в $\varepsilon$-окрестности построенной кривой, не учитываются в функционале риска. Здесь $\varepsilon$ -- настраиваемый параметр.
+
+\newpage
+\section{Реализация}
+\subsection{Задание 1. Классификация с линейным ядром, часть 1}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{data1}
+    \caption{Данные \textnumero 1: SVM с линейным ядром. Крестами отмечены точки, используемые в качестве опорных векторов }
+    \label{fig:data1}
+\end{figure}
+
+Число опорных векторов $ n_{SV} = 2 $ (по одному на класс).
+
+Ошибка на тренировочном и на тестовом наборе нулевая:
+$$ err_{train} = err_{test} = 0 $$
+Т. о. данные линейно разделимы, и разделяющая прямая проходит через серединный перпендикуляр к двум опорным векторам (рис. \ref{fig:data1}).
+
+\subsection{Задание 2. Классификация с линейным ядром, часть 2}\label{section:task2}
+
+На данных \textnumero2 были обучены несколько классификаторов с линейным ядром и различным значением параметра регуляризации $C$. Рис. \ref{fig:2} иллюстрирует полученные разбиения пространства признаков.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data2_cost1}
+        \caption{$ C = 1 $}
+        \label{fig:data2_c1}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data2_cost100}
+        \caption{$ C = 100 $}
+        \label{fig:data2_c100}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data2_cost500}
+        \caption{$ C = 500 $}
+        \label{fig:data2_c500}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data2_cost1000}
+        \caption{$ C = 1000 $}
+        \label{fig:data2_c1000}
+    \end{subfigure}
+    \caption{SVM для набора \textnumero2 с различным значением параметра регуляризации}
+    \label{fig:2}
+\end{figure}
+
+\begin{align*}
+    C = 1 \text{ (рис. \ref{fig:data2_c1})} & \Rightarrow err_{train} = 0.02, \thickspace err_{test} = 0.00 \\
+    C = 100 \text{ (рис. \ref{fig:data2_c100})} & \Rightarrow err_{train} = 0.02, \thickspace err_{test} = 0.04 \\
+    C = 500 \text{ (рис. \ref{fig:data2_c500})} & \Rightarrow err_{train} = 0.00, \thickspace err_{test} = 0.06 \text{ (переобучение)} \\
+    C = 1000 \text{ (рис. \ref{fig:data2_c1000})} & \Rightarrow err_{train} = 0.00, \thickspace err_{test} = 0.06 \text{ (переобучение)} \\
+\end{align*}
+
+Достаточно выбрать $ C = 1 $, поскольку, хоть данные и являются линейно разделимыми, но, вероятно, точка с максимальными значениями $X1$ и $X2$, принадлежащая классу красных точек, является выбросом.
+Или, возможно, на самом деле границу следует описывать нелинейной фукнцией.
+
+\subsection{Задание 3. Классификация с различными ядрами (1)}\label{section:task3}
+
+Тестовая выборка в задании \textnumero3 отсутствует, поэтому данные из набора \texttt{svmdata3} были разделены псевдослучайным образом на тренировочную и тестовую части в отношении $ 8:2 $.
+
+Изменение параметра \texttt{degree} при использовании полиномиального ядра на единицу приводит к существенным изменениям в формах областей, на которые разбивается пространство признаков.
+Однако рисунок разделения на области схожий для чётных степеней, равно как и для нечётных.
+
+Результаты вычисления доли ошибочных ответов приведены в таблице \ref{table:3}.
+При увеличении степени полинома ошибка возрастает (оставаясь меньшей при чётных степенях) -- по-видимому, наблюдается переобучение.
+Разумно выбрать радиальное ядро или полиномиальное со значением \texttt{degree} $ =2 $ либо $ 4 $.
+
+\begin{table}[H]
+    \caption{Ошибка на тестовой выборке (набор данных \textnumero3)}
+    \begin{tabular}{m{0.45\linewidth} | m{0.45\linewidth}}
+        \hline \hline
+        ядро & $err_{test}$ \\
+        \hline
+        \texttt{polynomial}, \texttt{degree} = 2 (рис. \ref{fig:data3_2_polynomial} ) & $ 0.05 $ \\
+        \texttt{polynomial}, \texttt{degree} = 3 (рис. \ref{fig:data3_3_polynomial} ) & $ 0.45 $ \\
+        \texttt{polynomial}, \texttt{degree} = 4  & $ 0.05 $ \\
+        \texttt{polynomial}, \texttt{degree} = 5  & $ 0.5 $ \\
+        \texttt{polynomial}, \texttt{degree} = 6  & $ 0.15 $ \\
+        \texttt{radial} (рис. \ref{fig:data3_radial} ) & $ 0.05 $ \\
+        \texttt{sigmoid} (рис. \ref{fig:data3_sigmoid} ) & $ 0.6 $ \\
+        \hline
+    \end{tabular}
+    \label{table:3}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data3_2_polynomial}
+        \caption{Полиномиальное ядро, \texttt{degree}$ =2 $}
+        \label{fig:data3_2_polynomial}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data3_3_polynomial}
+        \caption{Полиномиальное ядро, \texttt{degree}$ =3 $}
+        \label{fig:data3_3_polynomial}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data3_radial}
+        \caption{Радиальное ядро}
+        \label{fig:data3_radial}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data3_sigmoid}
+        \caption{Ядро -- гиперболический тангенс}
+        \label{fig:data3_sigmoid}
+    \end{subfigure}
+    \caption{SVM для набора \textnumero3 с различными ядрами}
+    \label{fig:3}
+\end{figure}
+
+\subsection{Задание 4. Классификация с различными ядрами (2)}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data4_2_polynomial}
+        \caption{Полиномиальное ядро, \texttt{degree}$ =2 $}
+        \label{fig:data4_2_polynomial}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data4_3_polynomial}
+        \caption{Полиномиальное ядро, \texttt{degree}$ =3 $}
+        \label{fig:data4_3_polynomial}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data4_radial}
+        \caption{Радиальное ядро}
+        \label{fig:data4_radial}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data4_sigmoid}
+        \caption{Ядро -- гиперболический тангенс}
+        \label{fig:data4_sigmoid}
+    \end{subfigure}
+    \caption{SVM для набора \textnumero4 с различными ядрами}
+    \label{fig:4}
+\end{figure}
+
+Проведены измерения, аналогичные описанным в \ref{section:task3}. Результаты сведены в таблицу \ref{table:4}, на рис. \ref{fig:4} приведены иллюстрации. В данном примере вновь оказывается, что радиальное ядро демонстрирует наименьшее значение ошибки.
+
+\begin{table}[H]
+    \caption{Ошибка на тестовой выборке (набор данных \textnumero4)}
+    \begin{tabular}{m{0.45\linewidth} | m{0.45\linewidth}}
+        \hline \hline
+        ядро & $err_{test}$ \\
+        \hline
+        \texttt{polynomial}, \texttt{degree} = 2 (рис. \ref{fig:data4_2_polynomial} ) & $ 0.51 $ \\
+        \texttt{polynomial}, \texttt{degree} = 3 (рис. \ref{fig:data4_3_polynomial} ) & $ 0.13 $ \\
+        \texttt{polynomial}, \texttt{degree} = 4  & $ 0.495 $ \\
+        \texttt{polynomial}, \texttt{degree} = 5  & $ 0.21 $ \\
+        \texttt{polynomial}, \texttt{degree} = 6  & $ 0.495 $ \\
+        \texttt{radial} (рис. \ref{fig:data4_radial} ) & $ 0.11 $ \\
+        \texttt{sigmoid} (рис. \ref{fig:data4_sigmoid} ) & $ 0.195 $ \\
+        \hline
+    \end{tabular}
+    \label{table:4}
+\end{table}
+
+\subsection{Задание 5. Классификация с различными ядрами (3)}
+
+Можно влиять на форму границ, изменяя параметр регуляризации \texttt{cost}, как в разделе \ref{section:task2}.
+Для полиномиального, радиального и сигмоидального ядра также можно варьировать параметр \texttt{gamma} ($\gamma$).
+Рис. \ref{fig:data5_err} демонстрирует полученные значения ошибки на тестовом наборе при различных значениях $ \gamma $ для модели, обученной на данных \textnumero5. На рис. \ref{fig:5} приведены визуализации некоторых классификаторов. Видно, что при больших $ \gamma $ классификатор с радиальным ядром проводит границу слишком близко к опорным векторам.
+Сигмоидальное ядро плохо справляется с задачей <<спрямления>> пространства признаков для этого набора данных.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{data5_err_rates}
+    \caption{Доля ошибочных ответов на тестовой выборке в зависимости от параметра $\gamma$}
+    \label{fig:data5_err}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data5_gamma_0.001_polynomial}
+        \caption{Полиномиальное ядро, $ \gamma = 0.001 $}
+        \label{fig:data5_polynomial}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data5_gamma_100_polynomial}
+        \caption{Полиномиальное ядро, $ \gamma = 100 $}
+        \label{fig:data5_polynomial1}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data5_gamma_0.001_radial}
+        \caption{Радиальное ядро, $ \gamma = 0.001 $}
+        \label{fig:data5_radial}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data5_gamma_100_radial}
+        \caption{Радиальное ядро, $ \gamma = 100 $}
+        \label{fig:data5_radial1}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data5_gamma_0.001_sigmoid}
+        \caption{Сигмоидальное ядро, $ \gamma = 0.001 $}
+        \label{fig:data5_sigmoid}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{data5_gamma_100_sigmoid}
+        \caption{Сигмоидальное ядро, $ \gamma = 100 $}
+        \label{fig:data5_sigmoid1}
+    \end{subfigure}
+
+    \caption{SVM для набора \textnumero5 с различными ядрами}
+    \label{fig:5}
+\end{figure}
+
+\subsection{Задание 6. SVM в приложении к задаче регрессии}
+
+По данным построены регрессионные SVM-модели с радиальным ядром для различных значений $ \varepsilon $ (пример -- рис. \ref{fig:data6}). На рис. \ref{fig:data6_stats} изображена зависимость среднеквадратичного отклонения от величины $ \varepsilon $. При $ \varepsilon \approx 0.08 $ достигается оптимум; при меньших значениях, когда число учитываемых в функционале риска точек велико, отклонение увеличивается.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{data6}
+    \caption{SVM для регрессии ($ \varepsilon=0.1 $)}
+    \label{fig:data6}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{data6_stats}
+    \caption{С. К. О. в зависимости от $ \varepsilon $}
+    \label{fig:data6_stats}
+\end{figure}
+
+\newpage
+\section{Заключение}
+
+Метод опорных векторов позволяет строить модели для решения задач классификации и регрессии, конструируя границу принятия решения на основе лишь некоторого подмножества исходных точек ("sparce model").
+SVM с различными ядрами -- обобщение других алгоритмов (например, гребневой регрессии).
+Это делает его мощной и, вместе с тем, удобной техникой, поскольку после выбора ядра нам не нужно настраивать никакие параметры, кроме $ C $ и, может быть, $ \gamma $.
+
+Код программы, с помощью которой проведены вычислительные эксперименты, доступен на сайте \href{https://github.com/zuevval/source/blob/master/r/ml/svm/svm.R}{GitHub}.
+
+\begin{thebibliography}{99}
+    \bibitem{murphy} Murphy, Kevin P. Machine learning: a probabilistic perspective.: Kevin P. Murphy. -- Cambridge, Massachusetts: The MIT Press, 2012.
+    \bibitem{vapnik} Vapnik, V., Golowich, S. and Smola, A. Support vector method for function approximation, regression estimation,
+    and signal processing. Advances in Neural Information Processing Systems, 9:281–287, 1996
+\end{thebibliography}
+
+\end{document}
