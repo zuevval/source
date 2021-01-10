@@ -1,0 +1,238 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Задание}
+
+\begin{enumerate}[noitemsep]
+    \item Построить дерево классификации для набора данных \texttt{Glass} из библиотеки \texttt{mlbench}.
+    Дать интерпретацию полученным результатам.
+    Является ли построенное дерево избыточным?
+    Выполнить все операции оптимизации дерева (\texttt{snip.tree}, \texttt{prune.tree}).
+    \item Построить дерево классификации для данных \texttt{spam7} из пакета \texttt{DAAG} (модель -- \texttt{yesno $\thicksim$ .}), дать интерпретацию результатам.
+    Запустить процедуру "Cost-complexity pruning"\hspace{0pt} с выбором параметра $ k $ по умолчанию, метод -- \texttt{misclass}; вывести полученную последовательность деревьев.
+    Какое из деревьев оптимально? Объяснить свой выбор.
+    \item Построить дерево по данным \texttt{spam7} из пакета \texttt{DAAG} (модель -- \texttt{re78 $\thicksim$ .}). Также построить линейную и SVM-регрессию. Сравнить качество моделей, выбрать оптимальную и объяснить выбор.
+    \item Построить дерево решений для данных \texttt{Lenses}.
+    Определить, какие линзы следует носить пациенту с предстарческой дальнозоркостью, близорукостью, наличием астигматизма и сокращённой слезы.
+    \item По дереву, построенному на основе данных \texttt{Glass}, определить класс экземпляра с характеристиками: \\
+    $RI=1.516$, $Na=11.7$, $Mg=1.01$, $Al=1.19$, $Si=72.59$, $K=0.43$, $Ca=11.44$, $Ba=0.02$, $Fe=0.1$
+    \item Построить дерево, используя данные \texttt{svmdata4}, и оценить качество классификации на тестовом наборе \texttt{svmdata4test}.
+    \item Разработать классификатор на основе дерева решений для данных <<Титаник>>.
+\end{enumerate}
+
+\newpage
+\section{Реализация}
+\subsection{Данные <<Glass>>}
+
+На основе данных \texttt{Glass} с помощью функции \texttt{tree} из одноимённой библиотеки построено дерево решений (рис. \ref{fig:glass_tree}).
+Видно, что основной критерий разбиения -- содержание магния. Также важно содержание натрия, алюминия, бария и коэффициент преломления.
+На рис. \ref{fig:glass_pairs} изображены диаграммы рассеяния для указанных признаков (цветом обозначен класс стекла). На картинке, действительно, можно заметить, что данные условно разделимы на две большие группы: те, где магний есть, и те, где магний отсутствует.
+
+Дерево избыточно (в некоторых узлах предпоследнего яруса выбор ветви не влияет на ответ).
+Поэтому с помощью функции \texttt{snip.tree} такие узлы (к примеру, 9 и 10) были объединены, после чего к дереву применена процедура \texttt{prune.tree} с параметром \texttt{best} $ = 6 $ (чтобы в дереве остались только 6 листьев, по одному на класс).
+Результат приведён на рисунке \ref{fig:glass_tree_snip}.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=.8\linewidth]{glass_pairs}
+    \caption{Диаграммы рассеяния для пяти признаков данных "Glass"\hspace{0pt}, стоящих в ближайших к корню узлах дерева}
+    \label{fig:glass_pairs}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{glass_tree}
+    \caption{Дерево, построенное по данным "Glass"}
+    \label{fig:glass_tree}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{glass_tree_snip}
+    \caption{Дерево, построенное по данным "Glass"\hspace{0pt} (применено сокращение числа узлов)}
+    \label{fig:glass_tree_snip}
+\end{figure}
+
+\subsection{Данные <<spam7>>}
+
+По данным из набора \texttt{spam7} было построено дерево, по которому можно определить, что основными критериями, по которым определяется рекламное письмо, является частота употребления слов "dollar"\hspace{0pt} и "bang"\hspace{0pt}. В дереве оказались два избыточных узла.
+После удаления этих узлов дерево было подвергнуто процедуре "cost-complexity prunning"\hspace{0pt}, в результате которой были определены две последовательные конфигурации, полученные удалением наименее важных узлов: дерево, получающееся из исходного при оптимизации с параметром cost-complexity function $ k = 137.5 $ и $ k = 864 $ соответственно (рис. \ref{fig:spam7_prune}). В первом случае ошибочно определяются 949 из 4601 тренировочных экземпляров, после второго сокращения (когда в дереве остаются только два узла) уже 1800 (рис. \ref{fig:spam7_prune_stats}). В исходном дереве неверно классифицируются 665 писем.
+
+По-видимому, изначальное дерево всё же является оптимальным: оставшиеся два не используют все признаки, хотя каждый из них, как представляется, может быть использован для принятия решения.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{spam7_pruned}
+    \caption{Число неверно опознанных экземпляров набора "spam7"\hspace{0pt} в зависимости от размера дерева при последовательном добавлении узлов}
+    \label{fig:spam7_prune_stats}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.9\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{spam7_pruned_k0}
+        \caption{Изначальное дерево}
+        \label{fig:spam7_k0}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{spam7_pruned_k137.5}
+        \caption{ Сокращённое дерево ($k=137.5$) }
+        \label{fig:spam7_k137}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{spam7_pruned_k864}
+        \caption{ Сокращённое дерево ($k=864$) }
+        \label{fig:spam7_k864}
+    \end{subfigure}
+    \caption{ Сокращение числа ветвей в дереве, построенном по данным "spam7" }
+    \label{fig:spam7_prune}
+\end{figure}
+
+\subsection{Данные <<nsw74psid1>>}
+
+По данным \texttt{nsw74psid1} построено дерево, аппроксимирующее непрерывную величину \texttt{re78} (рис. \ref{fig:nsw_tree}).
+На рис. \ref{fig:nsw_sd} показаны значения среднеквадратичного отклонения модели от данных при аппроксимации с помощью линейной регрессии, SVM, дерева и просто среднеквадратичное отклонение выборки (то есть модель -- константа).
+Видно, что дерево немного хуже остальных двух регрессий, но всё же даёт примерно на треть меньшее отклонение, чем тривиальная модель-константа. Также видно, что модель, построенная методом опорных векторов, даёт наименьшее значение СКО, и лучше всего использовать её.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{nsw_tree}
+    \caption{Дерево, построенное по данным "nsw74psid1" }
+    \label{fig:nsw_tree}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{nsw_deviations}
+    \caption{ С. К. О. предсказания от данных (различные модели) }
+    \label{fig:nsw_sd}
+\end{figure}
+
+\subsection{Данные <<Lenses>>}
+
+В наборе \texttt{Lenses} только 24 значения, поэтому классификатор, который получается при построении с параметрами по умолчанию (минимальное число элементов в узле \texttt{mincut}$=5$), содержит только одно разветвление. Построены три дерева с параметрами \texttt{mincut} $ = 1, \thickspace 3, \thickspace 5 $ соответственно (рис. \ref{fig:lenses_trees}). \\
+
+Все три дерева рекомендуют для пациента со старческой близорукостью, дальнозоркостью, астигматизмом и сокращённой слезой линзы не носить (это определяется уже на первом разветвлении: при сокращённой слезе, видимо, носить линзы противопоказано).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.9\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{lenses_tree_mincut_1}
+        \caption{ \texttt{mincut} $ =1 $ }
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{lenses_tree_mincut_3}
+        \caption{ \texttt{mincut} $ =3 $ }
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{lenses_tree_mincut_5}
+        \caption{ \texttt{mincut} $ =5 $ }
+    \end{subfigure}
+    \caption{ Деревья, построенные по данным "Lenses" }
+    \label{fig:lenses_trees}
+\end{figure}
+
+\subsection{Данные <<Glass>>. Продолжение}
+
+Для экземпляра с параметрами $RI=1.516$, $Na=11.7$, $Mg=1.01$, $Al=1.19$, $Si=72.59$, $K=0.43$, $Ca=11.44$, $Ba=0.02$, $Fe=0.1$ дерево, построенное по данным \texttt{Glass} (рис. \ref{fig:glass_tree}), предсказывает класс $ 2 $  с вероятностью $ 0.875 $ и класс $ 7 $ с вероятностью $ 0.175 $.
+Если же использовать усечённое дерево, изображённое на рис. \ref{fig:glass_tree_snip}, то вероятности классов таковы: $ p(2) \approx 0.46, \thickspace p(5) = 0.5, \thickspace p(7) \approx 0.04 $.
+
+\subsection{Данные <<svmdata4>>}
+
+По данным \textit{svmdata4} было построено дерево, изображённое на рис. \ref{fig:svmdata_tree}. У этих точек всего два признака, поэтому можно визуализировать разбиение пространства признаков (рис. \ref{fig:svmdata_partition}).
+
+Доля ошибочных ответов на тестовых данных \texttt{svmdata4test} у такого дерева составляет $ 0.1 $.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{svmdata_tree}
+    \caption{ Дерево, построенное по данным "svmdata4" }
+    \label{fig:svmdata_tree}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{svmdata_partition}
+    \caption{ Разбиение пространства признаков деревом решений }
+    \label{fig:svmdata_partition}
+\end{figure}
+
+\newpage
+\subsection{Данные <<Titanic>>}
+
+Для построения классификатора по данным \texttt{Titanic} были отобраны следующие признаки:  \texttt{Survived}, \texttt{Pclass}, \texttt{Sex}, \texttt{Age}, \texttt{SibSp}, \texttt{Parch}, \texttt{Fare}, \texttt{Embarked} (остальные либо категориальные и содержат слишком много категорий, как \texttt{Cabin} -- номер каюты, либо не могут влиять на результат, как \texttt{PassengerId}). На рис. \ref{fig:titanic} изображено полученное дерево.
+Видно, что признак \texttt{Embarked} не участвует в разбиении, что логично: скорее всего, порт отправления пассажира мало влияет на шансы выживания.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{titanic_tree}
+    \caption{ Дерево, построенное по данным "Titanic" }
+    \label{fig:titanic}
+\end{figure}
+
+Результат на Kaggle -- $ 0.78 $ верно классифицированных экземпляров.
+
+\newpage
+\section{Заключение}
+
+Деревья решений позволяют строить классификаторы, которые поддаются интерпретации даже в случае, когда входные данные имеют сравнительно большую размерность.
+В качестве недостатков деревьев можно назвать наличие нескольких настраиваемых параметров в алгоритме построения классификатора (минимальная дисперсия данных в узле, минимальное число элементов в листе, минимальное число элементов в листе, при котором он будет разбит на два).
+После создания деревья часто нужно сокращать вручную, что также является недостатком.
+Нелинейность, которую даёт дерево, ограничена, поскольку на практике число ярусов дерева имеет предел (в библиотеке \texttt{tree} максимально позволяется 31 ярус).
+
+Применение дерева для построения регрессии не показало выигрыша по сравнению с линейной или SVM-регрессией. \\
+
+Код программы, с помощью которой построены и визуализированы деревья, \href{https://github.com/zuevval/source/blob/master/r/ml/tree/tree.R}{доступен в GitHub}
+
+\end{document}
