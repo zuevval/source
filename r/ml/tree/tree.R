@@ -16,7 +16,7 @@ abs_path <- function(path) here("r/ml/tree", path) # path relative to the Git ro
 source(abs_path("gg_partition_tree.R"))
 
 std_img_width <- 4500
-std_img_height <- 4500
+std_img_height <- 3000
 std_img_dpi <- 600
 
 draw.smth <- function(jpeg_filename = ? character, do_plot = function() { }, scale = 1) {
@@ -49,6 +49,7 @@ data(spam7)
 head(spam7)
 
 spam7.tree <- tree(yesno ~ ., spam7)
+spam7.tree <- snip.tree(spam7.tree, nodes = 11) # snip node 11 (redundant)
 draw.smth("spam7_tree.jpeg", function() draw.tree(spam7.tree))
 
 spam7.cv <- cv.tree(spam7.tree, , prune.tree)
@@ -73,16 +74,16 @@ nsw.tree <- tree(re78 ~ ., data = nsw74psid1)
 nsw.svm <- svm(re78 ~ ., data = nsw74psid1, type = "eps-regression", kernel = "radial")
 nsw.regression <- lm(re78 ~ ., data = nsw74psid1)
 
-nsw.find_sd <- function(model) sum(sd(predict(model) - nsw74psid1$re78))
+nsw.find_sd <- function(model) sum(sd(predict(model) - nsw74psid1$re78)) # TODO sum not necessary?
 nsw.deviations <- data.frame(model = c("tree", "svm", "regression", "y = y_mean"),
                              sd = c(nsw.find_sd(nsw.tree), nsw.find_sd(nsw.svm), nsw.find_sd(nsw.regression), sd(nsw74psid1$re78)))
 
 ggplot(data = nsw.deviations, aes(model, sd)) +
   geom_bar(stat = "identity") +
-  ggtitle(" Sum of standard deviation for all points in \`nsw74psid1\` ") +
+  ggtitle(" Standard deviation for models fitted to \`nsw74psid1\` ") +
   theme_bw() +
   theme(plot.title = element_text(hjust = .5))
-ggsave(abs_path("nsw_deviations.jpeg"), scale = .7)
+ggsave(abs_path("nsw_deviations.jpeg"), scale = .3)
 
 draw.smth("nsw_tree.jpg", function() draw.tree(nsw.tree, digits = 1))
 
@@ -106,6 +107,7 @@ devnull <- c(1, 3, 5) %>% lapply(function(mincut = ? integer) {
 
   # print misclassification error
   cat("misclassification error for mincut =", mincut, "is", misclass.tree(lenses.tree) / nrow(lenses), "\n")
+  cat("prediction: ", predict(lenses.tree, data.frame(age = 3, myopia = 1, astigm = 2, tear = 1)), "\n")
 })
 
 ggplot(data = lenses, aes(tear, astigm)) +
@@ -135,7 +137,7 @@ svm.test <- read_table(svm.data_dir, "svmdata4test.txt")
 head(svm.train)
 
 svm.tree <- tree(Colors ~ ., svm.train)
-draw.smth("svmdata_tree.jpeg", function () draw.tree(svm.tree))
+draw.smth("svmdata_tree.jpeg", function() draw.tree(svm.tree))
 
 ggplot(data = svm.train, aes(X2, X1)) +
   geom_point(mapping = aes(color = Colors, shape = Colors)) +
@@ -146,19 +148,24 @@ ggplot(data = svm.train, aes(X2, X1)) +
   theme(plot.title = element_text(hjust = .5))
 ggsave(abs_path("svmdata_partition.jpeg"), scale = .7)
 
+svm.table <- as.numeric(as.data.frame(predict(svm.tree, newdata = svm.test))$red >= .5) %>%
+  recode_factor(`0` = "green", `1` = "red") %>%
+  table(svm.test$Colors)
+sum(diag(svm.table)) / sum(svm.table)
+
 # ---------------------------------
 # --- Task 7: `Titanic` dataset ---
 # ---------------------------------
 
 titanic_data_dir <- "r/ml/lab1bayes/data"
-titanic.train <- read_table(titanic_data_dir,"titanic_train.csv", sep = ",") %>%
-  select(Survived, Pclass, Sex, Age, SibSp, Parch, Fare) %>%
+titanic.train <- read_table(titanic_data_dir, "titanic_train.csv", sep = ",") %>%
+  select(Survived, Pclass, Sex, Age, SibSp, Parch, Fare, Embarked) %>%
   na.omit %>%
   mutate(Survived = as.factor(Survived))
-titanic.test <- read_table(titanic_data_dir,"titanic_test.csv", sep = ",")
+titanic.test <- read_table(titanic_data_dir, "titanic_test.csv", sep = ",")
 
 titanic.tree <- tree(Survived ~ ., titanic.train)
-draw.smth("titanic_tree.jpeg", function () draw.tree(titanic.tree))
+draw.smth("titanic_tree.jpeg", function() draw.tree(titanic.tree))
 titanic.test.predictions <- predict(titanic.tree, newdata = titanic.test) %>% as.data.frame
 titanic.test$Survived <- as.integer(titanic.test.predictions$`1` > .5)
 
