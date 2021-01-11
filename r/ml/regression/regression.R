@@ -51,8 +51,8 @@ devnull <- seq_along(reg1.models) %>% lapply(function(i = ? integer) {
   reg1.test.rss <- sum((reg1.test$predicted - reg1.test$z)^2)
   reg1.train.rss <- deviance(reg1.lm)
   cat("\n model:", name, "\n")
-  cat("test RSS:", reg1.test.rss, "\n")
-  cat("train RSS:", reg1.train.rss, "\n")
+  cat("test RSS:", round(reg1.test.rss, 3), "\n")
+  cat("train RSS:", round(reg1.train.rss, 3), "\n")
 })
 
 # ---------------------------------
@@ -223,7 +223,7 @@ head(sunspot)
 
 ggplot(data = sunspot, aes(x = year, y = value)) +
   geom_line() +
-  geom_smooth(method = lm, linetype = "dotdash", size = 2, se = F) +
+  geom_smooth(method = lm, linetype = "dotdash", size = 2) +
   theme_bw()
 ggsave(data_path("sunspot.jpeg"), scale = .5)
 
