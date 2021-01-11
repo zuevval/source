@@ -1,0 +1,283 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{array} % utils for tables
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Задание}
+
+\begin{enumerate}[noitemsep]
+    \item Для данных из файла \texttt{reglab1.txt} построить линейную регрессию с несколькими разными моделями.
+    Выбрать наиболее подходящую и объяснить выбор.
+    \item Выбрать оптимальное подмножество признаков для данных из файла \texttt{reglab2.txt}, используя следующий алгоритм: для каждого $k \in \{1;d\}$ найти подмножество мощности $k$, минимизирующее сумму квадратов отклонений данных (RSS).
+    Здесь $d$ -- общее число признаков.
+    \item Построить регрессию для данных \texttt{cygage.txt} (зависимость возраста породы от глубины залегания), используя веса наблюдений.
+    Оценить качество построенной модели.
+    \item Для набора макроэкономических данных \texttt{Longley} построить линейную регрессию и гребневую регрессию ($ \lambda = 10^{-3 + 0.2 k}, k = 0, 1, ..., 25 $), исключив признак \texttt{Population} и разделив случайным образом на тренировочный и тестовый наборы.
+    Вычислить ошибку на тренировочных и тестовых данных, построить графики.
+    Объяснить полученные результаты.
+    \item Исследовать данные \texttt{EuStocksMarkets} из пакета \texttt{datasets}: построить на одном графике кривые зависимости прибыли от времени, обучить линейную регрессию по данным в каждом квартале по отдельности, а также по всем точкам в совокупности.
+    Какая биржа имеет наибольшую динамику?
+    \item Изучить данные \texttt{JohnsonJohnson} из пакета \texttt{datasets}: построить графики аналогично предыдущему пункту; предсказать поквартальную и среднегодовую прибыль в 2016 году. \label{task:johnson}
+    Оценить, в каком квартале компания показывает наименьшую и наибольшую динамику доходности.
+    \item Для данных \texttt{sunspots.year} из пакета \texttt{datasets} построить линейную регрессию и изобразить на графике вместе с исходным набором наблюдений.
+    \item С данными из файла \texttt{UKgas.csv} провести те же действия, что с данными \texttt{JohnsonJohnson} (пункт \ref{task:johnson}): построить графики, определить кварталы с максимальной и минимальной динамикой потребления газа, сделать прогноз по потреблению газа в 2016 году.
+    \item На основе данных о зависимости тормозного пути автомобиля от скорости (набор \texttt{cars} из пакета \texttt{datasets}) построить регрессионную модель и оценить длину тормозного пути для автомобиля со скоростью 40 (миль в час).
+\end{enumerate}
+
+\newpage
+\section{Реализация}
+\subsection{Данные <<reglab1.txt>>}
+
+Разобьём данные псевдослучайным образом на тренировочную и тестовую часть в отношении $8:2$ и попробуем по тренировочной части построить регрессию, используя только два признака -- $x$ и $y$ (рис. \ref{fig:reg1}).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{reg1_3d}
+    \caption{Точки \texttt{reglab1} и линейная регрессия вида $ z = ax + by + c $. Цветом отмечено отклонение точек от модели.}
+    \label{fig:reg1}
+\end{figure}
+
+Заметим, что не хватает некоторого нелинейного слагаемого, симметричного относительно оси $ y = x $. Попробуем различные модели с такими слагаемыми. Результаты приведены в таблице \ref{table:reg1}.
+Видно, что появление признака $ xy $ существенно уменьшает отклонение, но добавление прочих слагаемых не улучшает поведение на тестовой выборке, поэтому ограничимся тремя.
+Впрочем, возможно, есть более оптимальный вариант, который не был опробован.
+
+\begin{table}[H]
+    \caption{Ошибка на тестовой выборке (набор данных \textnumero3)}
+    \begin{tabular}{m{0.45\linewidth} | m{0.2\linewidth} | m{0.2\linewidth}}
+        \hline \hline
+        признаки & $ RSS_{test} $ & $ RSS_{train} $ \\
+        \hline
+        $ x, y $ & $ 4.60 $ & $ 18.1 $ \\
+        $ x, y, xy $ & $ 0.051 $ & $ 0.176$ \\
+        $ x, y, e^{x + y}  $ & $ 1.09 $ & $ 6.97 $ \\
+        $ x, y, (xy)^2 $ & $ 0.052 $ & $ 0.175 $ \\
+        $ x, y, xy, x^2, y^2 $ & $ 0.053 $ & $ 0.173 $ \\
+        $ x, y, xy, (xy)^2 $ & $ 0.052 $ & $ 0.175 $ \\
+        $ x, y, xy, (xy)^2, e^{xy} $ & $ 0.052 $ & $ 0.174 $ \\
+        $ x, y, xy, x^2, y^2, (xy)^2, e^{x+y}, e^{xy}  $ & $ 0.053 $ & $ 0.173 $ \\
+        \hline
+    \end{tabular}
+    \label{table:reg1}
+\end{table}
+
+\subsection{Данные <<reglab2.txt>>}
+
+Из признаков $x_1$, $x_2$, $x_3$, $x_4$ были составлены всевозможные комбинации, с использованием которых обучены алгоритмы линейной регрессии.
+Результаты сведены в таблицу \ref{table:reg2}.
+
+\begin{table}[H]
+    \caption{Ошибка на тестовой выборке (набор данных \textnumero3)}
+    \begin{tabular}{m{0.45\linewidth} | m{0.45\linewidth}}
+        \hline \hline
+        Признаки & $ RSS $ \\
+        \hline
+        $ x_1 $ & $ 157.22 $ \\
+        $ x_2 $ & $ 268.25 $ \\
+        $ x_3 $ & $ 393.49 $ \\
+        $ x_4 $ & $ 394.59 $ \\
+        $ x_1, x_2 $ & $ 0.54 $ \\
+        $ x_1, x_3 $ & $ 156.35 $ \\
+        $ x_1, x_4 $ & $ 157.22 $ \\
+        $ x_2, x_3 $ & $ 267.8 $ \\
+        $ x_2, x_4 $ & $ 393.46 $ \\
+        $ x_3, x_4 $ & $ 0.33 $ \\
+        $ x_1, x_2, x_3 $ & $ 0.33 $ \\
+        $ x_1, x_2, x_4 $ & $ 0.36 $ \\
+        $ x_1, x_3, x_4 $ & $ 156.35 $ \\
+        $ x_2, x_3, x_4 $ & $ 267.44 $ \\
+        $ x_1, x_2, x_3, x_4 $ & $ 0.19 $ \\
+        \hline
+    \end{tabular}
+    \label{table:reg2}
+\end{table}
+
+Можно заметить, что есть пара признаков ($x_1, x_2$), по которым получается построить линейную регрессию с небольшим значением $ RSS $.
+Эта модель и проекция точек в пространстве $ (x_1, x_2, y) $ изображена на рис. \ref{fig:reg2}.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=.8\linewidth]{reg2}
+    \caption{Проекция данных \texttt{reglab2}. Цвет соответствует отклонению от линейной регрессии.}
+    \label{fig:reg2}
+\end{figure}
+
+\subsection{Данные <<cygage.txt>>}
+
+Для данных \texttt{cygage} построена регрессия, изображённая на рис. \ref{fig:cygage}.
+Судя по графику, линейная зависимость является хорошим приближением.
+Значение $ RSS = 2725934 $.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{cygage}
+    \caption{Данные \texttt{cygage} и линейная аппроксимация. Размер точки пропорционален весу.}
+    \label{fig:cygage}
+\end{figure}
+
+\subsection{Данные <<Longley>>}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{longley_train}
+    \caption{\texttt{Longley} (обучающий набор) и гребневая регрессия с разными $ \lambda $.}
+    \label{fig:longley_train}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{longley_test}
+    \caption{\texttt{Longley} (тестовая выборка) и гребневая регрессия с разными $ \lambda $.}
+    \label{fig:longley_test}
+\end{figure}
+
+\newpage
+Набор данных \texttt{Longley} был разделён на тренировочную и тестовую выборку в отношении $8:2$, после чего на тренировочном наборе последовательно обучены модели гребневой регрессии со значением регуляризационного параметра $ \lambda $ в диапазоне от $ 0.001 $ до $ 63.096 $.
+Модель и данные изображены в осях <<год-число занятых>> на рис. \ref{fig:longley_train} и \ref{fig:longley_test}.
+Видно, что регуляризация почти не улучшает поведение на тестовом наборе, а при больших $ \lambda $ функция стремится к константе (но не к нулю, т. к. свободный член не штрафуется).
+Впрочем, $ \lambda \approx 0.001 $, действительно, даёт некоторое уменьшение RSS на тестовых данных (рис. \ref{fig:longley_err}).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{longley_err}
+    \caption{Зависимость RSS на тренировочном и тестовом наборе от параметра $ \lambda $ для данных \texttt{Longley} (логарифмический масштаб). Пунктирная линия -- RSS линейной регрессии без регуляризации на тренировочных данных. }
+    \label{fig:longley_err}
+\end{figure}
+
+Замечание: RSS тренировочной и тестовой выборки изображены в одних осях, но сравнивать их абсолютные значения бессмысленно.
+
+\newpage
+\subsection{Данные <<EuStocksMarket>>}
+
+Рисунок \ref{fig:markets} изображает данные о котировках и их приближение линейной функцией (приближение по кварталам и в среднем).
+Видно, что наиболее высокие темпы роста демонстрирует биржа SMI, медленнее всех растут индексы биржи DAX. Судя по всему, линейная зависимость здесь -- достаточно грубое приближение, но качественные выводы о динамике сделать можно.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{markets}
+    \caption{Данные \texttt{EuStockMarkets} и приближение линейной регрессией. Жирная синяя линия обозначает модель, построенную по всей выборке, остальные -- по данным за определённый квартал. }
+    \label{fig:markets}
+\end{figure}
+
+\newpage
+\subsection{Данные <<JohnsonJohnson>>}
+
+На рис. \ref{fig:johnson} приведены графики выручки Johnson \& Johnson в разных кварталах, их аппроксимации линейной регрессией и аппроксимация всего множества данных.
+Доходность в четвёртом квартале растёт медленее, чем в остальных трёх; в первом-третьем примерно одинаково.
+
+Построенные модели предсказывают следующее значение доходов в 2016 году:
+\begin{align*}
+    & 36.8 \text{ в первом квартале} \\
+    & 36.5 \text{ во втором квартале} \\
+    & 37.7 \text{ в третьем квартале} \\
+    & 28.8 \text{ в четвёртом квартале} \\
+    & 34.5 \text{ за один квартал в среднем в году} \\
+\end{align*}
+
+Впрочем, надёжность такого предсказания невысока: приближение с помощью линейной регрессии явно слишком грубо аппроксимирует данные, к тому же, непонятно, можно ли экстраполировать на 35 лет вперёд.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{johnson}
+    \caption{Данные \texttt{JohnsonJohnson} и приближение линейной регрессией. Жирная синяя линия обозначает модель, построенную по всей выборке, остальные -- по данным за какой-то из кварталов. }
+    \label{fig:johnson}
+\end{figure}
+
+\newpage
+\subsection{Данные <<sunspot.year>>}
+
+В данных о солнечных пятнах явно присутствуют какие-то периодические закономерности, но среднее число наблюдаемых пятен за последние три столетия растёт от года к году, что демонстрирует линейная регрессия (рис. \ref{fig:sunspot}).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{sunspot}
+    \caption{Данные \texttt{sunspot.year} и линейная аппроксимация (жирная синяя линия). Серая область -- $95\%$-доверительный интервал для регрессии.}
+    \label{fig:sunspot}
+\end{figure}
+
+\newpage
+\subsection{Данные <<UKgas.csv>>}
+
+Построение линейной регрессии по данным о потреблении газа в разных кварталах (рис. \ref{fig:ukgas}) показывает, что самый низкий рост показателя наблюдается в третьем квартале, а самый высокий - в первом. Линейные модели дают такие предсказания потребления в 2016 году:
+
+\begin{align*}
+    & 2230 \text{ в первом квартале} \\
+    & 1077 \text{ во втором квартале} \\
+    & 505 \text{ в третьем квартале} \\
+    & 1677 \text{ в четвёртом квартале} \\
+    & 1373 \text{ в среднем за квартал } \\
+\end{align*}
+
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{ukgas}
+    \caption{Данные \texttt{UKgas} и приближение линейной регрессией. Жирная синяя линия обозначает модель, построенную по всей выборке, остальные -- по данным за первый, второй, третий или четвёртый квартал. }
+    \label{fig:ukgas}
+\end{figure}
+
+\newpage
+\subsection{Данные <<cars>>}
+
+Тормозной путь в зависимости от скорости автомобиля имеет большую дисперсию, данных не очень много, и лучше линейной регрессии, видимо, здесь трудно что-либо придумать. Построенная линейная модель показана на рисунке \ref{fig:cars}.
+
+При скорости $ 40 $ миль в час предсказываемая линейной регрессией длина тормозного пути составляет приблизительно $ 140 $ футов.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\linewidth]{cars}
+    \caption{Данные \texttt{cars} и линейная аппроксимация (жирная синяя линия). Серая область -- $95\%$-доверительный интервал для регрессии. }
+    \label{fig:cars}
+\end{figure}
+
+\newpage
+\section{Заключение}
+
+Линейная регрессия позволяет делать качественные выводы о динамике показателей в определённом интервале.
+В некоторых случаях её можно использовать для описания закона, которому подчиняется наблюдаемая величина.
+Иногда путём добавления новых признаков можно свести к задаче линейной регрессии задачу поиска более сложной зависимости.
+
+Во избежание переобучения можно использовать регуляризованную модель (гребневую регрессию). \\
+
+Код программы, которая была использована для расчётов и построения изображений, доступен в \href{https://github.com/zuevval/source/blob/master/r/ml/regression/regression.R}{GitHub}.
+
+\end{document}
