@@ -1,0 +1,178 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{array} % utils for tables
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+\subfile{titlepage}
+
+\section{Задача}
+
+Провести анализ набора данных \texttt{Mammographic Mass Data} (вариант \textnumero 5).
+
+\begin{enumerate}[noitemsep]
+    \item Разработать классификаторы:
+    \begin{enumerate}[noitemsep]
+        \item Алгоритм $k$ ближайших соседей
+        \item Метод опорных векторов
+        \item Bagging
+    \end{enumerate}
+    При этом разбить выборку на обучающую и тестовую случайным образом в отношении $ 3:1 $.
+
+    Настроить оптимальные параметры алгоритмов.
+    Сравнить полученные модели по доли ошибочных ответов на тестовых данных и выбрать наилучшую.
+    \item Разбить точки в пространстве признаков на группы, применив метод $ k $ медоидов с параметром $ k $, равным числу классов.
+
+\end{enumerate}
+
+\newpage
+\section{Реализация}
+\subsection{Классификация} \label{section:classification}
+\subsubsection{Метод k ближайших соседей}
+
+По набору данных были построены и оценены классификаторы с помощью алгоритма $ k $ ближайших соседей с параметрами $ k \in \{1, 2, 7, 15\} $, с различными ядрами и метриками.
+На рис. \ref{fig:knn} приведены полученные результаты.
+Наименьшую долю ошибочных ответов на тестовой выборке демонстрирует классификатор с двумерным ядром и манхэттенской метрикой (параметр $ d = 1 $): $err_{test} \approx 0.154$.
+
+При увеличении $ k $ ошибка в целом уменьшается (видимо, малые значения $ k $ ведут к переобучению).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{knn_k1}
+        \caption{$ k = 1 $}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{knn_k2}
+        \caption{$ k = 2 $}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{knn_k7}
+        \caption{$ k = 7 $}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{knn_k15}
+        \caption{$ k = 15 $}
+    \end{subfigure}
+    \caption{Метод $k$ ближайших соседей. Ошибка на тествой выборке в зависимости от выбора ядра и параметра $d$ расстояния Минковского }
+    \label{fig:knn}
+\end{figure}
+
+\subsubsection{Метод опорных векторов}
+
+Сконструирован ряд SVM-классификаторов с различными ядрами и значениями параметра регуляризации $ \gamma $.
+В случае полиномиального ядра необходимо указать параметр $ d $ -- степень полинома; выбрано значение $ d=1 $ (линейное ядро), т. к. при $ \gamma = 0 $ такой выбор даёт наименьшую ошибку на тестовых данных из всех целых $ d $ в диапазоне $ \{1;15\} $ (рис. \ref{fig:svm_polynomial}).
+
+Оценка вероятности ошибки на тестовом наборе (рис. \ref{fig:svm_kernels}) показала, что лучший результат даёт выбор линейного ядра при $ \gamma = 0.1 $ ($err_{test} \approx 0.163 $).
+
+\begin{figure}[H]
+    \centering \includegraphics[width=.8\linewidth]{svm_polynomial}
+    \caption{SVM. Доля неверных ответов на тестовой выборке при использовании полиномиального ядра в зависимости от степени полинома}
+    \label{fig:svm_polynomial}
+\end{figure}
+
+\begin{figure}[H]
+    \centering \includegraphics[width=.8\linewidth]{svm}
+    \caption{SVM. Доля ошибочных ответов на тестовой выборке с разными ядрами (в случае полиномиального ядра использована степень 1, то есть линейное ядро)}
+    \label{fig:svm_kernels}
+\end{figure}
+
+\subsubsection{Bagging}
+
+С помощью алгоритма "Bagging"\hspace{0pt} построены 16 композиций деревьев решений с параметрами $ minsplit \in \{2, 4, 6, 8\} $, $cp \in \{1;4\} \cdot 5 \cdot 10^{-4}$. Параметр $ minsplit $ определяет минимальное число элементов в узле дерева, при котором совершается разбиение; $ cp $ -- пороговое значение некоторой функции сложности, вычисляемой по топологии дерева (при превышении порога построение дерева прекращается).
+
+Результаты оценки классификаторов приведены на рис. \ref{fig:bagging}.
+Есть несколько оптимальных конфигураций; можно выбрать, к примеру, $ minsplit = 6 $, $ cp = 0.0015 $; при этом ошибка на тестовом наборе $ err_{test} \approx 0.149 $.
+Стоит отметить, что доля неверных ответов на тестовых данных для большинства деревьев находится на одном и том же уровне;
+вероятно, по какой-то причине, несмотря на использование лишь части выборки для построения каждого слабого классификатора, получается много одинаковых деревьев.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=.9\linewidth]{bagging}
+    \caption{Bagging.
+        Результаты на тестовом наборе при использовании разных значений параметров для построения деревьев}
+    \label{fig:bagging}
+\end{figure}
+
+\subsubsection{Выбор оптимальной модели}
+
+По итогам рассмотрения классификаторов следует выбрать бэггинг, который даёт наименьшую ошибку на тестовом наборе.
+Возможно, подобный результат обусловлен внутренней структурой данных: граница принятия решений для бэггинга на основе деревьев имеет специальный вид -- она составляется из сегментов гиперплоскостей, параллельных всем осям в пространстве признаков, кроме одной.
+
+\subsection{Кластеризация с помощью алгоритма k медоидов}
+
+К точкам, лишённым меток классов, был применён алгоритм кластеризации ($ k $ медоидов при $ k = 2 $), после чего оценено число экземпляров данных, которые попали в иной кластер, чем большинство точек одного с ними класса.
+Результаты показаны на рис.  \ref{fig:clara}.
+Доля таких точек, как правило, больше, чем при обучении алгоритмов <<с учителем>>, рассмотренных в разделе \ref{section:classification}.
+Это логично: алгоритмы классификации используют дополнительную информацию о метках данных.
+
+Самый хороший результат даёт разбиение с использованием манхэттенской или евклидовой метрики при проведении предварительной регуляризации данных.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{clara_err}
+    \caption{Доля данных, для которых кластер не совпадает с кластером большинства точек того же класса, в зависимости от ядра и наличия/отсутствия стандартизации при разбиении методом $ k $ медоидов}
+    \label{fig:clara}
+\end{figure}
+
+\newpage
+\section{Заключение}
+
+Бэггинг, алгоритм $ k $ ближайших соседей и метод опорных векторов могут давать приемлимую точность в задаче классификации раковых опухолей при обучении по данным \texttt{Mammographic Mass Data} (если выбирать разумные значения параметров).
+
+Разбиение этих же данных на два кластера методом $ k $ медоидов также хорошо отражает их реальное разделение на злокачественные и доброкачественные образования. Возможно, разумно разработать классификатор, который как-то будет учитывать результат, полученный при кластеризации. \\
+
+Исходный код программы, использованной для работы с данными, расположен \href{https://github.com/zuevval/source/tree/master/r/ml/finale}{в свободном доступе на сайте GitHub}.
+
+\end{document}
