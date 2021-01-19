@@ -9,12 +9,7 @@ import 'package:flutter/material.dart';
 // a package import, as shown below.
 // More details at http://dart-lang.github.io/linter/lints/avoid_relative_lib_imports.html
 import 'package:converter/category.dart';
-
-import 'category_route.dart';
-
-const _categoryName = 'Cake';
-const _categoryIcon = Icons.cake;
-const _categoryColor = Colors.green;
+import 'package:converter/category_route.dart';
 
 /// The function that is called when main.dart is run.
 void main() {
@@ -22,11 +17,6 @@ void main() {
 }
 
 class UnitConverterApp extends StatelessWidget {
-  final categories = <Category>[
-    Category(
-        name: "Length", color: Colors.teal, iconLocation: Icons.architecture)
-  ];
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
