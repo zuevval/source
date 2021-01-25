@@ -52,6 +52,8 @@ python/stu_labs/lab3blosum/alignments/**
 *.toc
 *.lof
 *.lot
+*.bbl
+*.blg
 
 #---C--- 
 

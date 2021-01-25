@@ -1,0 +1,105 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article} %14pt - extarticle
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage[backend=biber, style=numeric, sorting=none, block=space]{biblatex}
+\bibliography{bibliography}
+
+\usepackage{subfiles}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{array} % utils for tables
+\usepackage{listings}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\lstset{language=R,
+	basicstyle=\small\ttfamily,
+	stringstyle=\color{dkgreen},
+	otherkeywords={0,1,2,3,4,5,6,7,8,9},
+	morekeywords={TRUE,FALSE},
+	deletekeywords={data,frame,length,as,character},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	tabsize=2,
+	breaklines=true,
+	columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\title{Схема обучения обнаружения объектов на частично размеченных данных алгоритма}
+\author{Валерий Зуев}
+\maketitle
+
+\emph{Задача:} распознать (в режиме реального времени) символы Брайля, попадающие в поле зрения камеры.
+
+\emph{Решение:} Пусть в нашем распоряжении есть небольшой размеченный набор изображений брайлевских точек и большой набор изображений без меток.
+Предлагается схема построения алгоритма обнаружения точек, идея которого близка к т. н. consistency-based semi-supervised detection \cite{jeong2019} \cite{Misra_2015_CVPR}.
+
+Будем использовать существующий алгоритм $ A_1 $, который хорошо умеет что-то распознавать (например, буквы или силуэты людей).
+
+\begin{enumerate}
+    \item Возьмём небольшое количество изображений, разметим их с помощью алгоритма $ A_1 $ и обучим на них алгоритм $ A_2 $. Т. о. второй алгоритм будет недообучен.
+
+    \item Рассмотрим картинку $ I^{(1)} $, не входящую в тренировочный набор для $ A_2 $. Будем считать, что $ A_1 $ находит все объекты не ней безошибочно, $ A_2 $, возможно, с ошибками. \\
+    Будем преобразовывать изображение: приближать/удалять камеру от объекта, сдвигать вправо/влево и т. п.
+    Пусть, например, сдвигая камеру влево на 1 мм, 2 мм, 3 мм, ..., мы получили изображения $ I_1^{(1)} $, $ I_2^{(1)} $, $ I_3^{(1)} $, ...; будем следить, как при этом меняется ответ $ A_2 $ (число и положение найденных объектов, вероятности классов -- см. рис. \ref{fig:a1_a2}). Для простоты будем считать, что класс только один. \\
+    Перебрав множество картинок $ I^{(i)}$, составим выборку $ \{(x_i, y_i)\} $, где $ x_i $ -- все данные о том, как изменялся ответ $ A_2 $ при трансформации картинки, $ y_i $ -- степень аккуратности ответа $ A_2 $ на исходной картинке $ I^{(i)} $ по сравнению с ответом $ A_1 $.
+
+    \item По выборке $ \{(x_i, y_i)\} $ составим модель регрессии $ R $. Заметим, что модель $ R $ не содержит информации о типе распознаваемых объектов.
+
+    \item Составим небольшую размеченную выборку интересующих нас объектов, для которых нет хорошего алгоритма (брайлевские точки). Обучим алгоритм $ A_3 $ находить их; он будет недообучен. \\
+    Затем снова будем брать неразмеченные изображения и для каждой смотреть, что выдаёт алгоритм $ A_3 $ на самой картинке и на преобразованных (со сдвигами, поворотами, ...); полученные данные подадим на вход алгоритму $ R $. Те изображения, на которых $ A_3 $ показывает аккуратный (по мнению $ R $) ответ, включим в новую обучающую выборку, на которой дообучим $ A_3 $. \label{learning_last}
+
+\end{enumerate}
+
+Отличие от существующих методик -- в использовании алгоритма $ R $ (обычно начинают сразу с шага \ref{learning_last} и отбирают для дообучения те неразмеченные экземпляры, в которых $ A_3 $ наиболее уверен). Понятно, что использование алгоритма $ R $ есть обобщение такого подхода.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=.8\linewidth]{a1_a2}
+    \caption{ Анализ недообученного алгоритма }
+    \label{fig:a1_a2}
+\end{figure}
+
+\smallskip
+
+Замечания:
+\begin{enumerate}
+    \item Использование алгоритма $ A_1 $ необязательно. Можно просто взять большой набор размеченных данных и обучить $ A_2 $, используя малую его часть, а остальную использовать для обучения $ R $.
+    \item Если на изображении присутствует сразу много объектов, можно попытаться построить такой алгоритм $ R $, который оценивает не ошибку $ A_2 $ и $ A_3 $ на всей картинке, а правильность обнаружения каждого объекта в отдельности.
+    \item Можно вместо того, чтобы брать изображение $ I^{(i)} $ и преобразовывать его, выбирать несколько последовательных кадров из некоторого видеопотока. Тогда алгоритм $ R $ можно будет использовать с уже обученным алгоритмом $ A_3 $ при распознавании в реальном времени.
+\end{enumerate}
+
+\medskip
+\printbibliography
+
+\end{document}
