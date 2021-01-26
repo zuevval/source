@@ -1,0 +1,86 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{report}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{chngcntr} % change counters
+\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+	\subfile{titlepage}
+    \tableofcontents
+    \newpage
+
+    Павлова Людмила Владимировна (\href{mailto:lyu0510@gmail.com}{lyu0510@gmail.com})
+
+    Зачёт с оценкой + экзамен. План лекций можно рассматривать практически как список вопросов.
+
+    Отчёты по лабораторным: сдавать не больше трёх раз!
+    Лучше с первого раза, но после третьей итерации уже всё, больше сдавать нельзя.
+    Язык программирования: любой.
+    ЛВ работает в MATLAB, можно Python/R.
+
+    Форма не очень строгая: постановка задачи, описание алгоритма, (какой-то пункт о том, что и как мы делаем - как готовим данные, как их обрабатываем), результаты, анализ результатов; в приложении обязательно код программ.
+    Код можно вставлять не целиком, а только важные кусочки.
+
+    Как нужно делать отчёты: ЛВ пришлёт файл в Teams.
+    В первой работе лучше перебрать несколько уровней значимости, посмотреть на $ p-value $ .
+    Вторая работа объёмная: первые данные у всех одни (о пчёлах), вторые (попроще) можно найти самим или взять \texttt{wine} -- там три класса.
+    Сначала работаем с исходными данными, задем переходим к главным компонентам и работаем там.
+    Третья работа: данные будут одни, а шум у всех разный.
+
+    Первую работу можно начать делать сразу.
+
+    Отчёты делать в Word\texttrademark.
+    Можно (если очень хочется) окончательный вариант делать в \LaTeX.
+
+    \textbf{Литература}: мы придерживаемся фишеровской статистики (в отличие от Георгия Леонидовича).
+    \begin{enumerate}[noitemsep]
+        \item Ивченко, Медведев: Математическая статистика (любое издание). \emph{Материал этой книжки пройдём на первой паре лекций}.
+        \item Тюрин, Микиров: Анализ данных на компьютере (2016).
+        \item Фундаментальный труд: Айвазян, Енюков, Мешалкин: Прикладная статистика.
+        \emph{Мы пользуемся в основном Ч. 1., Основы моделирования и первичная обработка данных.}
+        \item Айвазян, Мхитарян: Прикладная статистика и основы эконометрики (2001) \emph{Если хочется, посмотрите книжечку (тоже фундаментальный труд).} \label{item:aivazyan_mhitaryan}
+        \item Афифи, Эйзен: Статистический анализ. Подход с использованием ЭВМ (1982). \emph{Устаревшая книжка.}
+        \item Линейная и нелинейная регрессия (любое издание) \emph{-- хорошо описана регрессия}.
+    \end{enumerate}
+
+    \href{https://drive.google.com/drive/folders/18WM37ML5G8PERAv0esU2HV9sqEgyejj0?usp=sharing}{Литература на Google Drive} (кроме Тюрина и Афифи, а также \ref{item:aivazyan_mhitaryan} нашёл только в издании 1989 года).
+
+    \chapter{Статистические гипотезы}
+    \subfile{parts/lec1}
+\end{document}
