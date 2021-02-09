@@ -1,7 +1,9 @@
-from typing import Tuple
+from typing import Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np  # type: ignore
+from scipy.optimize import minimize, OptimizeResult, Bounds
+from scipy.stats import chi2
 
 
 def mean(x: np.array) -> float:
@@ -55,8 +57,61 @@ def plot_cdf(x: np.array, cdf_values: np.array) -> None:
     plt.show()
 
 
-def plot_log_hist(x: np.array) -> None:
-    counts, bins = np.histogram(np.log(x))
+def plot_hist(x: np.array) -> None:
+    counts, bins = np.histogram(x)
     plt.hist(bins[:-1], bins, weights=counts)
-    plt.title("histogram (logarithm of data)")
+    plt.title("histogram")
+    plt.show()
+
+
+def exp_cdf(lamb: float, x: Union[float, np.array]) -> Union[float, np.array]:  # assuming x >= 0
+    return 1 - np.exp(- lamb * x)
+
+
+def exp_pdf(lamb: float, x: Union[float, np.array]) -> Union[float, np.array]:  # assuming x >= 0
+    return lamb * np.exp(- lamb * x)
+
+
+# def chi_sq()
+
+
+def fisher_exp_test(x: np.array, nu: float = 6) -> float:
+    x = np.sort(x)
+    n = len(x)
+    nu_last = n % nu or nu
+    bins = [(0, x[nu]),
+            *[(x[nu * (i - 1)], x[nu * i]) for i in range(2, (n - nu_last) // nu + 1)],
+            (x[n - nu_last], np.inf)]  # assuming n > nu
+
+    def loss(lamb: float) -> float:
+        probabs = np.array([exp_cdf(lamb, r) - exp_cdf(lamb, l) for l, r in bins])
+        nu_arr = np.array([nu] * (len(bins) - 1) + [nu_last])
+        return np.sum((nu_arr - n * probabs) ** 2 / (n * probabs))
+
+    lambda_init = 1 / mean(x)
+    lambda_bounds = Bounds(0, np.inf)
+    res: OptimizeResult = minimize(fun=loss, x0=lambda_init, options={"verbose": 1}, method='trust-constr',
+                                   bounds=lambda_bounds)
+    print("lambda found by minimizing the loss function: " + str(res.x))
+
+    # when n -> inf, res.x ~ chi_square(n/nu - 2)
+    print("p-value:" + str(1 - chi2.cdf(x=0.98, df=(n // nu - 2))))
+    return res.x
+
+
+def plot_pdf_cdf(x: np.array) -> None:
+    lamb = 1 / mean(x)
+    t = np.arange(start=0, stop=5, step=.02)
+
+    y_cdf = exp_cdf(lamb=lamb, x=t)
+    plt.plot(t, y_cdf, label="theoretical CDF, lambda=%.1g" % lamb)
+    plt.step(*cdf(x), label="empirical CDF")
+    plt.legend()
+    plt.show()
+
+    y_pdf = exp_pdf(lamb=lamb, x=t)
+    plt.plot(t, y_pdf, label="theoretical PDF, lambda=%.1g" % lamb)
+    counts, bins = np.histogram(x)
+    plt.hist(bins[:-1], bins, weights=counts * np.max(y_pdf) / np.max(counts), label="histogram")
+    plt.legend()
     plt.show()
