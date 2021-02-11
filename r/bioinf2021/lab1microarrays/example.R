@@ -108,3 +108,8 @@ data("CLLbatch")
 badArray = match("CLL1", sampleNames(CLLbatch))
 CLLB = CLLbatch[, -badArray]
 CLLrma = rma(CLLB) # TODO crashing here
+
+# exercise 8 | background correction (page 21)
+
+bgrma = bg.correct.rma(CLLB) # TODO crashing here
+exprs(bgrma) = log2(exprs(bgrma))
