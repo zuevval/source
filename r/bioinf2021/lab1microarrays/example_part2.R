@@ -27,7 +27,7 @@ arrayQualityMetrics::arrayQualityMetrics(expressionset = AEset, outdir = "QAraw"
                     force = FALSE, do.logtransform = TRUE, intgroup = fac)
 
 # exercise 10 (page 25)
-cAEset = AEset[, -6] # TODO not renormalized
+cAEset = oligo::rma(AEset[, -6]) 
 groups = pData(cAEset)[, fac]
 
 groups[groups == "wild_type"] = "WT"
