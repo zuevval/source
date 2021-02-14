@@ -1,6 +1,6 @@
 import numpy as np
 
-from .math_utils import mean, var, cdf_repeated
+from .math_utils import mean, var, cdf
 
 
 def test_mean():
@@ -16,6 +16,6 @@ def test_var():
 
 def test_cdf():
     arr = np.array([1.5, 2.2, 3.3, 2.2])
-    x, y = cdf_repeated(x=arr)
-    assert (x == np.array([1.5, 2.2, 3.3])).all()
-    assert (y == np.array([.25, .75, 1.])).all()
+    x, y = cdf(x=arr)
+    assert (x == np.array([1.5, 2.2, 2.2, 3.3])).all()
+    assert (y == np.array([.25, .5, .75, 1.])).all()
