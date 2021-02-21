@@ -15,11 +15,11 @@ def var(x: np.array) -> float:
 
 
 def asym(x: np.array) -> float:
-    return mean((x - mean(x)) ** 3)
+    return mean((x - mean(x)) ** 3) / var(x) ** (3 / 2)
 
 
 def kurtosis(x: np.array) -> float:
-    return mean((x - mean(x)) ** 4)
+    return mean((x - mean(x)) ** 4) / var(x) ** 2
 
 
 def cdf(x: np.array) -> Tuple[np.array, np.array]:
