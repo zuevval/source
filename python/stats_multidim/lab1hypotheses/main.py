@@ -2,7 +2,7 @@ import numpy as np
 
 from python.stats_multidim.lab1hypotheses.data import load_data
 from python.stats_multidim.lab1hypotheses.math_utils \
-    import mean, var, asym, kurtosis, fisher_exp_test, plot_pdf_cdf
+    import mean, var, asym, kurtosis, fisher_test, plot_pdf_cdf
 
 
 def print_var(variable: float, name: str, precision: int = 3) -> None:
@@ -17,7 +17,7 @@ def part1_moments(x: np.array) -> None:
 
 
 def part4_fisher(x: np.array) -> None:
-    fisher_exp_test(x)
+    fisher_test(x)
 
 
 def part6_theoretical_dist(x: np.array) -> None:
