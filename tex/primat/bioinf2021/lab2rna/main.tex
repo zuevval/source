@@ -1,0 +1,58 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\subfile{titlepage}
+
+\section{Исходные данные}
+
+В данной работе проводится анализ информации о б экспрессии генов в клетках людей, часть из которых больна психозом, который связан с употреблением метамфетамина \cite{breen}.
+Соответствующий набор данных расположен в открытом доступе. Краткая сводка со ссылками на ресурсы опубликована в базе данных ArrayExpress (\href{https://www.ebi.ac.uk/arrayexpress/experiments/E-GEOD-74737/}{E-GEOD-74737}); результаты секвенирования доступны для скачивания в формате FASTQ с сайта European Nucleotide Archive (\href{https://www.ebi.ac.uk/ena/browser/view/PRJNA301364}{PRJNA301364}), матрицу с информацией об уровне экспрессии каждого гена можно найти в базе GEO (\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74737}{GSE74737})
+
+\section{Оценка качества нефильтрованных данных с помощью FastQC}
+
+
+\begin{thebibliography}{99}
+    \bibitem{breen} Breen, M., Uhlmann, A., Nday, C. et al. Candidate gene networks and blood biomarkers of methamphetamine-associated psychosis: an integrative RNA-sequencing report. Transl Psychiatry 6, e802 (2016). doi: \href{https://doi.org/10.1038/tp.2016.67}{10.1038/tp.2016.67}
+    \bibitem{bogler} Bolger, A.M., Lohse, M., Usadel B. Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics. 2014 Aug 1;30(15):2114-20. doi: \href{https://doi.org/10.1093/bioinformatics/btu170}{10.1093/bioinformatics/btu170}
+\end{thebibliography}
+
+
+\end{document}
