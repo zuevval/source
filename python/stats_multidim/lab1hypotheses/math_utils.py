@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import numpy as np  # type: ignore
 from scipy.optimize import minimize, OptimizeResult
 from scipy.stats import chi2
-from scipy.special import gamma
 
 
 def mean(x: np.array) -> float:
@@ -42,7 +41,7 @@ def exp_pdf(lamb: float, x: Union[float, np.array]) -> Union[float, np.array]:  
     return lamb * np.exp(- lamb * x)
 
 
-def fisher_test(x: np.array, n_bins: int = 6) -> float:
+def fisher_test(x: np.array, n_bins: int = 6) -> None:
     """
     Fisher's test for exponential distribution
     """
@@ -76,30 +75,34 @@ def plot_pdf_cdf(x: np.array, n_bins=6) -> None:
     deg_of_freedom = 1 / mean(x)
     t = np.arange(start=0, stop=5, step=.02)
 
-    for y_pdf, y_cdf, label in (
-            (exp_pdf(lamb=lamb, x=t), exp_cdf(x=t, lamb=lamb), "exponential (lambda=%.2g)" % lamb),
-            (chi2.pdf(x=t, df=deg_of_freedom), chi2.cdf(x=t, df=deg_of_freedom),
-             "chi square (DoF=%.2g)" % deg_of_freedom)):
-        plt.figure()
+    dist_params = (
+        (exp_pdf(lamb=lamb, x=t), exp_cdf(x=t, lamb=lamb), "exponential (lambda=%.2g)" % lamb),
+        (chi2.pdf(x=t, df=deg_of_freedom), chi2.cdf(x=t, df=deg_of_freedom),
+         "chi square (DoF=%.2g)" % deg_of_freedom))
+
+    plt.figure()
+    for _, y_cdf, label in dist_params:
         plt.plot(t, y_cdf, label="theoretical CDF: " + label)
-        sq_n = np.sqrt(len(x))  # sqrt(n)
 
-        x_sorted, y_ecdf = cdf(x)
-        plt.step(x_sorted, y_ecdf, label="empirical CDF")
+    x_sorted, y_ecdf = cdf(x)
+    plt.step(x_sorted, y_ecdf, label="empirical CDF", color="red")
 
-        delta_y_01, delta_y_005 = 1.224 / sq_n, 1.385 / sq_n  # delta (alpha = 0.1, alpha = 0.05)
-        label_template = "confidence interval for CDF (gamma = {})"
-        for delta_y, color, label_conf in ((delta_y_01, "green", label_template.format(0.9)),
-                                           (delta_y_005, "black", label_template.format(0.95))):
-            plt.step(x_sorted, y_ecdf + delta_y, color=color, label=label_conf, linewidth=1)
-            plt.step(x_sorted, y_ecdf - delta_y, color=color, linewidth=1)
-        plt.legend()
-        plt.savefig("data/cdf " + label + ".png")
+    sq_n = np.sqrt(len(x))  # sqrt(n)
+    delta_y_01, delta_y_005 = 1.224 / sq_n, 1.385 / sq_n  # delta (alpha = 0.1, alpha = 0.05)
+    label_template = "confidence interval for CDF (gamma = {})"
+    for delta_y, color, label_conf in ((delta_y_01, "green", label_template.format(0.9)),
+                                       (delta_y_005, "black", label_template.format(0.95))):
+        plt.step(x_sorted, y_ecdf + delta_y, color=color, label=label_conf, linewidth=1)
+        plt.step(x_sorted, y_ecdf - delta_y, color=color, linewidth=1)
+    plt.legend()
+    plt.savefig("data/cdf.png")
 
-        plt.figure()
-        plt.plot(t, y_pdf, label="theoretical PDF, lambda=%.2g" % lamb)
-        counts, bins = np.histogram(x, bins=n_bins)
-        plt.hist(bins[:-1], bins, weights=counts * np.max(y_pdf[y_pdf != np.inf]) / np.max(counts),
-                 label="histogram (normalized)")
-        plt.legend()
-        plt.savefig("data/pdf " + label + ".png")
+    plt.figure()
+    for y_pdf, _, label in dist_params:
+        plt.plot(t, y_pdf, label="theoretical PDF: " + label)
+    counts, bins = np.histogram(x, bins=n_bins)
+    exp_pdf_values = dist_params[0][0]
+    plt.hist(bins[:-1], bins, weights=counts * np.max(exp_pdf_values) / np.max(counts),
+             label="histogram (normalized)", color="white", edgecolor="black")
+    plt.legend()
+    plt.savefig("data/pdf.png")
