@@ -25,6 +25,17 @@
 \usepackage{caption}
 \usepackage{subcaption} % captions for subfigures
 \usepackage{color}
+\usepackage{listings}
+\lstset{
+    language=bash,
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    commentstyle=\color{red},
+    keywordstyle=\color{blue},
+    breaklines=true,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    columns=fullflexible
+}
 
 % styling
 \usepackage{float} % force pictures position
@@ -34,7 +45,7 @@
 
 % misc
 \graphicspath{{./img/}}
-\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\myPictWidth}{.99\textwidth}
 \newcommand{\phm}{\phantom{-}}
 
 \begin{document}
@@ -46,13 +57,63 @@
 В данной работе проводится анализ информации о б экспрессии генов в клетках людей, часть из которых больна психозом, который связан с употреблением метамфетамина \cite{breen}.
 Соответствующий набор данных расположен в открытом доступе. Краткая сводка со ссылками на ресурсы опубликована в базе данных ArrayExpress (\href{https://www.ebi.ac.uk/arrayexpress/experiments/E-GEOD-74737/}{E-GEOD-74737}); результаты секвенирования доступны для скачивания в формате FASTQ с сайта European Nucleotide Archive (\href{https://www.ebi.ac.uk/ena/browser/view/PRJNA301364}{PRJNA301364}), матрицу с информацией об уровне экспрессии каждого гена можно найти в базе GEO (\href{https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74737}{GSE74737})
 
-\section{Оценка качества нефильтрованных данных с помощью FastQC}
+\section{Оценка качества с помощью FastQC}
 
+\subsection{Подготовка материалов}
+
+С ftp-сайта European Nucleotide Archive были загружены два набора данных (прочтения с 5'-конца и 3'-конца), соответствующих эксперименту \href{https://www.ebi.ac.uk/ena/browser/view/SRX1421028}{SRX1421028} (клетки крови человека, образец из контрольной выборки):
+
+\begin{lstlisting}
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR292/004/SRR2927744/SRR2927744_1.fastq.gz
+wget ftp://ftp.sra.ebi.ac.uk/vol1/fastq/SRR292/004/SRR2927744/SRR2927744_2.fastq.gz
+\end{lstlisting}
+
+\subsection{Оценивание необработанных данных}
+
+Проведён комплексный анализ качества образцов с помощью FastQC.
+Результаты приведены в приложении.
+
+Видно, что качество прочтения падает с увеличением номера позиции нуклеотида (рис. \ref{fig:raw:per_base_q}).
+Среднее качество прочтения хорошее (рис. \ref{fig:raw:across_reads_q}).
+В обоих наборах прочтений распределение GC-контента бимодальное (рис. \ref{fig:raw:gc}).
+Заметно, что первые 9-10 нуклеотидов в прочтениях $ 5' \to 3'$ распределены неравномерно (рис. \ref{fig:raw:sequence_content}); скорее всего, это влияние адаптерной последовательности.
+
+\subsection{Обработка последовательностей}
+
+Прочтения обрезаны с помощью утилиты TrimmoMatic \cite{bogler}:
+
+\begin{lstlisting}
+java -jar "C:/Program Files/Trimmomatic-0.39/trimmomatic-0.39.jar" PE -threads 50 -phred33 SRR2927744_1.fastq.gz SRR2927744_2.fastq.gz SRR2927744_1_paired.fastq.gz SRR2927744_1_unpaired.fastq.gz SRR2927744_2_paired.fastq.gz SRR2927744_2_unpaired.fastq.gz  ILLUMINACLIP:truseq3pe2mod.fa:2:30:10:2:keepBothReads LEADING:3 TRAILING:3 SLIDINGWINDOW:4:15 MINLEN:36
+\end{lstlisting}
+
+Переданные аргументы имеют следующий смысл:
+\begin{enumerate}[noitemsep]
+    \item \texttt{-threads 50} -- программа запускается одновременно в 50 потоках максимум (по умолчанию в одном потоке).
+    \item \texttt{-phred33} -- оценка качества записана в формате Phred 33 (впрочем, Trim\-mo\-Matic умеет сам это пределять, поэтому данный параметр можно не указывать).
+    \item \texttt{ILLUMINACLIP:truseq3pe2mod.fa:2:30:10:2:keepBothReads} -- в ридах ищутся и вырезаются адаптерные последовательности из файла, который получен добавлением часто встречающейся в исходных данных последовательности CTTC\-GATG\-TCGG\-CTCT\-TCCT\-ATCA\-TTGT\-GAAG\-CAGAA\-TTCAC\-CAAG\-CGTT в файл \texttt{Tru\-Seq3-\-PE-2.fa} (поставляется вместе с программой в папке \texttt{adapters}), причём допускается максимально 2 несовпадения нуклеотидов.
+    Порог для различия двух палиндромов - 30, порог для различия между адаптерами - 10.
+    \item \texttt{LEADING:3 TRAILING:3} -- минимально допустимое качество отдельного нуклеотида.
+    \item \texttt{SLIDINGWINDOW:4:15} -- в каждой четвёрке подряд идущих оснований среднее качество должно быть не меньше 15.
+    \item \texttt{MINLEN:36} -- если последовательность короче 36 оснований, она отбрасывается.
+\end{enumerate}
+
+Фильтры применяются последовательно (сперва обрезка адаптеров, затем фильтрация по минимально допустимому качеству отдельного нуклеотида и так далее).
+
+\subsection{Оценивание обработанных данных}
+
+TrimmoMatic в режиме работы с парными прочтениями распределяет последовательности из одного набора в два: те, для которых была найдена пара, и те, для которых пары не нашлось.
+В данной работе приведена оценка качества только для тех последовательностей, которые нашли свой палиндром.
+Всего в исходном наборе $ 11, 852, 482 $ фрагментов, после фильтрации остались $ 9, 257, 785 $, т. е. чуть больше $ 78\% $.
+
+После обработки в данных остаются только последовательности с хорошим качеством прочтения в последних позициях (рис. \ref{fig:trimmed:per_base_q}), но число последовательностей с хорошим средним качеством уменьшается (рис. \ref{fig:trimmed:across_reads_q}).
+Второй пик в бимодальном распределении удаётся сгладить, оно становится почти унимодальным (рис. \ref{fig:trimmed:gc}), но не удаётся извлечь адаптерные последовательности (рис. \ref{fig:trimmed:sequence_content}) -- возможно, используются неверные предположения о том, какие последовательности используются в качестве праймеров.
 
 \begin{thebibliography}{99}
     \bibitem{breen} Breen, M., Uhlmann, A., Nday, C. et al. Candidate gene networks and blood biomarkers of methamphetamine-associated psychosis: an integrative RNA-sequencing report. Transl Psychiatry 6, e802 (2016). doi: \href{https://doi.org/10.1038/tp.2016.67}{10.1038/tp.2016.67}
     \bibitem{bogler} Bolger, A.M., Lohse, M., Usadel B. Trimmomatic: a flexible trimmer for Illumina sequence data. Bioinformatics. 2014 Aug 1;30(15):2114-20. doi: \href{https://doi.org/10.1093/bioinformatics/btu170}{10.1093/bioinformatics/btu170}
 \end{thebibliography}
 
+\newpage
+\subfile{appendix}
 
 \end{document}

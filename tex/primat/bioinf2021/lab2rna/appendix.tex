@@ -1,0 +1,155 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+
+\section{Приложение. Результаты анализа качества}
+
+\subsection{Анализ качества исходных данных}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/1/per_base_quality}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/2/per_base_quality}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+\caption{Качество прочтения каждой позиции в последовательности}
+\label{fig:raw:per_base_q}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/1/per_sequence_quality}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/2/per_sequence_quality}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Распределение среднего качества прочтения по последовательности}
+    \label{fig:raw:across_reads_q}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/1/per_sequence_gc_content}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/2/per_sequence_gc_content}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Доля GC-контента в зависимости от позиции}
+    \label{fig:raw:gc}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/1/per_base_sequence_content}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{raw/2/per_base_sequence_content}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Частота встречи каждого нуклеотида в позиции }
+    \label{fig:raw:sequence_content}
+\end{figure}
+
+\newpage
+\subsection{Анализ качества обработанных данных}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/1/per_base_quality}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/2/per_base_quality}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Качество прочтения каждой позиции в последовательности (данные после фильтрации)}
+    \label{fig:trimmed:per_base_q}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/1/per_sequence_quality}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/2/per_sequence_quality}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Распределение среднего качества прочтения по последовательности (данные после фильтрации)}
+    \label{fig:trimmed:across_reads_q}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/1/per_sequence_gc_content}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/2/per_sequence_gc_content}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Доля GC-контента в зависимости от позиции (данные после фильтрации)}
+    \label{fig:trimmed:gc}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/1/per_base_sequence_content}
+        \caption{$ 5' \to 3' $}
+        % TODO \label{fig:}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{trimmed/2/per_base_sequence_content}
+        \caption{$ 3' \to 5' $}
+        % TODO \label{fig:}
+    \end{subfigure}
+    \caption{Частота встречи каждого нуклеотида в позиции (данные после фильтрации)}
+    \label{fig:trimmed:sequence_content}
+\end{figure}
+
+\end{document}
