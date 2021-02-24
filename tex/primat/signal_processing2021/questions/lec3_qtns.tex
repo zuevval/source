@@ -1,0 +1,176 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{amsthm} % theorems with proofs
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{listings} % code chunks
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\lstset{language=Python,
+    basicstyle=\small\ttfamily,
+    stringstyle=\color{dkgreen},
+    keywordstyle=\color{blue},
+    commentstyle=\color{dkgreen},
+    tabsize=2,
+    breaklines=true,
+    columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+\newtheorem{problem}{Задача}
+
+\begin{document}
+
+\section{Вопрос 7}
+
+\textbf{Q:} На каких изображениях детектор Харриса найдет угол вероятнее, чем детектор Ферстнера?
+А наоборот?
+
+\textbf{A:} Детектор Фёрстнера неустойчив к шуму.
+На рис. \ref{fig:xperia_foerstner} видно, что он находит углы практически везде.
+
+В то же время, на картинке без помех (например, на созданной в редакторе), детектор Фёрстнера может обнаруживать некоторые скруглённые углы, которые детектор Харриса не будет распознавать или ошибочно считать множеством углов (рис. \ref{fig:drawing_harris}, \ref{fig:drawing_foerstner}).
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{xperia_harris}
+        \caption{детектор Харриса}
+        \label{fig:xperia_harris}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{xperia_foerstner}
+        \caption{детектор Фёрстнера}
+        \label{fig:xperia_foerstner}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{drawing_harris}
+        \caption{детектор Харриса}
+        \label{fig:drawing_harris}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{drawing_foerstner}
+        \caption{детектор Фёрстнера}
+        \label{fig:drawing_foerstner}
+    \end{subfigure}
+    \caption{Нахождение углов детектором Харриса и детектором Фёрстнера}
+    \label{fig:1}
+\end{figure}
+
+Исходный код (Python 3):
+
+\begin{lstlisting}
+import cv2
+import numpy as np
+from skimage.feature import corner_foerstner
+
+for input_name in ("xperia", "drawing"):
+    img = cv2.imread(input_name + ".jpg")
+    gray = np.float32(cv2.cvtColor(img, cv2.COLOR_BGR2GRAY))
+    dst = cv2.cornerHarris(gray, 2, 3, 0.04)
+
+    img_harris = np.copy(img)
+    img_harris[dst > 0.01 * dst.max()] = [0, 0, 255]
+    cv2.imwrite(input_name + "_harris.jpg", img_harris)
+
+    w, q = corner_foerstner(gray)
+    accuracy_thresh = 1.8
+    roundness_thresh = 0.99
+    foerstner = (q > roundness_thresh) * (w > accuracy_thresh) * w
+
+    img_foerstner = np.copy(img)
+    img_foerstner[foerstner > .5] = [0, 0, 255]
+    cv2.imwrite(input_name + "_foerstner.jpg", img_foerstner)
+\end{lstlisting}
+
+\section{Вопрос 8}
+
+
+\begin{problem}
+Дано:
+\begin{align}
+    \label{eq:laplacian}
+    & L(x,y; \sigma) = (x^2 + y^2 - 2 \sigma^2) e^{-\frac{x^2+y^2}{2 \sigma^2}} \\
+    \label{eq:f}
+    & f(x,y) = \begin{cases}
+        1, x^2 + y^2 \le r^2 \\
+        0 \text{ иначе}
+    \end{cases} \\
+   \label{eq:convolution}
+   & g(\sigma) = f * L
+\end{align}
+Доказать, что $ \sigma_0 = \frac{r}{\sqrt 2} $ -- экстремум функции $g$ \eqref{eq:convolution}.
+\end{problem}
+
+\begin{proof}
+\[ g(\sigma) = f*L = \iint_D L(x,y) dxdy, \thickspace D := \{(x, y) | f(x, y) = 1\} \\ \]
+
+Перейдём к полярным координатам $ (\rho, \phi)$:
+\[ \begin{cases}
+    x = \rho \cos(\phi) \\
+    y = \rho \sin(\phi) \\
+\end{cases}, \thickspace |J| = \rho \]
+\begin{align*}
+    g(\sigma) & = \iint_D L(x(\rho, \phi), y(\rho, \phi)) |J| d\rho d\phi  \overset{\eqref{eq:laplacian}}= \int_0^{2 \pi} d\phi \int_0^r d\rho \left[ (\rho^2 - 2 \sigma^2) e^{-\frac{\rho^2}{2 \sigma^2}} \cdot \rho \right] \\
+    & = 2 \pi \int_{\rho=0}^{\rho=r} \sigma^2 \left(\left(\frac{\rho}{\sigma}\right)^2 - 2 \right) e^{- \frac{1}{2} \left(\frac{\rho}{\sigma}\right)^2} d \left[ \frac{\sigma^2}{2} \left(\frac{\rho}{\sigma}\right)^2\right]
+\end{align*}
+Замена: $ t = \frac{\rho^2}{\sigma^2} $
+
+\[g(\sigma) = \pi \sigma^4 \int_{t=0}^{t=\frac{r^2}{\sigma^2}} (t-2) e^{-\frac{t}{2}} dt = [...] = \pi \sigma^4 \left(-2 \frac{r^2}{\sigma^2} e^{-\frac{r^2}{2 \sigma^2}}\right) \]
+\begin{equation}\label{eq:g}
+    \boxed{ g(\sigma) = -2 r^2 \sigma^2 e^{-\frac{r^2}{2 \sigma^2}} }
+\end{equation}
+
+Введём функцию $ h(\sigma) := \frac{g(\sigma)}{2 r^2} $. Решение сводится к доказательству того, что $ \sigma_0 $ есть экстремум $ h(\sigma) $.
+
+\begin{align*}
+    & h(\sigma) \overset{\eqref{eq:g}}= -\sigma^2 e^{-\frac{r^2}{2 \sigma^2}} \\
+    & h'(\sigma) = \left( \frac{r^2}{\sigma} - \sigma \right) \cdot e^{-\frac{r^2}{2 \sigma^2}} \\
+    & h'(\sigma_0) = 0 \\
+    & h''(\sigma) = \frac{1}{\sigma} e^{-\frac{r^2}{2 \sigma^2}} (r^4 - 2 r^2 \sigma^2 - \sigma^4) \\
+    & sign(h''(\sigma_0)) = sign(r^4 - 2 r^2 \sigma_0^2 - \sigma_0^4) = sign \left(\frac{r^4}{2} - r^4 \right) = -1 \\
+\end{align*}
+
+Т. о. первая производная $h$ обращается в ноль в точке $\sigma_0$, вторая производная отрицательна.
+
+\end{proof}
+
+
+
+\end{document}
