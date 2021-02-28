@@ -55,7 +55,7 @@ def fisher_test(x: np.array, n_bins: int = 6) -> None:
         return np.sum((nu - n * probabs) ** 2 / (n * probabs))
 
     lambda_init = 1 / mean(x)  # start with maximum likelihood lambda
-    df_init = 1 / mean(x)  # chi2 distribution: start with maximum likelihood degrees-of-freedom
+    df_init = 1.02  # matlab: [phat,pci] = mle(x,'pdf',@(x,v)chi2pdf(x,v),'start',1.1)
 
     for theor_cdf, param, label in ((exp_cdf, lambda_init, "exponential"), (chi2.cdf, df_init, "chi squared")):
         print("\n" + label + " distribution:")
@@ -72,7 +72,7 @@ def fisher_test(x: np.array, n_bins: int = 6) -> None:
 
 def plot_pdf_cdf(x: np.array, n_bins=6) -> None:
     lamb = 1 / mean(x)
-    deg_of_freedom = 1 / mean(x)
+    deg_of_freedom = 1.02  # matlab: [phat,pci] = mle(x,'pdf',@(x,v)chi2pdf(x,v),'start',1.1)
     t = np.arange(start=0, stop=5, step=.02)
 
     dist_params = (
