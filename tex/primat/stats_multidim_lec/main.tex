@@ -14,6 +14,7 @@
 \usepackage{ mathrsfs } % curved letters with e. g. \mathscr{F}
 
 % utilities
+\usepackage{amsthm} % theorems with proofs
 \usepackage{systeme} % systems of equations
 \usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
 \usepackage{array} % utils for tables
@@ -40,6 +41,7 @@
 \graphicspath{{./img/}}
 \newcommand{\myPictWidth}{.95\textwidth}
 \newcommand{\phm}{\phantom{-}}
+\newtheorem{theorem}{Теорема}
 
 \begin{document}
 	\subfile{titlepage}
@@ -85,8 +87,12 @@
     \chapter{Статистические гипотезы}
     \subfile{parts/lec1}
     \subfile{parts/lec2}
-    
+
     \chapter{Многомерный статистический анализ}
     \subfile{parts/lec3}
+
+    \chapter{Линейная регрессия}
     \subfile{parts/lec4}
+    \subfile{parts/lec5}
+    \subfile{parts/lec6}
 \end{document}
