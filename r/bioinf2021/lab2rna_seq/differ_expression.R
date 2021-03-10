@@ -4,12 +4,14 @@
 
 # BiocManager::install("DESeq2")
 # BiocManager::install("apeglm") # for `lfcShrink(<...>, type="apeglm")`
-library(DESeq2)
-library(here)
+# BiocManager::install("clusterProfiler")
+# BiocManager::install("fgsea")
+# BiocManager::install("AnnotationDbi")
+# BiocManager::install("goseq")
 library(tidyverse) # dplyr, ggplot2, ...
 
 data_dir <- "r/bioinf2021/lab2rna_seq/dataset"
-abs_path <- function(path) here(data_dir, path) # path relative to the Git root
+abs_path <- function(path) here::here(data_dir, path) # path relative to the Git root
 
 # ------------------------------------------
 # --- Analyzing RNA-seq data with DESeq2 ---
@@ -22,27 +24,52 @@ counts <- read.csv(abs_path("GSE74737_counts.txt"), sep = "\t", row.names = "Gen
 
 all(rownames(coldata) == colnames(counts)) # Performing a sanity check. Must be TRUE
 
-dds <- DESeqDataSetFromMatrix(countData = counts, colData = coldata, design = ~ condition)
-dds_analysed <- DESeq(dds)
-res <- results(dds_analysed)
+dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts, colData = coldata, design = ~condition)
+dds_analysed <- DESeq2::DESeq(dds)
+deseq_res <- DESeq2::results(dds_analysed)
+DESeq2::plotMA(deseq_res)
+
+res_sorted <- deseq_res %>%
+  na.omit %>%
+  as.data.frame %>%
+  arrange(padj)
 pval_thresh <- .2
-diff_expr <- res %>% na.omit %>% as.data.frame %>% filter(padj < pval_thresh) %>% rownames # differentially expressed genes
-# same as in the article: "ARL6", "ELK3", "MTHFSD"
+diff_expr <- res_sorted %>%
+  filter(padj < pval_thresh) %>%
+  rownames # differentially expressed genes. The following are the same as in the article: "ARL6", "ELK3", "MTHFSD"
 
 write.csv(diff_expr, abs_path("diff_expr.csv"))
 
-#resultsNames(dds_analysed) # lists the coefficients
-#res_lfc_ma <- lfcShrink(dds_analysed, coef = "condition_.map_vs_.control", type = "apeglm")
-#res_lfc_map <- lfcShrink(dds_analysed, coef = "condition_.ma_vs_.control", type = "apeglm")
-#plotMA(res)
-#plotMA(res_lfc_ma)
-#plotMA(res_lfc_map)
+# --------------------------------
+# --- dowloading KEGG pathways ---
+# --------------------------------
+kegg_pathways <- clusterProfiler::download_KEGG("hsa")
 
-# -------------
-# --- FGSEA ---
-# -------------
+# ------------
+# --- GSEA ---
+# ------------
 
-# BiocManager::install("fgsea")
-library(fgsea)
-res_sorted <- res %>% na.omit %>% as.data.frame %>% arrange(padj)
-es <- calcGseaStat(res_sorted$padj, 1:6)
+# --- fgsea ---
+res_sorted$entrez <- AnnotationDbi::mget(rownames(res_sorted), AnnotationDbi::revmap(org.Hs.eg.db::org.Hs.egSYMBOL), ifnotfound = NA) # https://stat.ethz.ch/pipermail/bioconductor/2009-April/027168.html
+res_sorted <- res_sorted[!is.na(res_sorted$entrez),]
+ranks <- res_sorted$padj
+names(ranks) <- res_sorted$entrez
+
+fgsea_res <- fgsea::fgsea(kegg_pathways, ranks, scoreType = "pos") # https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2018/RNASeq2018/html/06_Gene_set_testing.nb.html#conduct-analysis
+
+# --- KEGG enrichment with clusterProfiler ---
+kk <- clusterProfiler::enrichKEGG(gene = res_sorted[diff_expr,]$entrez, organism = 'hsa') # `hsa` stands for Homo Sapiens
+head(kk, n = 10) # only 3 found
+# --- GO enrichment with goseq ---
+res_sorted$genes_signif <- as.integer(res_sorted$padj < pval_thresh)
+genome_id <- "hg19"
+gene_type_id <- "geneSymbol"
+res_sorted$lengths <- goseq::getlength(rownames(res_sorted), genome = genome_id, id = gene_type_id)
+res_sorted <- res_sorted[!is.na(res_sorted$lengths) & !is.na(res_sorted$genes_signif),]
+genes_signif <- res_sorted$genes_signif
+names(genes_signif) <- rownames(res_sorted)
+pwf <- goseq::nullp(res_sorted$genes_signif, genome = genome_id, id = gene_type_id, bias.data = res_sorted$lengths) # https://bioinformatics-core-shared-training.github.io/cruk-summer-school-2018/RNASeq2018/html/06_Gene_set_testing.nb.html#fit-the-probability-weighting-function-pwf
+rownames(pwf) <- rownames(res_sorted)
+go_res <- goseq::goseq(pwf, genome_id, gene_type_id)
+go_res$padj <- p.adjust(go_res$over_represented_pvalue)
+go_res %>% filter(padj < .05) # empty result
