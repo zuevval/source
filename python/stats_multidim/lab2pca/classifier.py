@@ -68,6 +68,8 @@ def calc_alpha(sample: Sample) -> Tuple[np.array, float, float]:
     p = len(sample.train_x[0])  # number of parameters
 
     s = ((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2)
+    if isinstance(s, float):
+        s = np.array([[s]])
     alpha = np.matmul(np.linalg.inv(s), mu1 - mu2)
     z = np.matmul(alpha, sample.train_x.T)
     ksi1, ksi2 = np.matmul(alpha, mu1), np.matmul(alpha, mu2)
@@ -109,7 +111,7 @@ def calc_misclass_probabs(sample: Sample, du2: float) -> Tuple[float, float]:
     return p21, p12
 
 
-def classify(sample: Sample, title: str) -> None:
+def classify(sample: Sample, title: str) -> Tuple[float, float]:
     print("\n--- {} ---".format(title))
     alpha, c, du2 = calc_alpha(sample)
     print("Mahalanobis distance: {}".format(du2))
@@ -119,7 +121,9 @@ def classify(sample: Sample, title: str) -> None:
     print(pd.crosstab(classifier(sample.test_x), sample.test_y))
     print("train: contingency table")
     print(pd.crosstab(classifier(sample.train_x), sample.train_y))
-    print("Misclassification probabilities: {}, {}".format(*calc_misclass_probabs(sample, du2)))
+    p21, p12 = calc_misclass_probabs(sample, du2)
+    print("Misclassification probabilities: {}, {}".format(p21, p12))
+    return p21, p12
 
 
 def main():
