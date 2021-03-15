@@ -30,7 +30,7 @@ $ x_l \in \mathcal{X} \in \mathds{R}^p, l \in \{1;p\} $
 Пусть $ \{D_i\} = \{D_1, D_2\}, R_1 : P_1 \sim \mathcal{N}\left(\mu_1, \Sigma \right), P_2 \sim \mathcal{N}\left(\mu_1, \Sigma \right) $ (два нормальных распределения с одинаковыми ковариационными матрицами).
 
 Строим \emph{дискриминантную функцию} $ z = \sum_{i=1}^{n} \alpha_i x^{(i)} $.
-Классификация: $ z \glq c $
+Классификация: $ z \lessgtr c $
 
 Величина $ z $ такова, что классы распределены по ней согласно двум нормальным законам: $ \mathcal{N}(\xi_1, \sigma_z), \mathcal{N}(\xi_2, \sigma_z) $.
 Подбираем $ \alpha_i $ так, чтобы максимизировать \emph{расстояние Махаланобиса} $ \Delta^2 = \frac{(\xi_1 - \xi_2)^2}{\sigma_z^2} $
@@ -62,7 +62,7 @@ $$ \Delta^2 \to D^2 $$
 
 Несмещённая оценка расстояния Махаланобиса
 
-$$ D^2_H = \frac{n_1 + n_2 - p - 3}{n_1 + n_2 - 2} + p \cdot \left(\frac{1}{n_1} + \frac{1}{n_2}\right) $$
+$$ D^2_H = \frac{n_1 + n_2 - p - 3}{n_1 + n_2 - 2} D^2 + p \cdot \left(\frac{1}{n_1} + \frac{1}{n_2}\right) $$
 
 \subsection{Случай многих классов}
 
