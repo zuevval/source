@@ -21,7 +21,7 @@ class Sample:
     def __init__(self, train_x: np.array, train_y: np.array, test_x: np.array, test_y: np.array):
         self.train_x, self.train_y, self.test_x, self.test_y = train_x, train_y, test_x, test_y
         self.class_labels = np.unique(train_y)
-        train_subsamples = [train_x[train_y == i] for i in self.class_labels]
+        train_subsamples = {i: train_x[train_y == i] for i in self.class_labels}
         self.train_means = {i: np.mean(train_subsamples[i], axis=0) for i in self.class_labels}
         self.train_covariances = {i: np.cov(train_subsamples[i].T) for i in self.class_labels}
         self.train_sizes = {i: len(train_subsamples[i]) for i in self.class_labels}
