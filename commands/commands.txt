@@ -85,3 +85,8 @@ git push -u origin master
 ||---------Cygwin---------||
 apt-cyg install <package>
 
+
+||--------- SSH / SCP ---------||
+
+ssh valera@azuev.ddns.net
+scp <local_file> valera@azuev.ddns.net:
