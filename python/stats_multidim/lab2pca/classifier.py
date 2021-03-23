@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Tuple, Sequence, Dict, Callable, Any
+from typing import Tuple, Sequence, Dict, Callable
 
 import matplotlib.pyplot as plt  # type: ignore
 import numpy as np  # type: ignore
@@ -72,14 +72,14 @@ def calc_alpha(sample: Sample) -> Tuple[np.array, float, float]:
         s = np.array([[s]])
     alpha = np.matmul(np.linalg.inv(s), mu1 - mu2)
     z = np.matmul(alpha, sample.train_x.T)
-    ksi1, ksi2 = np.matmul(alpha, mu1), np.matmul(alpha, mu2)
-    c = (ksi1 + ksi2) / 2
-    d2 = (ksi1 - ksi2) ** 2 / np.var(z)
+    xi1, xi2 = np.matmul(alpha, mu1), np.matmul(alpha, mu2)
+    c = (xi1 + xi2) / 2
+    d2 = (xi1 - xi2) ** 2 / np.var(z)
     du2 = (n1 + n2 - p - 3) * d2 / (n1 + n2 - 3) + p * (1 / n1 + 1 / n2)
     return alpha, c, du2
 
 
-def linear_classifier_factory(alpha: np.array, c: float, class_labels: np.array) -> Callable[[np.array], Any]:
+def linear_classifier_factory(alpha: np.array, c: float, class_labels: np.array) -> Callable[[np.array], np.array]:
     assert len(class_labels) == 2, "only binary classifiers supported"
 
     def linear_classifier(x: np.array) -> np.array:
@@ -124,20 +124,3 @@ def classify(sample: Sample, title: str) -> Tuple[float, float]:
     p21, p12 = calc_misclass_probabs(sample, du2)
     print("Misclassification probabilities: {}, {}".format(p21, p12))
     return p21, p12
-
-
-def main():
-    out_path = Path("out")
-    good_sample, good_sample_title = generate_data(), "well-separated"
-
-    bad_means = [[.5] * 3, [-.5] * 3]
-    bad_cov = [[1.5, 0, 0], [0, 1.5, 0], [0, 0, 1.5]]
-    bad_sample, bad_sample_title = generate_data(bad_means, bad_cov), "poorly_separated"
-
-    for sample, title in ((good_sample, good_sample_title), (bad_sample, bad_sample_title)):
-        classify(sample=sample, title=title)
-        visualize_3d(data=sample, out_path=out_path, title=title)
-
-
-if __name__ == "__main__":
-    main()

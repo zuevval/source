@@ -68,4 +68,6 @@ def plot_two_prcomps(sample: Sample, title: str, out_path: Path):
     x, y = np.concatenate((sample.test_x, sample.train_x)), np.concatenate((sample.test_y, sample.train_y))
     plt.scatter(x[:, 0], x[:, 1], c=y)
     plt.title("{}: data on the plane of two first principal components".format(title))
-    plt.savefig(out_path / "pca_two_comp_{}".format(title))
+    path_to_save = out_path / "pca_two_comp_{}".format(title)
+    plt.savefig(path_to_save)
+    print("saved figure at path: " + str(path_to_save))
