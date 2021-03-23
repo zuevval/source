@@ -1,13 +1,11 @@
 from dataclasses import dataclass
-
 from pathlib import Path
-
 from typing import Tuple, Dict, List
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from python.stats_multidim.lab2pca.classifier import Sample
+from python.stats_multidim.lab2pca.classifier import Sample, calc_alpha
 
 
 def pca(sample: Sample) -> Tuple[Sample, np.array, np.array]:
@@ -67,6 +65,12 @@ def plot_two_prcomps(sample: Sample, title: str, out_path: Path):
     plt.figure()
     x, y = np.concatenate((sample.test_x, sample.train_x)), np.concatenate((sample.test_y, sample.train_y))
     plt.scatter(x[:, 0], x[:, 1], c=y)
+
+    alpha, c, _ = calc_alpha(cut_components(sample, leave_components=2))
+    x_boundary = np.linspace(*plt.gca().get_xlim(), 20)  # x values for decision boundary
+    y_boundary = (- alpha[0] * x_boundary + c) / alpha[1]  # y values for decision boundary
+    plt.plot(x_boundary, y_boundary)
+
     plt.title("{}: data on the plane of two first principal components".format(title))
     path_to_save = out_path / "pca_two_comp_{}".format(title)
     plt.savefig(path_to_save)
