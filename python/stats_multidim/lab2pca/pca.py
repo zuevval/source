@@ -10,7 +10,8 @@ from python.stats_multidim.lab2pca.classifier import Sample, calc_alpha
 
 def pca(sample: Sample) -> Tuple[Sample, np.array, np.array]:
     x = np.concatenate((sample.test_x, sample.train_x))
-    u, s, vt = np.linalg.svd(x, full_matrices=False)
+    x_centered = x - np.mean(x, axis=0)
+    u, s, vt = np.linalg.svd(x_centered, full_matrices=False)
     new_test_x = u[:len(sample.test_x), :]
     new_train_x = u[len(sample.test_x):, :]
     return Sample(train_x=new_train_x, train_y=sample.train_y, test_x=new_test_x, test_y=sample.test_y), s, u
@@ -22,13 +23,18 @@ def cut_components(sample: Sample, leave_components: int) -> Sample:
     return Sample(train_x=new_train_x, train_y=sample.train_y, test_x=new_test_x, test_y=sample.test_y)
 
 
+def save_and_log(path_to_save: Path):
+    plt.savefig(path_to_save)
+    print("saved figure at path: {}".format(path_to_save))
+
+
 def plot_explained_variance(s: np.array, out_path: Path, title: str):
     plt.figure()
     plt.bar(range(len(s)), np.cumsum(s) / np.sum(s))
     plt.title("PCA for {}: explained variance".format(title))
     plt.xlabel("number of retained components")
     plt.xlabel("explained variance")
-    plt.savefig(out_path / "{}_explained_var.png".format(title))
+    save_and_log(out_path / "{}_explained_var.png".format(title))
 
 
 def normalize(sample: Sample) -> Sample:
@@ -57,7 +63,7 @@ def plot_misclass_probabs(n_retained_components: List[int], misclass_probabs: Di
     plt.xticks(n_retained_components)
     plt.xlabel("number of retained components")
     plt.ylabel("probability of misclassification")
-    plt.savefig(out_path / "misclass_probabs.png")
+    save_and_log(out_path / "misclass_probabs.png")
 
 
 def plot_two_prcomps(sample: Sample, title: str, out_path: Path):
@@ -71,7 +77,5 @@ def plot_two_prcomps(sample: Sample, title: str, out_path: Path):
     y_boundary = (- alpha[0] * x_boundary + c) / alpha[1]  # y values for decision boundary
     plt.plot(x_boundary, y_boundary)
 
-    plt.title("{}: data on the plane of two first principal components".format(title))
-    path_to_save = out_path / "pca_two_comp_{}".format(title)
-    plt.savefig(path_to_save)
-    print("saved figure at path: " + str(path_to_save))
+    plt.title("{}\ndata on the plane of two first principal components".format(title))
+    save_and_log(out_path / "pca_two_comp_{}".format(title))
