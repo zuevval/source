@@ -75,7 +75,7 @@ def calc_alpha(sample: Sample) -> Tuple[np.array, float, float]:
     xi1, xi2 = np.matmul(alpha, mu1), np.matmul(alpha, mu2)
     c = (xi1 + xi2) / 2
     d2 = (xi1 - xi2) ** 2 / np.var(z)
-    du2 = (n1 + n2 - p - 3) * d2 / (n1 + n2 - 3) + p * (1 / n1 + 1 / n2)
+    du2 = (n1 + n2 - p - 3) * d2 / (n1 + n2 - 3) - p * (1 / n1 + 1 / n2)
     return alpha, c, du2
 
 
@@ -95,7 +95,7 @@ def linear_classifier_factory(alpha: np.array, c: float, class_labels: np.array)
 
 
 def laplace_function(x: float) -> float:
-    return .5 * (1 + erf(x * np.sqrt(2)))
+    return .5 * (1 + erf(x / np.sqrt(2)))
 
 
 def calc_misclass_probabs(sample: Sample, du2: float) -> Tuple[float, float]:
