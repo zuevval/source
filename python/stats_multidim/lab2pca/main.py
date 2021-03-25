@@ -18,10 +18,11 @@ def process_synthetic(out_path: Path) -> None:
     for sample, title in ((good_sample, good_sample_title), (bad_sample, bad_sample_title)):
         classify(sample=sample, title=title)
         visualize_3d(data=sample, out_path=out_path, title=title)
+        sample.print_moments()
 
-    (good_pca, _, _), (bad_pca, _, _) = pca(good_sample), pca(bad_sample)
-    for sample, title in ((good_pca, good_sample_title), (bad_pca, bad_sample_title)):
-        classify(sample=sample, title=title + "_pca")
+    (good_pc, _, _), (bad_pc, _, _) = pca(good_sample), pca(bad_sample)
+    for sample, title in ((good_pc, good_sample_title), (bad_pc, bad_sample_title)):
+        classify(sample=cut_components(sample, leave_components=2), title=title + "_pca")
         plot_two_prcomps(sample=sample, out_path=out_path, title=title)
 
 
@@ -35,9 +36,11 @@ def process_german(out_path: Path) -> None:
         classify(data, title=title)
         data_pcomp, s, _ = pca(data)
         for leave_components in n_components_range:
-            p21, p12 = classify(cut_components(data_pcomp, leave_components=leave_components),
-                                "{} with PCA: {} principal components".format(title, leave_components))
+            data_cut = cut_components(data_pcomp, leave_components=leave_components)
+            p21, p12 = classify(data_cut, "{} with PCA: {} principal components".format(title, leave_components))
             misclass_probabs[title].append(MisclassProbab(p12=p12, p21=p21))
+            if leave_components <= 3:
+                data_cut.print_moments()
 
         plot_explained_variance(s, out_path=out_path, title=title)
         plot_two_prcomps(data_pcomp, out_path=out_path, title=title)

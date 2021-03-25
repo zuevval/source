@@ -26,6 +26,13 @@ class Sample:
         self.train_covariances = {i: np.cov(train_subsamples[i].T) for i in self.class_labels}
         self.train_sizes = {i: len(train_subsamples[i]) for i in self.class_labels}
 
+    def print_moments(self):
+        np.set_printoptions(precision=2)
+        print("means:")
+        print(self.train_means)
+        print("covarinaces:")
+        print(self.train_covariances)
+
 
 def generate_data(means: Sequence[Sequence[float]] = ((1, 3, 1), (1, -3, -1)),
                   covariance: Sequence[Sequence[float]] = ((1, .5, .5), (.5, 1, 0), (.5, 0, 1)),
@@ -117,10 +124,16 @@ def classify(sample: Sample, title: str) -> Tuple[float, float]:
     print("Mahalanobis distance: {}".format(du2))
 
     classifier = linear_classifier_factory(alpha, c, sample.class_labels)
+    test_crosstab = pd.crosstab(classifier(sample.test_x), sample.test_y)
     print("test: contingency table")
-    print(pd.crosstab(classifier(sample.test_x), sample.test_y))
+    print(test_crosstab)
+    cls1, cls2 = sample.class_labels
+    nu_21 = test_crosstab[cls2][cls1] / (test_crosstab[cls1][cls1] + test_crosstab[cls2][cls1])
+    nu_12 = test_crosstab[cls1][cls2] / (test_crosstab[cls2][cls2] + test_crosstab[cls1][cls2])
+    print("Misclassification frequencies: nu_21={}, nu_12={}".format(nu_21, nu_12))
+
     print("train: contingency table")
     print(pd.crosstab(classifier(sample.train_x), sample.train_y))
     p21, p12 = calc_misclass_probabs(sample, du2)
-    print("Misclassification probabilities: {}, {}".format(p21, p12))
+    print("Misclassification probabilities: p_21={}, p_12={}".format(p21, p12))
     return p21, p12
