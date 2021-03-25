@@ -4,7 +4,7 @@
 \section{Лабораторная 2 от АБ. Полногеномный поиск ассоциаций}
 11 марта 2021 г.
 
-Whole-genome association search.
+Genome-wide association study.
 
 Анализ однонуклеотидных полиморфизмов.
 В прошлой работе финальный результат был -- vcf-файл.
@@ -34,7 +34,7 @@ ped-файл должен сопровождаться map-файлом (там 
 Далее -- фильтрация по минорному аллелю (минорный -- там, где 1, где альтернативный вариант).
 Стандартно: частота минорного аллеля должна быть больше 3-5\% (maf -- minor allele frequency).
 
-Команды для фильтрации: PLINK -- \texttt{plink --bfile <...>.bed --maf 0.03 --gene 0.1}, vcftools -- \texttt{vcftools --vcf <...>.vcf --maf 0.03 --max-missing 0.9} \\
+Команды для фильтрwации: PLINK -- \texttt{plink --bfile <...>.bed --maf 0.03 --gene 0.1}, vcftools -- \texttt{vcftools --vcf <...>.vcf --maf 0.03 --max-missing 0.9} \\
 
 \subsubsection{GWAS-анализ}
 
@@ -52,11 +52,11 @@ ped-файл должен сопровождаться map-файлом (там 
 \begin{leftbar}
 	Выделить мышкой vcf.
 	В меню сверху опция -- провести PCA.
-	
+
 	Далее -- kinship matrix
-	
+
 	После этого будет три файла, которые надо объединить (вкладка IntersectJoin) $ \Rightarrow $ ещё один файл.
-	
+
 	Далее надо выделить получившийся
 \end{leftbar}
 Всё это можно сделать в командной строке.
