@@ -262,108 +262,215 @@ $$ H_{\text{разомкн}} = \frac{K}{p(T_1 p + 1)(T_2 p + 1)} $$
 $$ T_1 + T_2 > T_1 T_2 $$
 
 \subsection{Критерий Найквиста}
-Найквист (1932) -- американец.
-Чуть посложнее.
+Найквист (Nyquist, 1932, чуть пораньше Михайлова) -- американец.
+Чуть попроще критерия Михайлова + преимущество: можем определить число неустойчивых корней.
 
-Сравнение: Михайлов работает со знаменателем замкнутой цепи $ \alpha_{\text{з}}(j \omega) $, Найквиста -- с дробью разомкнутой $ H_{\text{разомкн}} = \frac{\beta(j \omega)}{\alpha(j \omega)} = \prod H_i $.
-По сложности в среднем примерно одно и то же.
+\textbf{Сравнение:} Михайлов работает со знаменателем замкнутой передаточной функции $ \alpha_{\text{з}}(j \omega) $, Найквист -- с разомкнутой $ H_{\text{разомкн}} = \frac{\beta(j \omega)}{\alpha(j \omega)} $.
+Строить годограф полинома, конечно, проще, чем дроби, в этом недостаток Найквиста; но зато, как правило, передаточная функция разомкнутой цепи есть произведение элементарных передаточных функций (т. к. последовательное соединение): $ H_{\text{разомкн}} = \prod H_i $.
+По трудоёмкости в среднем примерно одно и то же. \\
 
-Сейчас получим :
+Построим вспомогательную функцию
+$$ \Psi(p) = 1 + H_{\text{разомкн}(p)} $$
+Здесь $ H_{\text{раз}}=\frac{\alpha}{\beta} $:
+
+\includegraphics[width=.4\linewidth]{lec6/19_nyquist_example1}
+
 $$ \Psi(p) = 1 + H_{\text{разомкн}} = 1 + \frac{\beta}{\alpha} = \frac{\alpha + \beta}{\alpha} = \frac{\alpha_{\text{з}}}{\alpha} $$
-Порядок знаменателя $n$, числителя -- $ m \le n \Rightarrow $ порядок $  $ % TODO
-$$ \Delta \arg \Psi() $$ % TODO
+Порядок знаменателя $n$, числителя -- $ m \le n \Rightarrow $ порядок $ \alpha_{\text{з}} $ тоже $ n $.
+
+Хотим найти изменение аргумента $ \Psi $ от $ 0 $ до $ \infty $:
+$$ \Delta \arg \Psi(j\omega) |_0^\infty = \Delta  \arg \alpha_{\text{замкн}}(j\omega)|_0^\infty - \Delta  \arg \alpha(j\omega)|_0^\infty $$
+
+Пусть число правых корней $ m=0 \Rightarrow \alpha_{\text{замкн}} $ -- устойчивый многочлен $ \Rightarrow $ согласно критерию Михайлова, первое слагаемое $ = \frac{\pi}{2} n $. Т. о.
+
+$$ \Delta \arg \Psi(j\omega) |_0^\infty = \frac{\pi}{2} n - \frac{\pi}{2} (n - 2l) = \pi l = (2 \pi) \cdot \left( \frac{l}{2}\right)  $$
 
 здесь $ l $ -- количество строго неустойчивых корней знаменателя $ H_{\text{разомкн}} $.
 
-Cтроим годограф $ H_{\text{разомкн}} $ в осях $ Re( \Psi(j \omega) ), Im( \Psi(j \omega)) $
+$ \Psi(j \omega) = 1 + H_{\text{разомкн}} (j \omega) $.
+$ H_{\text{разомкн}} $ дана (это произведение каких-то дробей), поэтому удобнее строить её, а не $ \Psi $.
 
-Т. о. для устойчивой системы необходимо и достаточно, чтобы годограф $ H_{\text{разомкн}} $ сделал $ \frac{l}{2} $ оборотов вокруг точки $ (-1;0) $ (это оси $ \Psi $)
+Cтроим годограф $ H_{\text{разомкн}} $ в осях $ Re( \Psi(j \omega) ), Im( \Psi(j \omega)) $:
+$ 2 \pi $ -- полный оборот $ \Rightarrow $ для устойчивой системы необходимо и достаточно, чтобы годограф $ H_{\text{разомкн}} $ сделал $ \frac{l}{2} $ оборотов вокруг точки $ (-1;0) $ (эта точка -- ноль $ \Psi $).
+
+\includegraphics[width=.4\linewidth]{lec6/20_nyquist_godograph}
+
+$ H_{\text{разомкн}} = \frac{\alpha}{\beta} $, порядок числителя, как правило, меньше порядка знаменателя $ \Rightarrow $ при $ \omega \to \infty $ $ H_{\text{разомкн}} \to 0 $.
+
 
 Примеры.
-% TODO img, img
-Число неустойчивых корней знаменателя $ l = 0 $, годограф делает ноль оборотов вокруг точки $ (-1;0) $ (на обеих картинках), и
+Пусть $ l = 0 $ (тогда для устойчивости нужно ноль оборотов вокруг точки $ (-1;0) $).
+
+\includegraphics[width=.4\linewidth]{lec6/21_nyquist_godograph_stable1}
+\includegraphics[width=.4\linewidth]{lec6/22_nyquist_godograph_stable2}
+
+Число неустойчивых корней знаменателя $ l = 0 $, годограф делает ноль оборотов вокруг точки $ (-1;0) $ (на обеих картинках), и обе системы устойчивы.
 
 \subsubsection{Геометрическое правило Цыпкина}
+
+Это правило позволяет определить число оборотов вокруг точки $ (-1;0) $ по алгоритму.
+
 Будем считать число пересечений с лучом $ ( - \infty; -1 ]) $ на вещественной оси: если пересекаем из второго квадранта в третий, добавляем +1; из третьего во второй -- -1; если стартуем из точки на отрицательной вещественной полуоси, добавляем + или $ - \frac{1}{2} $ в зависимости от того, в какую сторону стартуем.
-% TODO img
+
+\includegraphics[width=\linewidth]{lec6/23_tsipkin}
+
+Критерий Найквиста в интерпретации Цыпкина: система устойчива $ \Leftrightarrow  \sum X = \frac{l}{2}$ (число пересечений годографа с осью абсцисс левее $ -1 $ равняетая $ \frac{l}{2} $).
 
 Пример.
-$$ H_{\text{раз}} = \frac{2}{p-1}, \thickspace l = 1 $$
+$$ H_{\text{раз}}(p) = \frac{2}{p-1} \Rightarrow l = 1 $$
 $$ H_{\text{раз}}(j \omega) = \frac{2}{j \omega - 1} = \frac{-2 - 2 j \omega}{\omega^2 + 1} $$
-% TODO img
-% TODO вывод из примера, проверка
+Годограф:
+
+\includegraphics[width=.4\linewidth]{lec6/24_tsipkin_example1}
+
+Сумма пересечений $ \sum X = \frac{1}{2}  $, $ l = 1 $ $ \Rightarrow $ система устойчива!
+
+Проверка (по критерию Михайлова):
+$$ \alpha_{\text{з}} = \alpha + \beta = (p - 1) + 2 = p + 1 $$
+Это устойчивый многочлен!
 
 \subsubsection{Критические случаи}
 У критерия Михайлова нет особых случаев.
 У критерия Найквиста есть.
 
-\begin{itemize}[noitemsep]
-    \item $ H_{\text{раз}} = \frac{\beta(p)}{p^s \alpha(p)} $ -- плохо, т. к.
-    Тогда принцип аргумента применить нельзя, $ \Delta \arg (1 + H_{\text{раз}}(j \omega)) |_0^{\infty} $ -- величина не определённая.
+\textbf{Первый критический случай:}
 
-    Как быть? % TODO запутался, не уверен в следующей строке.
-    %	Если на мнимой оси $ l $ корней у $ \alpha_{\text{разомкн}} $, $ \Delta \arg \alpha(j \omega) |_{- \infty}^\infty = \pi (n - 2 l) $
-    % TODO
-    Обходим неприятную точку $ (0;0) $ справа (слева нам неудобно): % TODO
-    Модификация принципа аргумента для знаменателя: $\Delta \arg \alpha(p) |_{\text{trajectory}}$
+$ H_{\text{раз}} = \frac{\beta(p)}{p^s \alpha(p)} $ -- плохо, т. к.
+$$ H_{\text{раз}}(j \omega)|_{\omega \to 0} \to \infty $$
+Тогда принцип аргумента применить нельзя, $ \Delta \arg (1 + H_{\text{раз}}(j \omega)) |_0^{\infty} $ не  определена.
 
-    $$ trajectory = \begin{cases}
-        j \omega, \omega < - \varepsilon or \omega > \varepsilon \\
-        \varepsilon e^{- j \frac{\pi \omega}{ 2 \varepsilon}}, \omega \in [- \varepsilon; \varepsilon]
-    \end{cases} $$
-    % TODO
-    $$ \Delta \arg [1 + H_{\text{раз}}(p)] |_{traject} =  $$
+\includegraphics[width=.4\linewidth]{lec6/25_critical1}
 
-    $$ H_{\text{раз}}(p) = \begin{cases}
-        H_{\text{раз}}(j \omega), \omega > \varepsilon \\
-        H_{\text{раз}}(p), p = % TODO a bit
-    \end{cases} $$
-    $$ H_{\text{раз}}(p) |_{traj, \varepsilon \to 0} = \begin{cases}
-        content...
-    \end{cases} $$
+Как быть?
 
-    Т. о. надо дополнить годограф дугой бесконечно большого радиуса с фазой $ - \frac{\pi}{2}s $ ($ s $ -- кратность нуля как корня знаменателя), которая должна начинаться на положительной полуоси.
-    Найдя эту траекторию, считаем число пересечений:
+Изменим траекторию: будем идти не везде по мнимой оси, а обойдём корень, который расположен на этой оси, по дуге очень маленькой окружности (маленькой, чтобы не захватить дугой другие корни).
 
-    Итак, разрыв в нуле % TODO
+Принцип аргумента при этом сохраняется, приращение аргумента от всех корней слева всё так же будет $ + \pi $, от правых $ - \pi $.
+Раньше было так:
+ $$ \Delta \arg \alpha(j \omega) |_{- \infty}^\infty = \pi (n - 2 l) $$
+Обходим неприятную точку $ (0;0) $ справа (слева нам неудобно).
+Теперь становится так (модификация принципа аргумента для знаменателя): $\Delta \arg \alpha(p) |_{\text{trajectory}}$
 
-    Для применения правила Цыпкина достаточно брать не бесконечно большую дугу, а любую с радиусом $ > 1 $.
+$$ trajectory = \begin{cases}
+    j \omega, \omega < - \varepsilon or \omega > \varepsilon \\
+    \varepsilon e^{- j \frac{\pi \omega}{ 2 \varepsilon}}, \omega \in [- \varepsilon; \varepsilon]
+\end{cases} $$
+Если $ \omega = \pm \varepsilon $, мы в точке $ (0; \pm \varepsilon) $; $ \omega = 0 \Rightarrow (\varepsilon, 0) $
 
-    Пример: интегратор.
-    $$ H_{\text{раз}} = \frac{1}{p} $$
-    Годограф интегратора, напомним, таков:
-    % TODO img
+\includegraphics[width=.3\linewidth]{lec6/27_critical_omega_path}
 
-    $ s = 1, l = 0 $.
-    Дополняем эту траекторию дугой.
-    % TODO
+\begin{align*}
+    \Delta \arg [1 + H_{\text{раз}}(p)] |_{traject} & = \Delta \arg \alpha_{\text{з}}(p)|_{traject} - \Delta \arg \alpha (p) |_{traject} \\
+    & = \pi(n-2m) - \pi(n-2l) \overset{m=0}= 2 \pi l
+\end{align*}
 
-    Ещё один пример:
-    $$  $$
+Если же проходим половину траектории от $ \omega = 0 $ до $ \infty $:
+$$ \Delta \arg [1 + H_{\text{раз}}(p)] |_{traject / 2} = \pi l = 2 \pi \cdot \frac{l}{2} $$
 
-    Проверка: $ \alpha_{\text{з}} = p^{} $ % TODO
-    \item Второй критический случай: комплексно сопряжённые
-    $$ H_{\text{раз}}(p) = \frac{\beta(p)}{\prod(p^2 + \omega_\mu^2) \alpha(p)} $$
-    % TODO img
-    <<Прыжок>> на $\pi$ или $-\pi$, разрыв
+Как строить годограф?
 
-    Выход: обходим корень по дуге бесконечно малого радиуса.
-    Тогда изменение аргумента вспомогательной функции от $p$ есть % TODO
+$$ H_{\text{раз}}(p) = \begin{cases}
+    H_{\text{раз}}(j \omega), \omega > \varepsilon \\
+    H_{\text{раз}}(p), p = \varepsilon e^{j \frac{\pi}{2} \frac{\omega}{\varepsilon}}
+\end{cases} $$
 
-    Итак, если у нас второй критический случай (в знаменателе есть чисто мнимые корни), то дополняем годограф дугой бесконечно большого радиуса с радиусом $ - \pi \cdot \text{кратность корня} $, после чего уже можно пользоваться правилом Цыпкина.
+Что происходит вблизи нуля?
+Пример:
 
-    Пример.
-    \begin{align*}
-        & H_{\text{раз}}(p) = \frac{p}{p^2 + 1}, \thickspace l = 0  \\
-        % TODO
-    \end{align*}
+\includegraphics[width=.5\linewidth]{lec6/28_critical_integrator_godograph}
 
-    То же самое, но со знаком минус:
-    \begin{align*}
-        & H_{\text{раз}}(p) = \frac{-p}{p^2 + 1}, \thickspace l = 0  \\
-        % TODO
-    \end{align*}
-\end{itemize}
+$$ H_{\text{раз}}(p) |_{traj / 2, \varepsilon \to 0} = \begin{cases}
+    H_{\text{раз}}(j \omega), \omega > \varepsilon \\
+    \frac{\beta(0)}{\varepsilon^s e^{j \frac{\pi}{2} s \frac{\omega}{\varepsilon}} \alpha(0)}, 0 \le \omega \le \varepsilon
+\end{cases} $$
+
+Вблизи нуля можно представить $ H_{\text{раз}} = \frac{\beta(p)}{p^s \alpha(p)}  $  в виде $ \frac{\beta(0)}{\alpha(0)} R e^{- j \phi} $, где $ R = \frac{1}{\varepsilon^s} \underset{\varepsilon \to 0}\to \infty $, $ \phi \in \left[ 0; \frac{\pi}{2}s \right] $
+
+Т. о. надо дополнить годограф дугой бесконечно большого радиуса с фазой $ - \frac{\pi}{2}s $ ($ s $ -- кратность нуля как корня знаменателя), которая должна начинаться на положительной полуоси.
+Найдя эту траекторию, считаем число пересечений.
+
+Замечание: для применения правила Цыпкина достаточно брать не бесконечно большую дугу, а любую с радиусом $ R > 1 $, чтобы захватить точку $ (-1;0) $. \\
+
+Пример: интегратор.
+$$ H_{\text{раз}} = \frac{1}{p} $$
+Годограф интегратора, напомним, таков:
+
+\includegraphics[width=.4\linewidth]{lec6/29_critical_example}
+
+$ s = 1, l = 0 $.
+Дополняем эту траекторию дугой так, чтобы движение по дуге осуществлялось по часовой стрелке.
+Сумма пересечений левее $ (-1;0) $ равна нулю и $ l=0 \Rightarrow $ система устойчива.
+
+Проверка:
+$$ \alpha_{\text{з}} = p + 1 $$
+Система устойчива! \\
+
+Ещё один пример:
+\begin{align*}
+    & H_{\text{раз}} = \frac{1}{p^3} \\
+    & H_{\text{раз}}(j \omega) = \frac{1}{(j \omega)^3} = \frac{j}{\omega^3}
+\end{align*}
+
+$ s = 3 \Rightarrow $ достраиваем годограф в районе точки $ \omega = 0 $ дугой с углом $ \Delta \phi = - \frac{3}{2}\pi $.
+
+\includegraphics[width=.4\linewidth]{lec6/30_critical_example2}
+
+Число пересечений $ \sum X = -1 \ne \frac{l}{2} = 0 $.
+
+Проверка: $ \alpha_{\text{з}} = p^3 + 1 $; корни расположены на единичной окружности (см. рисунок ниже) и не все в левой полуплоскости $ \Rightarrow $ система неустойчива!
+
+\includegraphics[width=.4\linewidth]{lec6/31_critical_example2_roots}
+
+\textbf{Второй критический случай:} когда есть комплексно сопряжённые чисто мнимые корни знаменателя, т. е. передаточная функция
+$$ H_{\text{раз}}(p) = \frac{\beta(p)}{\prod(p^2 + \omega_\mu^2) \alpha(p)} $$
+
+Корни:
+
+\includegraphics[width=.4\linewidth]{lec6/33_critical_example3_roots}
+
+Скобка в точке $ \omega_\mu $ меняет знак $ \Rightarrow $ <<прыжок>> на $\pi$ или $-\pi$, разрыв.
+
+Что делать?
+Выход: обходим корень по дуге бесконечно малого радиуса.
+
+\includegraphics[width=.4\linewidth]{lec6/34_critical_example3_roots2}
+
+Тогда изменение аргумента вспомогательной функции от $p$ всё так же $ 2 \pi l $:
+
+$$ \Delta \arg \left[ 1 + H_{\text{раз}}(p) \right]|_{traj} = 2 \pi l $$
+Из симметрии, как и раньше, можно взять половину траектории:
+$$ \Delta \arg \left[ 1 + H_{\text{раз}}(p) \right]|_{traj / 2 } = \pi l = 2 \pi \frac{l}{2} $$
+Для каждого разрыва дополняем годограф дугой с углом $ - \pi $.
+
+Годограф выглядит теперь так:
+
+\includegraphics[width=.4\linewidth]{lec6/32_critical_example3_godograph}
+
+Итак, если у нас второй критический случай (в знаменателе есть чисто мнимые корни), то дополняем годограф дугой бесконечно большого радиуса с радиусом $ - \pi \cdot \text{кратность корня} $, после чего уже можно пользоваться правилом Цыпкина. \\
+
+Пример.
+\begin{align*}
+    & H_{\text{раз}}(p) = \frac{p}{p^2 + 1} \Rightarrow \thickspace l = 0  \\
+    & p_{1,2} = \pm j \\
+    & H_{\text{раз}}(j \omega) = \frac{j \omega}{1 - \omega^2}
+\end{align*}
+
+\includegraphics[width=.4\linewidth]{lec6/35_critical_example4}
+
+Число пересечений левее $ -1 $: $ \sum X = 0 = \frac{l}{2} $ $ \Rightarrow $ система устойчива. \\
+
+Проверка: $ \alpha_{\text{з}} = p^2 + p + 1 $ $ \Rightarrow $ система устойчива.
+
+Второй пример -- то же самое, но со знаком минус:
+\begin{align*}
+    & H_{\text{раз}}(p) = \frac{-p}{p^2 + 1}, \thickspace l = 0  \\
+    & \text{Сразу запишем: } \alpha_{\text{з}} = p^2 - p - 1 \Rightarrow \text{ неустойчива} \\
+    & H_{\text{раз}}(j \omega) = \frac{- j \omega}{1 - \omega^2}
+\end{align*}
+
+\includegraphics[width=.4\linewidth]{lec6/36_critical_example5}
+
+Число пересечений $ \sum X = -1 \ne \frac{l}{2} \Rightarrow $ неустойчива!
 
 \subsubsection{Границы устойчивости в критерии Найквиста}
 
@@ -371,17 +478,35 @@ $$ H_{\text{раз}}(j \omega) = \frac{2}{j \omega - 1} = \frac{-2 - 2 j \omega}
 Как исследовать?
 Точно так же: пошевелить.
 
+\includegraphics[width=.4\linewidth]{lec6/37_nyquist_boundary}
+
 Пример:
-% TODO
 \begin{align*}
-    & \phi = 0 - \left[\frac{num}{den}\right] \\
-    & \\ % TODO
-    & K_{\text{крит}} = \frac{T_1 + T_2}{T_1 T_2} \text{ (совпадает с результатом, полученным по критерию )} \\
+    & H_{\text{раз}} = \frac{K}{p(T_1 p + 1)(T_2 p + 1)}; K_{\text{крит}} = ? \\
+    & l = 0 \\
+    & H_{\text{раз}}(j \omega) = \frac{K}{j \omega(1 + j \omega T_1)(1 + j \omega T_2)} \\
+\end{align*}
+Удобно представить в полярных координатах:
+\begin{align*}
+    & | H_{\text{раз}}(j \omega) | = \frac{K}{\omega \sqrt{(1 + \omega^2 T_1^2}\sqrt{1 + \omega^2 T_2^2}} \\
+    & \phi = 0 - \left[\frac{\pi}{2} + \arctan \omega T_1 + \arctan \omega T_2 \right]
 \end{align*}
 
-\begin{itemize}[noitemsep]
-    \item
-    \item
-\end{itemize}
+\includegraphics[width=.6\linewidth]{lec6/39_nyquist_bound_example}
+\includegraphics[width=.3\linewidth]{lec6/38_atan}
+
+Когда $ K = K_{\text{крит}} $, годограф проходит через $ -1 $.
+
+Пусть это пересечение происходит в точке $ \omega^* $.
+Решаем уравнение:
+
+\begin{align*}
+    & \phi(\omega^*) = - \pi \\
+    & \arctan \omega T_1 + \arctan \omega T_2 = \frac{\pi}{2} \\
+    & \frac{\omega T_1 + \omega T_2}{1 - \omega^2 T_1 T_2} = \infty \\
+    & \omega^{*2} = \frac{1}{T_1 T_2} \\
+    & | H_{\text{раз}}(j \omega^*) | = 1 = \frac{K_{\text{крит}}}{\omega^* \sqrt{1 + \frac{T_1^2}{T_1 T_2}} \sqrt{1 + \frac{T_2^2}{T_1 T_2}}} = \frac{K_{\text{крит}}}{\frac{T_1 + T_2}{T_1 T_2}} \\
+    & K_{\text{крит}} = \frac{T_1 + T_2}{T_1 T_2} \text{ (совпадает с результатом, полученным по критерию Михайлова)} \\
+\end{align*}
 
 \end{document}
