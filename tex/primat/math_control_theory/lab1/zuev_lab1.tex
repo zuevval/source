@@ -1,0 +1,169 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float} % force pictures position
+\usepackage{subcaption} % captions for subfigures
+
+
+% styling
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\subfile{titlepage}
+
+\section{Постановка задачи}
+\subsection{Исходная постановка задачи}
+
+Дана передаточная функция разомкнутой цепи:
+\[ H_{\text{раз}}(p) = \frac{ k(T_1 p + 1) }{p (p^2 + \omega_0^2)(T_2 p + 1) (T_3 p + 1)} \]
+где
+\[ k = \frac{i}{4}, \omega_0 = i, T_1 = 0.01, T_2 = 0.02i, T_3 = 0.01i \]
+($ i = 4 $ -- порядковый номер студента). \\
+
+Определить устойчивость системы тремя способами:
+
+\begin{enumerate}[noitemsep]
+    \item По критерию Гурвица или Льенара-Шипара
+    \item По критерию Михайлова
+    \item По критерию Найквиста
+\end{enumerate}
+
+\subsection{Постановка задачи с конкретными числами}
+\[ i = 4 \Rightarrow k = 1, \omega_0 = 4, T_1 = 0.01, T_2 = 0.08, T_3 = 0.04 \]
+\[ H_{\text{раз}}(p) = \frac{ (0.01 p + 1) }{p (p^2 + 16)(0.08 p + 1) (0.04 p + 1)} \]
+
+Определить устойчивость системы с подобной $ H_{\text{раз}} $ указанными выше способами.
+
+\section{ Результаты расчётов }
+
+\subsection{ Критерий Льенара-Шипара }
+
+Преобразуем для удобства передаточную функцию:
+\[ H_{\text{раз}}(p)  = \frac{25(p+100)}{8p(p^2+16)(p+12.5)(p+25)}  \]
+Знаменатель передаточной функции замкнутой цепи есть сумма числителя и знаменателя разомкнутой:
+\[ \alpha_{\text{замкн}} = \alpha_{\text{раз}} + \beta_{\text{раз}} = 8 p^5 + 3000 p^4 + 2628 p^3 + 4800 p^2 + 40025 p + 2500 \]
+Обозначим коэффициенты $ \alpha_{\text{замкн}} $ как $ a_0, a_1, ..., a_5 $.
+Тогда матрица Гурвица
+
+$$
+\Gamma_{5 \times 5}=
+\begin{pmatrix}
+    a_1 & a_3 & a_5 & 0   & 0 \\
+    a_0 & a_2 & a_4 & 0   & 0 \\
+    0   & a_1 & a_3 & a_5 & 0 \\
+    0   & a_0 & a_2 & a_4 & 0 \\
+    0   & 0   & a_1 & a_3 & a_5 \\
+\end{pmatrix}=
+\begin{pmatrix}
+    3000 & 4800 & 2500  & 0     & 0 \\
+    8    & 2628 & 40025 & 0     & 0 \\
+    0    & 3000 & 4800  & 2500  & 0 \\
+    0    & 8    & 2628  & 40025 & 0 \\
+    0    & 0    & 3000 & 4800   & 2500 \\
+\end{pmatrix}
+$$
+
+Необходимое и достаточное условие Льенара-Шипара:
+
+\begin{enumerate}[noitemsep]
+    \item Коэффициенты $ \alpha(p) $ $ a_i > 0 $ \label{item:stodola}
+    \item Взятые через один главные угловые миноры матрицы Гурвица $ \Delta_{2k} > 0 $ (равносильное утверждение: $ \Delta_{2k-1} > 0 $) \label{item:lienard}
+\end{enumerate}
+
+Условие \ref{item:stodola} выполнено. Проверим условие \ref{item:lienard}.
+
+Чётные миноры: $ \Delta_2 \approx 7.846 \cdot 10^6$, $ \Delta_4 \approx -1.296 \cdot 10^{16} \Rightarrow $ система неустойчива.
+
+\subsection{ Критерий Михайлова }
+
+Система устойчива $ \Leftrightarrow $ приращение аргумента годографа знаменателя передаточной функции замкнутой цепи
+\[ \Delta \phi(\alpha_{\text{замкн}}(j\omega))|_{\omega = 0}^{\omega = \infty} = \frac{\pi}{2} n \]
+$ n = 5 $ -- порядок полинома.
+
+Построим годограф в осях $ \Re [ \alpha_{\text{замкн}}(j\omega) ] $, $ \Im [ \alpha_{\text{замкн}}(j\omega) ] $ (рис. \ref{fig:mikhailov}).
+
+
+Видно, что приращение аргумента $ \frac{pi}{2} \ne 5 \frac{\pi}{2} \Rightarrow $ система неустойчива.
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{mikhailov}
+        \caption{В крупном масштабе}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{mikhailov_near0}
+        \caption{Вблизи нуля}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{mikhailov_near0_1}
+        \caption{Совсем вблизи нуля}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{mikhailov_near0_2}
+        \caption{Совсем-совсем вблизи нуля}
+    \end{subfigure}
+    \caption{Годограф Михайлова}
+    \label{fig:mikhailov}
+\end{figure}
+
+\subsection{ Критерий Найквиста }
+
+Система устойчива $ \Leftrightarrow $ число пересечений годографа $ H_{\text{раз}}(p)|_{trajectory} $ с вещественной осью левее $ -1 $ равняется $ \frac{l}{2} l $, $ l $ -- число строго неустойчивых корней знаменателя, $ trajectory $ -- путь, на котором $ p $ пробегает значения от $ 0 $ до $ + \infty $ по мнимой оси (за исключением особых точек, где строится обходной путь). \\
+
+В нашем случае $ l = 0 $.
+Изобразим годограф в осях  $ \Re(H(p)), \Im(H(p)) $ (рис. \ref{fig:nyquist}), сделав дополнительные построения:
+\begin{enumerate}[noitemsep]
+    \item При $ p \to 0 $ дополним годограф дугой с фазой $ - \frac{\pi}{2} $ (поскольку ноль является простым корнем знаменателя).
+    Можно взять любой радиус $ r > 1 $; положим, к примеру, $ r = 1.5 $.
+    \item При $ p \to 4j $ дополним годограф дугой с фазой $ - \pi $.
+\end{enumerate}
+
+Число пересечений левее $ -1 $: $ \sum X = -1 \ne \frac{l}{2} \Rightarrow $ система неустойчива.
+
+\begin{figure}[H]
+    \centering \includegraphics[width=\myPictWidth]{nyquist}
+    \caption{Годограф Найквиста}
+    \label{fig:nyquist}
+\end{figure}
+
+\section{ Ответ }
+
+Номер студента $ i = 4 $.
+
+Ответ: система \textbf{неустойчивая}, как утверждают хором А. Льенар, М. Шипар, А. В. Михайлов, Г. Найквист и Я. З. Цыпкин.
+
+\end{document}
