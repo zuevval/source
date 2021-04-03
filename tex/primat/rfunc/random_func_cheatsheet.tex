@@ -1,0 +1,418 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,11pt, twocolumn]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{pdfpages} % insert pdf pages, e.g. scans
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{mdframed}
+\usepackage{graphicx}
+\usepackage{color}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\textwidth=19cm
+\oddsidemargin=-1.5cm
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.99\textwidth}
+\newcommand{\phm}{\phantom{-}}
+\newcommand{\defeq}{\overset{def}=}
+
+\begin{document}
+
+\title{Корреляционная теория случайных функций}
+\author{Валерий Зуев}
+\maketitle
+
+\section{Основные понятия ТСФ}
+Мат. ожидание процесса:
+$$ \bar x(t) = M[X(t)] = \int_{-\infty}^{\infty} f_1(x,t)xdx $$
+Центрированный процесс:
+$$ \mathring X (t) = X(t) - \bar x(t)  $$
+Корреляционная функция вещественнозначного процесса:
+\begin{align*}
+    K_x(t_1, t_2) & = M[(X(t_1)-\bar x(t_1))(X(t_2)-\bar x(t_2))] \\
+                  & = M[\mathring X(t_1) \mathring{X}(t_2)] \\
+                  & = \iint_{-\infty}^{\infty} x_1 x_2 f_2(x_1,x_2;t_1,t_2) dx_1 dx_2
+\end{align*}
+В случае комплекснозначного процесса
+$$ K_x(t_1, t_2) = M[\mathring X(t_1)^* \mathring{X}(t_2)] $$
+(* -- комплексное сопряжение). \\
+
+Дисперсия процесса
+$$ D[X(t)] = \sigma^2_X(t) = K_x(t,t) $$
+Нормированная корреляционная функция
+$$ k_x(t_1,t_2)=\frac{K_x(t_1,t_2)}{\sigma_x(t_1) \sigma_x(t_2)} $$
+Это безразмерная величина; $ k \le 1 $. \\
+
+\emph{Стационарный процесс} -- характеристики не меняются при произвольном изменении начала отсчёта времени. \\
+Характеристики стационарного процесса:
+\begin{align*}
+    & f_1(x_1,t_1)=const(t_1)=f_1(x) \\
+    & f_2(x_1,x_2;t_1,t_2) = f_2(x_1,x_2;t_2-t_1) \\
+    & K_x(t_1,t_2) = K_x(t_2 - t_1) = K_x(\tau), \tau = t_2-t_1 \\
+    & \bar x(t) = \bar x = const(t) \\
+    & \sigma_x^2(t) = \sigma_x^2 = const(t) = K_x(0) \\
+    & K_x(t_1, t_2) = \frac{K_x(t_2-t_1)}{K_x(0)} = \frac{K_x(\tau)}{K_x(0)} \\
+    & k_x(t_1, t_2) = \frac{K_x(\tau)}{K_x(0)}
+\end{align*}
+Общие неравенства для корреляционной функции:
+\begin{align*}
+    & |K_x(t_1, t_2)| \le \sigma_x(t_1) \sigma_x(t_2) \\
+    & |k_x(t_1, t_2)| \le 1 \\
+    & |K_x(t_1,t_2)|^2 \le \frac{1}{2}\left( \sigma_x^2(t_1) + \sigma_x^2(t_2) \right) \\
+    & k_x^2(t_1,t_2) \le \frac{1}{2} \left( \frac{\sigma_x(t_1)}{\sigma_x(t_2)} + \frac{\sigma_x(t_2)}{\sigma_x(t_1)} \right)
+\end{align*}
+
+\section{Взаимная корреляционная функция двух случайных функций}
+
+Взаимная корреляционная функция процессов (корреляционная функция связи)
+\begin{align*}
+    R_{xy}(t_1,t_2) & \defeq M[( X(t_1) - \bar x(t_1) )( Y(t_2) - \bar y(t_2) )] \\
+    = & M[ \mathring X(t_1) \mathring Y(t_2) ] \\
+    = & M[X(t_1)Y(t_2) - \bar x(t_1) \bar y(t_2) ] \\
+    = & \iint_{-\infty}^{+\infty} (x - \bar x(t_1))(y - \bar y(t_2)) f_{1,1}(x,y; t_1,t_2) dxdy
+\end{align*}
+где $ f_{1,1} $ -- совместный закон распределения $ X(t_1) $ и $ Y(t_2) $. \\
+
+Корреляционный момент между $ X(t) $ и $ Y(t) $ (в один и тот же момент времени):
+$$ k_{xy}(t) = R_{xy}(t,t) $$
+
+Ограниченность:
+\begin{align*}
+    & |R_{xy}(t_1, t_2)| \le \sqrt{K_x(t_1, t_2) K_y(t_1, t_2)} \\
+    & |R_{xy}(t_1, t_2)| \le \frac{1}{2} \left[ K_x(t_1, t_2) + K_y(t_1, t_2) \right]
+\end{align*}
+
+Нормированная взаимная корреляционная функция:
+$$ \Gamma_{xy}(t_1, t_2) \defeq \frac{R_{xy}(t_1, t_2)}{\sqrt{K_x(t_1, t_2) K_y(t_1, t_2)}} $$
+$$ |\Gamma_{xy}(t_1,t_2)| \le 1 \text{ (безразмерная функция)} $$
+
+Симметрия при замене аргументов:
+$$ R_{xy}(t_1, t_2) = R_{yx}(t_2, t_1) $$
+
+В случае стационарных и стационарно связанных функций:
+
+\begin{align*}
+    & ] \begin{cases}
+        f_1(x,t) = const(t), \thickspace f_1(y,t) = const(t) \\
+        \bar x = const(t), \bar y = const(t) \\
+        f_2(x_1, x_2; t_1, t_2) = f_2 (x_1, x_2; t_2 - t_1) \\
+        f_2(y_1, y_2; t_1, t_2) = f_2 (y_1, y_2; t_2 - t_1) \\
+        f_{1,1}(x,y; t_1, t_2) = f_{1,1}(x,y; t_2 - t_1) \\
+    \end{cases} \Rightarrow \\
+    & K_x(t_1, t_2) = K_x(t_2 - t_1), \thickspace K_y(t_1, t_2) = K_y(t_2 - t_1) \\
+    & R_{xy}(t_1, t_2) = R_{xy}(t_2 - t_1) \\
+    & \Gamma_{xy}(t_1, t_2) = \frac{R_{xy}(t_2 - t_1)}{\sqrt{K_x(0)K_y(0)}} \\
+\end{align*}
+
+\section{Линейные операции над случайными функциями}
+
+\subsection{ Общие сведения }
+
+$ ] Y(t) = L_0 X(t), L_0 $ линейный однородный, т. е. $ L_0(ax + by) = a L_0 x + b L_0 y $.  Тогда
+$$ \boxed{ \bar y(t) = L_0 \bar x(t); \thickspace K_y(t_1, t_2) = L_{0t_1}^* L_{0t_2} K_x(t_1, t_2) } $$
+где $ L_0^* $ -- оператор, полученный из $ L_0 $ заменой всех коэффициентов на комплексно сопряжённые. \\
+
+$ ] L : Lx(t) = L_0 x(t) + F(t) $ (неоднородный оператор; $ F(t) $ -- неслучайная функция) $ \Rightarrow $
+
+\begin{mdframed}[linewidth=1]
+    \begin{align*}
+        & \bar z(t) = L \bar x(t) = L_0 \bar x(t) + F(t) \\
+        & K_z(t_1, t_2) = L_{0t_1}^* L_{0t_2} K_x(t_1, t_2) \\
+    \end{align*}
+\end{mdframed}
+Если $ F $ -- случайная функция и $ F, X $ независимы, то
+\begin{align*}
+    & \bar z(t) = L_0 \bar x(t) + \bar f(t) \\
+    & K_z(t_1, t_2) = L_{0t_1}^* L_{0t_2} K_x(t_1, t_2) K_F(t_1, t_2) \\ % TODO ask: K_F ?= 1 if F is not random
+\end{align*}
+
+% \emph{Определение}. Случайная функция дифференцируема 1 раз $ \overset{def}\Leftrightarrow $ существует смешанная частная производная корреляционной функции $ K_x(t_1, t_2) $ при $ t_1 = t_2 = t $ (т. е. для стационарного процесса -- от $ K_x(\tau)|_{\tau = 0} $). \\
+
+\textbf{Характеристики квадрата нормального процесса:}
+
+Если $ X(t) $ -- нормальная случайная функция (вещественная), $ Y = X^2(t) $, то
+
+\begin{mdframed}[linewidth=1]
+    \begin{align*}
+        & \bar y(t) = D[X(t)] + [\bar x(t)]^2 \\
+        & K_y (t_1, t_2) = 2 K_x^2(t_1, t_2) + x \bar x(t_1) \bar x(t_2) K_x(t_1, t_2)
+    \end{align*}
+\end{mdframed}
+
+\textbf{Характеристики сигнума стационарного нормального процесса}:
+
+Если $ X(t) $ -- нормальная стационарная и $ Y = sign(t) $, то
+$$ K_y(\tau) = \frac{2}{\pi} \arcsin k_x(\tau) $$
+где $ k_x(\tau) = e^{- \alpha |\tau|} \left( \cos \beta \tau - \frac{\alpha}{\beta} sin \beta |\tau| \right) $
+
+\subsection{Дифференцирование случайных  функций}
+
+\textbf{ Среднеквадратичное определение предела: }
+\[ x_n \xrightarrow{ms} x_* \xLeftrightarrow{def} M[(x_n-x_*)^2] \xrightarrow[n \to + \infty]{} 0  \]
+Пишут: $ x_* = \underset{n \to \infty}{l.i.m.} x_n  $
+
+\textbf{ Понятие производной: }
+
+\begin{align*}
+    V(t) & = \dot X(t) \defeq \underset{\Delta t \to 0}{l.i.m.} \frac{Delta X}{\Delta t} \\
+         & = \lim\limits_{\Delta t \to 0} \frac{1}{\Delta t} [ X(t + \Delta t) - X(t) ]
+\end{align*}
+
+\textbf{ Достаточное условие дифференцируемости процесса: }
+
+$ \bar x(t) $ дифференцируемо и $ K_x(t_1,t_2): \exists \frac{ \partial^2 K_x(t_1,t_2) }{\partial t_1 \partial t_2} $ при $ t_1=t_2 $ $ \Rightarrow $ процесс $ X(t) $ дифференцируем.
+
+\textbf{ Матожидание и корреляционная функция производной: }
+\[ \bar v(t) = \frac{d \bar x(t)}{d t} \]
+\[ K_v(t_1,t_2) = \frac{ \partial^2 K_x(t_1,t_2) }{\partial t_1 \partial t_2} \]
+
+\textbf{ Достаточное условие существования n-ой производной: }
+
+$$ \begin{cases}
+    \exists \frac{d^n \bar x(t)}{d t^n} \\
+    \exists  \frac{ \partial^n K_x(t_1,t_2) }{\partial t_1^n \partial t_2^n} \text{ при } t_1=t_2
+\end{cases} \Rightarrow
+\exists X^{(n)}(t) $$
+
+\textbf{ Матожидание и корреляционная функция n-ой производной: }
+Обозначим $ Y(t) := X^{(n)}(t) $.
+Тогда
+\[ \bar y(t) = \frac{d^n \bar x(t)}{d t} \]
+\[ K_y(t_1,t_2) = \frac{ \partial^{2n} K_x(t_1,t_2) }{\partial t_1^n \partial t_2^n } \]
+
+\textbf{ Случай стационарного (в широком смысле) процесса: }
+
+\begin{align*}
+    & M[ \dot X(t)] \equiv 0 \text{ (т. к.} M[X(t)] = const \text{ ) } \\
+    & K_{\dot X}(\tau) = - \frac{d^2 K_x(\tau)}{d \tau^2}, \thickspace \tau = t_2-t_1 \\
+    & M[X^{(n)}(t)] \equiv 0 \\
+    & K_{X^{(n)}}(\tau) = (-1)^n \frac{d^{2n} K_x(\tau)}{d \tau^{2n}}
+\end{align*}
+
+\subsection{ Интегрирование случайных функций }
+
+\textbf{ Определение интеграла: }
+\[ \lessdot I := \int_{a}^{b} X(t) dt, \thickspace a,b = const \]
+\[ I \defeq \underset{n \to \infty}{l.i.m.} S_n \]
+\[ S_n = \sum_{i=1}^{n} X(t_i)(t_i - t_{i-1}), \max_{1 \le i \le n} (t_i - t_{i-1}) \xrightarrow[n \to \infty]{} 0 \]
+
+\textbf{ Достаточные условия интегрируемости: }
+$$ \begin{cases}
+    \exists \int_{a}^{b} \bar x(t) dt \\
+    \exists \iint_{a,a}^{b,b} K_x(t_1, t_2) dt_1 dt_2
+\end{cases} \Rightarrow \exists I $$
+
+\textbf{ Матожидание и диспресия интеграла: }
+\[ \bar i = \int_{a}^{b} \bar x(t) dt \]
+\[ D[I] \equiv G_i^2 = \iint_{a,a}^{b,b} K_x(t_1, t_2) dt_1 dt_2 \]
+
+\textbf{ Интеграл с переменным верхним пределом: }
+\begin{align*}
+    & Y(t) = \int_{0}^{t} x(\tau) d \tau \\
+    & \bar y = \int_{0}^{t} \bar x(s) ds \\
+    & K_y(t_1, t_2) = \iint_{0,0}^{t_1, t_2} K_x(\tau_1, \tau_2) d \tau_1 d \tau_2 \\
+    & D[Y(t)] = \iint_{0,0}^{t,t} K_x(\tau_1, \tau_2) d \tau_1 d \tau_2
+\end{align*}
+
+\textbf{ Интеграл с переменным верхним пределом от стационарной функции: }
+
+\[ K_y(t_1, t_2) = \iint_{0,0}^{t_1, t_2} K_x(\tau_2 - \tau_1) d \tau_1 d \tau_2 \]
+Поскольку $ K_x(\tau) $ -- функция одного аргумента, удобнее свести к однократному интегралу:
+
+\begin{align*}
+    K_y(t_1, t_2) & = \int_{0}^{t_1} (t_1 - \tau) K_x(\tau) d \tau + \int_{0}^{t_2} (t_2 - \tau) K_x(\tau) d \tau - \\
+    & - \int_{0}^{|t_2-t_1|} (|t_2-t_1|-\tau) K_x(\tau) d\tau
+\end{align*}
+
+\textbf{ Линейный интегральный опреатор: }
+\begin{align*}
+    & ] Y(t) = \int_{a}^{b} g(t,s) X(s) ds \\
+    & \bar y(t) = \int_{a}^{b} g(t,s) \bar x(s) ds \\
+    & K_y(t_1,t_2) = \iint_{a,a}^{b,b} g(t_1,s_1) g(t_2,s_2) K_x(s_1,s_2) ds_1 ds_2
+\end{align*}
+
+\subsection{ Понятие случайного моста }
+Пусть $ X(t) $ -- некий случайный процесс.
+
+\[ \lessdot Y(t) := [X(t) - X(0)] - \frac{t}{T} [ X(T) - X(0) ], 0 \le t \le T \]
+Обобщение:
+\[ Y^\alpha(t) := \alpha \left(1 - \frac{t}{T}\right) + \beta \frac{t}{T} + Y(t) \]
+
+\subsection{ Вычисление вероятностных характеристик с. ф., заданных дифференциальными уравнениями }
+
+\textbf{ Линейное ДУ: }
+\[ Y^{(n)} = a_1(t) Y^{(n-1)} + ... + a_n(t)Y = X(t) \]
+$ a_i(t) $ детерминированные.
+
+\textbf{ Задача Коши для линейного ДУ: }
+\[ Y^{(i)}(0) = c_{i+1} \]
+$ c_i $ -- случайные постоянные, известны $ \bar c_i $ и корреляционные моменты $ K_{ij} = M[c_i c_j] $; $ X(t) $ (внешнее воздействие) не зависит от $ c_i $ и $ \exists \bar x(t) $, $ K_x(t_1, t_2) $
+
+\textbf{ Общее выражение решения: }
+
+\[ Y(t) = Y_0(t) + Y_*(t) \]
+где $ Y_0(t) $ -- общее решение однородного уравнения, $ Y_*(t) $ -- частное решение неоднородного при нулевых Н.У.
+
+\textbf{ Общее решение однородного ДУ: }
+
+\[ Y_0(t) = \sum_{i=1}^{n} c_i y_i(t), \{ y_i(t) \} \text{ -- ФСР } \]
+Как узнать, образуют ли  $y_i$ ФСР (фундаментальную систему решений)?
+Смотрим на \emph{ определитель Вронского }:
+\[ W(t) \defeq \begin{vmatrix}
+    y_1(t) & \dots & y_n(t) \\
+    y_1'(t) & \dots & y_n'(t) \\
+    \vdots & & \vdots \\
+    y_1^{(n-1)}(t) & \dots & y_n^{(n-1)}(t) \\
+\end{vmatrix}  \]
+
+Если $ \{ y_i(t) \} $ -- ФСР, то
+\[ W(t) = \begin{vmatrix}
+    1 & 0 & \dots & 0 \\
+    0 & 1 & \dots & 0 \\
+    \vdots & & & \vdots \\
+    0 & 0 & \dots & 1 \\
+\end{vmatrix} \]
+
+\textbf{ Весовая функция: }
+
+Если система линейная, можно выразить решение через правую часть.
+\[ Y_*(t) = \int_{0}^{t} p(t,t_1) X(t_1) d t_1 \]
+\[ p(t, t_1) = \frac{\begin{vmatrix}
+         y_1(t_1) & \dots & y_n(t_1) \\
+        \vdots & & \vdots \\
+        y_1^{(n-2)}(t_1) & \dots & y_n^{(n-2)}(t_1) \\
+        y_1(t) & \dots & y_n(t) \\
+\end{vmatrix}}{\begin{vmatrix}
+        y_1(t_1) & \dots & y_n(t_1) \\
+        \vdots & & \vdots \\
+        y_1^{(n-1)}(t_1) & \dots & y_n^{(n-1)}(t_1) \\
+\end{vmatrix}} \]
+
+\textbf{ Свойство весовой функции: }
+
+\begin{align*}
+    & \frac{\partial^k p(t, t_1)}{\partial t^{k}}|_{t=t_1} = 0, k \in \{ 0; n-2 \} \\
+    & \frac{\partial^{n-1} p(t, t_1)}{\partial t^{n-1}}|_{t=t_1} = 1 \\
+\end{align*}
+
+Частный случай: $ a_k = const(t) \Rightarrow p(t, t_1) = p(t-t_1) $
+
+\textbf{ Матожидание и корреляционная функция решения: }
+
+\begin{align*}
+     \bar y(t) & = \sum_{i=1}^{n} \bar c_i y_i(t) + \int_{0}^{t} p(t, t_1) \bar x(t_1) d t_1 \\
+    K_y(t_1, t_2) & = \sum_{i=1}^{n} \sum_{i=1}^{n} K_{ij} y_i(t_1) y_j(t_2) + \\
+    & + \iint_{0,0}^{t_1, t_2} p(t_1, s_1) p(t_2, s_2) K_x(s_1, s_2) d s_1 d s_2
+\end{align*}
+
+\textbf{ В случае устойчивой системы, постоянных коэффициентов и установившегося режима: }
+\[ \bar y = \frac{1}{a_n} \bar x \]
+\[ K_y(\tau) = \iint_{0,0}^{\infty, \infty} K_x(|\tau| - s_1 + s_2) p(s_1)p(s_2) ds_1 ds_2 \]
+Устойчивость можно проверить, к примеру, по критерию Гурвица (привет МТУ).
+
+
+\section{ Теория выбросов }
+
+\subsection{ Часть I (практика 7) }
+
+Снизу вверх -- \emph{ положительный выброс }, иначе \emph{ отрицательный }.
+
+$ ] X(t) $ стационарный, дифференцируемый; $ ] \exists V(t) = \dot X(t) $.
+Обозначим за $ f_{x \dot x}(x,v;t) $ совместный закон распределения $ X(t), V(t) $.
+
+Обозначим за $ N_a^+(t_1, t_2) $ число положительных выбросов в промежутке $ [t_1;t_2] $ за границу $ a $ и $ N_a^-(t_1, t_2) $ -- отрицательных.
+
+\textbf{ Матожидание числа выбросов: }
+\[ \bar n_a^\pm (t_1,t_2) = \int_{t_1}^{t_2} \nu_a^\pm (t) dt \]
+где $ \nu_a^+ (t) = \int_{0}^{+\infty} v f_{x \dot x}(a,v,t)dv $, $ \nu_a^- (t) = \int_{- \infty}^{0} v f_{x \dot x}(a,v,t)dv $ -- интенсивность появления положительных / отрицательных выбросов.
+
+\textbf{ Среднее число пересечений: }
+\[ M_a(t_1, t_2) \defeq N_a^+(t_1, t_2) + N_a^- (t_1,t_2) \]
+\[ \bar m_a(t_1,t_2) = \bar n_a^+ (t_1,t_2) + \bar n_a^- (t_1,t_2) \]
+\[ \mu_a(t) \defeq \nu_a^+ (t) + \nu_a^- (t) \]
+\[ \mu_a(t) = \int_{ -\infty }^{ \infty } |v| f_{x \dot x}(a, v, t) dv \]
+
+\textbf{ Средняя длительность выбросов: }
+Обозначим за $ T_a^\pm (t_1, t_2) $ общую длительность положительных / отрицательных выбросов.
+Матожидание этой величины:
+\[ \bar t_a^+ (t_1,t_2) = \int_{t_1}^{t_2}[1 - F_x(a;t)]dt \]
+\[ \bar t_a^- (t_1,t_2) = \int_{t_1}^{t_2}F_x(a;t)dt \]
+
+\textbf{ Средняя длительность одного выброса: }
+\[ \bar \tau_a^\pm(t_1,t_2) = \frac{ \bar t_a^\pm (t_1, t_2) }{ \bar n_a^\pm (t_1, t_2) } \]
+(не даёт полезной информации в случае нестационарного процесса). \\
+
+\textbf{ Среднее число максимумов: }
+\[ \bar n_{\max}(t_1,t_2) = \int_{t_1}^{t_2} \nu_{\max}(t) dt \]
+\[ \nu_{\max} (t) = - \int_{- \infty}^{0} x_2 f_{x \dot x} (0, x_2, t) dx_2 \]
+
+\textbf{ Среднее число минимумов: }
+\[ \nu_{\min} (t) = \int_{0}^{+ \infty} x_2 f_{x \dot x} (0, x_2, t) dx_2 \]
+
+\textbf{ Среднее число экстремумов: }
+
+\[ \nu_{extr}(t) = \int_{-\infty}^{\infty} |x_2| f_{x \dot x}(0, x_2, t) dx_2 \]
+
+\subsection{ Часть II (практика 8) }
+
+\textbf{Дисперсия числа положительных выбросов:}
+
+\[ D[N_a^+] = M[(N_a^+)^2] - (\bar n_a^+)^2 \]
+\[ M[(N_a^+)^2] = \iint_{t_1, t_1}^{t_2, t_2} \nu_{a a}^{++}(s_1, s_2) ds_1 ds_2 \]
+$ \nu_{a a}^{++}(s_1, s_2) $ -- совместная интенсивность положительных выбросов, возникающих одновременно в $s_1$ и $s_2$
+\[ \nu_{a a}^{++}(s_1, s_2) = \iint_0^{+\infty} f_{x_1 x_2 \dot x_1 \dot x_2} (a, a, v_1, v_2, s_1, s_2) v_1 v_2 d v_1 d v_2 \]
+(пример с нормальным распределением есть в Свешникове). \\
+
+\textbf{ Число выбросов за переменную границу }
+
+\[ N_a^\pm (t_1, t_2) = \int_{t_1}^{t_2} \nu_a^{\pm}(t) dt \]
+Пусть $ a = a(t) $.
+Предполагаем, что $ \exists \dot a(t) $.
+Тогда
+\[ \nu_a^+(t) = \int_{\dot a}^{\infty} (v - \dot a) f_{x \dot x} (a,v; t) dv \]
+\[ \nu_a^-(t) = - \int_{- \infty}^{\dot a} (v - \dot a) f_{x \dot x} (a,v; t) dv \]
+\[ \mu_a(t) = \int_{- \infty}^{\infty} |v - \dot a| f_{x \dot x} (a,v; t) dv \]
+
+\textbf{ Получение закона распределения ординаты экстремумов в случае стационарного процесса: }
+
+Введём трёхмерный стационарный закон $ f_{x \dot x \ddot x}(x_0, x_1, x_2) $.
+Плотность вероятности ординаты выброса (минимума)
+\[ f_{\min}(x) = \frac{ \int_{0}^{\infty} f_{x \dot x \ddot x}(x, 0, x_2) x_2 d x_2 }{ \int_{0}^{\infty} \int_{- \infty}^{\infty} f_{x \dot x \ddot x}(x, 0, x_2) x_2 dx_2 dx } \]
+
+\textbf{ Асимптотические формулы для распределения числа выбросов }
+\[ P^+_{a,k}(t_1, t_2) = \mathcal{P}\{ N_a^+(t_1, t_2) = k \} \]
+\begin{enumerate}[noitemsep]
+    \item Если уровень достаточно высокий и пересечение можно считать редким событием:
+    \[ P^+_{a,k}(t_1, t_2) = \frac{ (\bar n_a^+(t_1, t_2))^k }{ k! } e^{- \bar n_a^+(t_1, t_2)}, \thickspace k \in [ 0; \infty ] \]
+    В частности, вероятность того, что мы вообще не пересечём границу,
+    \[ P_{a,0}^+(t_1,t_2) = e^{ - \bar n_a^+(t_1, t_2) } \]
+    Если процесс стационарный и уровень $ a $ постоянный,
+    \[ P_{a,0}^+(t_1,t_2) = e^{ - \nu_a^+(t_2-t_1)} \]
+    \item Если интервал $ [t_1,t_2] $ достаточно длинный и $ \bar n_a^+ $ велико:
+    \[ P_{a,k}^+ = \int_{k}^{k+1} \frac{1}{\sqrt{2\pi} \sigma_{n_a^+(t_1,t_2)}} e^{- \frac{ (n - \bar n_a^+(t_1,t_2))^2 }{ 2 \sigma_{n_a^+}^2 (t_1,t_2) }} dn \]
+\end{enumerate}
+
+\includepdf[pages=-]{probab_handwritten_cheatsheet.pdf}
+
+\end{document}
