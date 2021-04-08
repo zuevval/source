@@ -3,8 +3,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt  # type: ignore
 
 import numpy as np  # type: ignore
-import array_to_latex as a2l  # pip install array-to-latex
-from matplotlib import colors
 from scipy import stats
 
 
@@ -29,7 +27,7 @@ def build_model(data_dir: Path, out_dir: Path) -> RegressionModel:
     x = np.loadtxt(data_dir / "X.txt")
     y = np.loadtxt(data_dir / "y.txt")
     model = RegressionModel(x, y)
-    print_latex(model.a.T, var_name="a")
+    print_matrix(model.a.T, var_name="a")
 
     out_dir.mkdir(exist_ok=True)
     visualize_3d(model=model, out_path=out_dir)
@@ -37,9 +35,10 @@ def build_model(data_dir: Path, out_dir: Path) -> RegressionModel:
     return model
 
 
-def print_latex(a: np.array, var_name: str) -> None:
+def print_matrix(a: np.array, var_name: str) -> None:
     print(var_name + " =")
-    a2l.to_ltx(a, frmt="{:.3f}")
+    np.set_printoptions(precision=3)
+    print(a)
     print("")  # empty line
 
 
@@ -55,15 +54,14 @@ def perform_analysis(model: RegressionModel) -> RegressionModel:
     print("s^2 = {:.3f}".format(s2))
 
     cov_a = s2 * model.inv_xx
-    np.set_printoptions(precision=3)
-    print_latex(cov_a, var_name="cov(a)")
+    print_matrix(cov_a, var_name="cov(a)")
 
     s_a = np.diag(cov_a) ** .5
-    print_latex(s_a, var_name="standard deviation of `a`")
+    print_matrix(s_a, var_name="standard deviation of `a`")
 
     ixx_diag = np.array([np.diag(model.inv_xx)])
     corr_a = model.inv_xx / np.sqrt(ixx_diag.T @ ixx_diag)
-    print_latex(corr_a, var_name="corr(a)")
+    print_matrix(corr_a, var_name="corr(a)")
 
     sum_y2_centered = sum((model.y - np.mean(model.y)) ** 2)
     r2 = 1 - sum_errs2 / sum_y2_centered
@@ -74,15 +72,17 @@ def perform_analysis(model: RegressionModel) -> RegressionModel:
     gamma = .9
     quantile = stats.t(n - m).ppf((1 + gamma) / 2)
     a_confidence_intervals = np.array([model.a - s_a * quantile, model.a + s_a * quantile])
-    print_latex(a_confidence_intervals.T, var_name="confidence intervals for `a` with confidence level {}".format(gamma))
+    print_matrix(a_confidence_intervals.T,
+                 var_name="confidence intervals for `a` with confidence level {}".format(gamma))
 
     tau = np.sqrt(m / (1 - gamma))
     a_joint_conf_intervals = np.array([model.a - s_a * tau, model.a + s_a * tau])
-    print_latex(a_joint_conf_intervals.T, var_name="joint confidence intervals for `a` with confidence {}".format(gamma))
+    print_matrix(a_joint_conf_intervals.T,
+                 var_name="joint confidence intervals for `a` with confidence {}".format(gamma))
 
     # testing hypotheses: a_i ?= 0
     zero_hypot_statistics = np.abs(model.a) / s_a
-    print_latex(zero_hypot_statistics, var_name="statistics for hypothesis a_i = 0 (t_alpha={})".format(quantile))
+    print_matrix(zero_hypot_statistics, var_name="statistics for hypothesis a_i = 0 (t_alpha={})".format(quantile))
 
     # building a new model
     x_reduced = model.x[:, zero_hypot_statistics > quantile]
@@ -95,14 +95,18 @@ def make_prediction(model: RegressionModel) -> None:
     incomplete_model = RegressionModel(model.x[:-1, :], model.y[:-1])
     new_x, new_y = model.x[-1, :], model.y[-1]
     new_y_hat = incomplete_model.a @ new_x
-    print("prediction for excluded sample: {:.3f}".format(new_y_hat))
-    print("answer for excluded sample: y={:.3f} ".format(new_y))
+    print("prediction for excluded sample: {:.1f}".format(new_y_hat))
+    print("answer for excluded sample: y={:.1f} ".format(new_y))
 
     n, m = incomplete_model.x.shape
     sum_errs2 = sum((model.y - model.y_hat) ** 2)
     s2 = sum_errs2 / (n - m)
     new_y_hat_s = s2 * (new_x.T @ incomplete_model.inv_xx @ new_x + 1)
-    print("estimate of variance of excluded sample prediction: {:.3f}".format(new_y_hat_s))
+    print("estimate of variance of excluded sample prediction: {:.2f}".format(new_y_hat_s))
+
+    gamma = 0.9
+    quantile = stats.t(n - m).ppf((1 + gamma) / 2)
+    print("confidence interval (gamma={}): [{:.1f}, {:.1f}]".format(gamma, new_y_hat - quantile, new_y_hat + quantile))
 
 
 def main():
