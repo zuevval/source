@@ -1,0 +1,255 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{float} % force pictures position
+\usepackage{subcaption} % captions for subfigures
+
+
+% styling
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\subfile{titlepage}
+
+\section{Постановка задачи}
+\subsection{Исходная постановка задачи}
+
+Дана линейная система второго порядка
+\begin{equation}\label{eq:task}
+    \begin{cases}
+        \ddot x - \omega_0^2 x = u \\
+        x(0) = x_0 \\
+        \dot x(0) = \nu_0
+    \end{cases}
+\end{equation}
+
+Требуется определить оптимальное управление, минимизирующее интегрально-квадратичный функционал
+\begin{equation}\label{eq:func}
+    J = \int_{0}^{+ \infty} \left( \dot x^2 + q \ddot x^2 + r \dot u^2 \right) dt \to \min_u
+\end{equation}
+а именно, найти $ u_{opt}(x, \dot x) $ и соответствующее значение $ J_{min} $.
+В приведённой выше формуле
+\[ \begin{cases}
+    q = \frac{1}{i} \\
+    r = \frac{1}{i^2} \\
+    \omega_0 = \frac{i}{2} \\
+    x_0 = 1 \\
+    \nu_0 = i + 5
+\end{cases} \]
+
+$ i=4 $ -- номер студента.
+
+\subsection{Постановка задачи с конкретными числами}
+
+\[ \begin{cases}
+    q = \frac{1}{4} \\
+    r = \frac{1}{16} \\
+    \omega_0 = 2 \\
+    x_0 = 1 \\
+    \nu_0 = 9
+\end{cases} \]
+\[ \begin{cases}
+    \ddot x - 4 x = u \\
+    x(0) = 1 \\
+    \dot x(0) = 9
+\end{cases} \]
+\[ J = \int_{0}^{+ \infty} \left( \ddot x^2 + \frac{1}{4} \dot x^2 + \frac{1}{16} \dot u^2 \right) dt \to \min_u  \]
+Найти $ J_{min} $ и выразить $ u_{opt} $.
+
+
+\section{ Результаты расчётов }
+
+Приведём систему к пространству состояний:
+\[ ] x_1 := x, x_2 := \dot x \overset{\eqref{eq:task}}\Rightarrow \begin{cases}
+    \dot x_1 = x_2 \\
+    \dot x_2 = 4 x_1 + u
+\end{cases} \]
+Тогда
+\[ A = \begin{pmatrix}
+    0 & 1 \\
+    4 & 0
+\end{pmatrix}, B = \begin{pmatrix}
+0 \\ 1
+\end{pmatrix} \]
+притом, как следует из \eqref{eq:func},
+\[ Q = \begin{pmatrix}
+    1 & 0 \\
+    0 & q
+\end{pmatrix} = \begin{pmatrix}
+1 & 0 \\
+0 & \frac{1}{4}
+\end{pmatrix}, R = r = \frac{1}{16} \]
+
+$ R > 0 $, $ Q > 0 $.
+Проверим, является ли система \eqref{eq:task} полностью управляемой.
+\[ A_u := (B, AB) = \begin{pmatrix}
+    0 & 1 \\
+    1 & 0
+\end{pmatrix} \]
+$ rank(A_u) = 2 \Rightarrow (A, B) $ -- невырожденная пара матриц $ \Rightarrow $ \eqref{eq:task} -- полностью управляемая система.
+
+Значит, согласно теореме Лурье, существует единственное положительно определённое решение уравнения Риккати
+
+\[ A^T P + PA - PB R^{-1} B^T P + Q = 0 \]
+
+Притом
+$ P = \begin{pmatrix}
+    p_{11} & p_{12} \\
+    p_{12} & p_{22}
+\end{pmatrix} = P^T, R = r \Rightarrow $ уравнение можно переписать так:
+\[ A^T P + (A^T P)^T - rPB(PB)^T + Q = 0 \]
+
+Подставляем и решаем.
+
+\[ A^T P = \begin{pmatrix}
+    0 & 4 \\
+    1 & 0
+\end{pmatrix} \begin{pmatrix}
+p_{11} & p_{12} \\
+p_{12} & p_{22}
+\end{pmatrix} = \begin{pmatrix}
+4 p_{12} & 4 p_{22} \\
+p_{11} & p_{12}
+\end{pmatrix} \]
+\[ (A^T P)^T = \begin{pmatrix}
+4 p_{12} &  p_{11} \\
+4 p_{22} & p_{12}
+\end{pmatrix} \]
+\[ PB = \begin{pmatrix}
+    p_{11} & p_{12} \\
+    p_{12} & p_{22}
+\end{pmatrix} \begin{pmatrix}
+0 \\ 1
+\end{pmatrix} = \begin{pmatrix}
+p_{12} \\ p_{22}
+\end{pmatrix} \Rightarrow (PB)^T =  \begin{pmatrix}
+p_{12} & p_{22}
+\end{pmatrix} \]
+
+\[ r^{-1} PB (PB)^T = 16 \begin{pmatrix}
+    p_{12} \\ p_{22}
+\end{pmatrix} \begin{pmatrix}
+p_{12} & p_{22}
+\end{pmatrix} = 16 \begin{pmatrix}
+p_{12}^2 & p_{12} p_{22} \\
+p_{12} p_{22} & p_{22}^2
+\end{pmatrix} \]
+
+Собираем всё воедино:
+\[ \begin{pmatrix}
+    4 p_{12} & 4 p_{22} \\
+    p_{11} & p_{12}
+\end{pmatrix} + \begin{pmatrix}
+4 p_{12} &  p_{11} \\
+4 p_{22} & p_{12}
+\end{pmatrix} - 16 \begin{pmatrix}
+p_{12}^2 & p_{12} p_{22} \\
+p_{12} p_{22} & p_{22}^2
+\end{pmatrix} + \begin{pmatrix}
+1 & 0 \\
+0 & \frac{1}{4}
+\end{pmatrix} = \begin{pmatrix}
+0 & 0 \\
+0 & 0
+\end{pmatrix} \]
+
+Приходим к системе:
+\[ \begin{cases}
+    8 p_{12} - 16 p_{12}^2 + 1 = 0 \\
+    4 p_{22} + p_{11} - 16 p_{12} p_{22} = 0 \\
+    2 p_{12} - 16 p_{22}^2 + \frac{1}{4} = 0
+\end{cases} \]
+
+Система была решена с помощью пакета SymPy в среде Python3.9;
+было найдено единственное положительно определённое решение (главные угловые миноры положительны):
+\[ P^* = \begin{pmatrix}
+        1.7071 &  0.6036\\
+        0.6036 &  0.3018
+    \end{pmatrix} \]
+
+Тогда, если положить  $ \vec x := \begin{pmatrix}
+    x_1 \\
+    x_2
+\end{pmatrix} $, то
+\[ u_{opt} = - K \vec x, \thickspace K = R^{-1} B^T P^* \]
+\[ J_{\min} = \vec x_0^T P^* \vec x_0, \thickspace \vec x_0 = \begin{pmatrix}
+    x_1(0) \\
+    x_2(0)
+\end{pmatrix} = \begin{pmatrix}
+x_0 \\
+\nu_0
+\end{pmatrix} = \begin{pmatrix}
+1 \\
+9
+\end{pmatrix} \]
+После подстановки и вычислений получаем:
+\[ K = 16 \begin{pmatrix}
+    0 & 1
+\end{pmatrix} \begin{pmatrix}
+1.7071 &  0.6036\\
+0.6036 &  0.3018
+\end{pmatrix} = \begin{pmatrix}
+9.6569 &  4.8284
+\end{pmatrix} \]
+\[ J_{\min} = \begin{pmatrix}
+    1 & 9
+\end{pmatrix} \begin{pmatrix}
+1.7071 &  0.6036\\
+0.6036 &  0.3018
+\end{pmatrix} \begin{pmatrix}
+    1 \\
+    9
+\end{pmatrix} = 37.015 \]
+
+Проверим систему с найденным оптимальным управлением на устойчивость.
+Пусть $ K = \begin{pmatrix}
+    k_1 & k_2
+\end{pmatrix} = \begin{pmatrix}
+9.6569 &  4.8284
+\end{pmatrix} $.
+Тогда уравнение \eqref{eq:task} имеет следующий вид:
+\begin{align*}
+    & \ddot x - \omega_0^2 x = u = - k_1 x - k_2 \dot x \Rightarrow \\
+    & \ddot x - 4 x = -9.6569x - 4.8284 \dot x \Rightarrow \\
+    & \boxed{ \ddot x + 4.8284 \dot x + 5.6569 x = 0 }
+\end{align*}
+
+Коэффициенты положительны $ \Rightarrow $ согласно условию Стодола, которое является достаточным для систем II порядка, система асимптотически устойчива.
+
+\section{ Ответ }
+
+Номер студента $ i = 4 $.
+
+Ответ:
+\begin{align*}
+    & u_{opt} = - 9.6569 x - 4.8284 \dot x \\
+    & J_{\min} = 37.015 \\
+\end{align*}
+
+\end{document}
