@@ -1,3 +1,4 @@
+from itertools import combinations
 from pathlib import Path
 
 import matplotlib.pyplot as plt  # type: ignore
@@ -42,11 +43,11 @@ def print_matrix(a: np.array, var_name: str) -> None:
     print("")  # empty line
 
 
-def perform_analysis(model: RegressionModel) -> RegressionModel:
+def perform_analysis(model: RegressionModel) -> np.array:
     """
     Calculates a set of statistics for a given linear regression model
     @param model: RegressionModel object to be studied
-    @return: a new, reduced model with filtered factors (for significance level 0.1)
+    @return: indices of factors which may be equal to zero (for significance level 0.1)
     """
     n, m = model.x.shape
     sum_errs2 = sum((model.y - model.y_hat) ** 2)
@@ -83,11 +84,7 @@ def perform_analysis(model: RegressionModel) -> RegressionModel:
     # testing hypotheses: a_i ?= 0
     zero_hypot_statistics = np.abs(model.a) / s_a
     print_matrix(zero_hypot_statistics, var_name="statistics for hypothesis a_i = 0 (t_alpha={})".format(quantile))
-
-    # building a new model
-    x_reduced = model.x[:, zero_hypot_statistics > quantile]
-    model_reduced = RegressionModel(x=x_reduced, y=model.y)
-    return model_reduced
+    return (zero_hypot_statistics < quantile).nonzero()[0]
 
 
 def make_prediction(model: RegressionModel) -> None:
@@ -112,24 +109,28 @@ def make_prediction(model: RegressionModel) -> None:
 def main():
     out_dir = Path("out")
     model = build_model(Path("data"), out_dir)
-    reduced_model = perform_analysis(model=model)
-    print("\n reduced model: \n")
-    perform_analysis(reduced_model)
-
+    maybezero_ids = perform_analysis(model=model)
     make_prediction(model)
-    make_prediction(reduced_model)
+
+    models = [(model, "None")]
+    for factor_id in list(maybezero_ids) + list(np.array([maybezero_ids])):
+        reduced_x = np.delete(model.x, factor_id, axis=1)
+        reduced_model = RegressionModel(reduced_x, model.y)
+        print("\n reduced model: removed feature(s) No. {} \n".format(factor_id))
+        perform_analysis(reduced_model)
+        make_prediction(reduced_model)
+        models.append((reduced_model, str(np.array(factor_id) + 1)))
 
     plt.figure()
     t = np.arange(len(model.y))
-    bar_width = .35
-    plt.bar(t, model.y_hat - model.y, bar_width, label="$ \hat y - y $ (all features)")
-    plt.bar(t + bar_width, reduced_model.y_hat - model.y, bar_width, label="$ \hat y - y $ (reduced features)")
-
+    for model, reduced_factors in models:
+        plt.plot(t, model.y_hat, label="prediction (removed factors: {})".format(reduced_factors))
+    plt.plot(model.y, label="ground truth values")
     plt.legend()
     plt.xlabel("index of sample")
-    plt.ylabel("deviation")
-    plt.title("deviations of linear regression models")
-    plt.savefig(out_dir / "models_comparison.png")
+    plt.ylabel("response")
+    plt.title("responses from different models compared with ground truth values")
+    plt.savefig(out_dir / "models_comparison_line.png")
 
 
 if __name__ == "__main__":
