@@ -26,16 +26,16 @@
 
 \subsubsection{Преобразование Лапласа}
 
-$$ \mathds{L}\{f(t)\} = \bar{f}(p) = \int_0^{+\infty} e^{-pt} f(t) dt $$
+$$ \mathcal{L}\{f(t)\} = \bar{f}(p) = \int_0^{+\infty} e^{-pt} f(t) dt $$
 
 Для чего переходим от вещественных функций к комплексным?
 Дифференциальные уравнения (а также интегральные и интегро-дифференциальные) в изображениях сводятся к линейным алгебраическим уравнениям.
 Это достигается за счёт свойства преобразования производной:
 
-$$ \mathds{L}\{\dot f (t)\} = p \bar{f}(p)- f(0) $$
+$$ \mathcal{L}\{\dot f (t)\} = p \bar{f}(p)- f(0) $$
 
 Устойчивые системы со временем <<забывают>> начальные условия, поэтому частая ситуация -- н. у. $= 0$.
-Тогда $ \mathds{L}\{ f^{(n)}(t) \} = p^n \cdot \bar f(p) $ и уравнение \eqref{eq:linear_de} трансформируется так:
+Тогда $ \mathcal{L}\{ f^{(n)}(t) \} = p^n \cdot \bar f(p) $ и уравнение \eqref{eq:linear_de} трансформируется так:
 \[ \alpha(D)y = \beta(D)u \to \alpha(p) \cdot \bar y(p) = \beta(p) \cdot \bar u(p) \]
 
 После преобразования уже ставится <<честный>> знак умножения $ \cdot $.
@@ -62,12 +62,12 @@ $$ \xrightarrow{\bar u(t)} \boxed{H(D)} \xrightarrow{ \bar y(t)} $$
 
 \begin{enumerate}[noitemsep]
     \item Функция Хевисайда:
-    \[ \mathds{L} \{ 1[t] \} = \frac{1}{p} \]
+    \[ \mathcal{L} \{ 1[t] \} = \frac{1}{p} \]
     \item Полином:
-    \[ \mathds{L}\{ t^n \} = \frac{n!}{p^{n+1}} \]
+    \[ \mathcal{L}\{ t^n \} = \frac{n!}{p^{n+1}} \]
     \item Тригонометрические функции:
-    \[ \mathds{L}\{ \sin \omega t \} = \frac{\omega}{p^2 + \omega^2} \]
-    \[ \mathds{L}\{ \cos \omega t \} = \frac{p}{p^2 + \omega^2} \]
+    \[ \mathcal{L}\{ \sin \omega t \} = \frac{\omega}{p^2 + \omega^2} \]
+    \[ \mathcal{L}\{ \cos \omega t \} = \frac{p}{p^2 + \omega^2} \]
 
 \end{enumerate}
 
@@ -75,9 +75,9 @@ $ (\bar{\sin(t)})^2 + (\bar{\cos(t)})^2 \ne 1 $ (преобразование Л
 
 \subsubsection{ Теорема затухания, пределы, преобразование от свёртки }
 
-\[ \mathds{L}\{ f(t)e^{- \alpha t} \} = \bar f(p+\alpha) \]
+\[ \mathcal{L}\{ f(t)e^{- \alpha t} \} = \bar f(p+\alpha) \]
 откуда
-\[ \mathds{L}\{ e^{- \alpha t} \} = \frac{1}{p+\alpha} \]
+\[ \mathcal{L}\{ e^{- \alpha t} \} = \frac{1}{p+\alpha} \]
 
 Часто требуется найти $ y_\infty $ и $ y(+0) $.
 
@@ -88,11 +88,11 @@ $ (\bar{\sin(t)})^2 + (\bar{\cos(t)})^2 \ne 1 $ (преобразование Л
 Размерность аргумента преобразования Лапласа -- $ \frac{1}{\text{сек}} $ (экспоненту можно брать только от безразмерной величины).
 
 Теорема о свёртке:
-\[ \mathds{L}\{ \int_{0}^{t} f_1(\tau) f_2(t-\tau) d\tau  \} = \mathds{L}\{ \int_{0}^{t} f_1(t-\tau) f_2(\tau) d\tau \} = \bar f_1 (p) \cdot \bar f_2 (p) = \]
+\[ \mathcal{L}\{ \int_{0}^{t} f_1(\tau) f_2(t-\tau) d\tau  \} = \mathcal{L}\{ \int_{0}^{t} f_1(t-\tau) f_2(\tau) d\tau \} = \bar f_1 (p) \cdot \bar f_2 (p) = \]
 
 Ещё одно полезное преобразование:
 
-\[ \mathds{L}\{ \sin (\omega t) e^{-\alpha t} \} = \frac{\omega}{(p + \alpha)^2 + \omega^2} \]
+\[ \mathcal{L}\{ \sin (\omega t) e^{-\alpha t} \} = \frac{\omega}{(p + \alpha)^2 + \omega^2} \]
 
 \subsection{Реализуемость}
 
@@ -148,7 +148,7 @@ $$ \delta(t) = \begin{cases}
 Определение: \emph{ весовая функция }
 
 \begin{equation} \label{eq:weight_fun}
-    h(t) := \mathds{L}^{-1}\{ H(p) \}
+    h(t) := \mathcal{L}^{-1}\{ H(p) \}
 \end{equation}
 
 Введём новую функцию $ f(t) $:
@@ -156,8 +156,8 @@ $$ \delta(t) = \begin{cases}
 $$ f(t) = \int_0^t h(t - \tau) u(\tau) d \tau $$
 
 тогда
-\[ \mathds{L}\{ f(t) \} = \bar h(p) \cdot \bar u(p) \overset{\eqref{eq:weight_fun}}= H(p) \cdot \bar u(p) \overset{\eqref{eq:transmit_func}}= \bar y(p) \]
-\[ \mathds{L}\{ f(t) \} = \bar y(p) \Leftrightarrow f(t) \equiv y(t) \]
+\[ \mathcal{L}\{ f(t) \} = \bar h(p) \cdot \bar u(p) \overset{\eqref{eq:weight_fun}}= H(p) \cdot \bar u(p) \overset{\eqref{eq:transmit_func}}= \bar y(p) \]
+\[ \mathcal{L}\{ f(t) \} = \bar y(p) \Leftrightarrow f(t) \equiv y(t) \]
 
 \begin{equation}\label{eq:third_form}
     content...
@@ -185,7 +185,7 @@ $$ y(t) \overset{\eqref{eq:third_form}}= \int_0^t h(t-\tau)\delta(\tau-\tau_0) d
 
 Какой физический смысл?
 Если у нас быстрое узконаправленное воздействие (например, удар), то выход (при нулевых н. у). равняется весовой функции.
-Узнав весовую функцию $ h(t) $, можем узнать преобразование Лапласа $ H(p) = \mathds{L}\{h(t)\} = \frac{\beta}{\alpha} \Rightarrow $ уже можем решать д. у.
+Узнав весовую функцию $ h(t) $, можем узнать преобразование Лапласа $ H(p) = \mathcal{L}\{h(t)\} = \frac{\beta}{\alpha} \Rightarrow $ уже можем решать д. у.
 
 Есть и иной подход, чтобы не потребовался удар: подать на вход функцию Хевисайда.
 $$ u = 1[t] \Rightarrow y(t) = \int_{0}^{t}  h(\tau) u(t-\tau) d\tau \overset{u(t-\tau)=1}= \int_{0}^{\infty} h(\tau) d\tau \equiv \pi(t) $$
@@ -245,7 +245,7 @@ $ A $ -- числовая матрица, $ c $ -- вектор-строка, $ 
 Докажем: $ \ref{represent:2} \Leftrightarrow \ref{represent:4} $.
 Для начала покажем: $ \ref{represent:4} \Rightarrow \ref{represent:2} $.
 
-\[ \mathds{L}\{ (\ref{represent:4}) \}: \begin{cases}
+\[ \mathcal{L}\{ (\ref{represent:4}) \}: \begin{cases}
     p \bar X = A \bar x + B \bar u \\
     \bar y = c \bar x
 \end{cases} \]
@@ -518,7 +518,7 @@ $ x_1 = y $; остальные переменные выразим.
 
     \begin{leftbar}
         Ещё одно свойство преобразования Лапласа, которое забыли написать раньше:
-        \[ \mathds{L}\left\{ \int_{0}^{t} f(\tau) d\tau \right\} = \frac{1}{p} \bar f(p) \]
+        \[ \mathcal{L}\left\{ \int_{0}^{t} f(\tau) d\tau \right\} = \frac{1}{p} \bar f(p) \]
     \end{leftbar}
     \[ \bar y = \frac{1}{p} \bar u \]
     \[ h(t) = 1[t] \]
