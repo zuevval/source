@@ -1,6 +1,6 @@
 % compile with XeLaTeX or LuaLaTeX
 
-\documentclass[a4paper,12pt]{report}
+\documentclass[a4paper,12pt]{article}
 \usepackage[utf8]{inputenc} % russian, do not change
 \usepackage[T2A, T1]{fontenc} % russian, do not change
 \usepackage[english, russian]{babel} % russian, do not change
@@ -26,7 +26,7 @@
 \usepackage{subcaption} % captions for subfigures
 \usepackage{color}
 \usepackage{chngcntr} % change counters
-\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
 
 
 % styling
@@ -42,19 +42,18 @@
 
 \begin{document}
 
-% \subfile{titlepage}
-% \tableofcontents
+\subfile{titlepage}
+\tableofcontents
 \newpage
-% \subfile{parts/lec0}
-% \chapter{TODO}
-% \subfile{parts/lec1}
-% \subfile{parts/lec2}
-% \subfile{parts/lec3}
-% \subfile{parts/lec4}
-% \subfile{parts/lec5}
-% \subfile{parts/lec6} % TODO fill TODOs
-% \subfile{parts/lec7}
-% \subfile{parts/lec8}
+\subfile{parts/lec0}
+\subfile{parts/lec1}
+\subfile{parts/lec2}
+\subfile{parts/lec3}
+\subfile{parts/lec4}
+\subfile{parts/lec5}
+\subfile{parts/lec6} % TODO fill TODOs
+\subfile{parts/lec7}
+\subfile{parts/lec8}
 \subfile{parts/lec9}
 \subfile{parts/lec10}
 
