@@ -1,4 +1,3 @@
-from itertools import combinations
 from pathlib import Path
 
 import matplotlib.pyplot as plt  # type: ignore
@@ -8,11 +7,11 @@ from scipy import stats
 
 
 class RegressionModel:
-    def __init__(self, x: np.array, y: np.array):
+    def __init__(self, x: np.array, y: np.array, title: str):
         self.inv_xx = np.linalg.inv(x.T @ x)
         self.a = self.inv_xx @ x.T @ y
         self.y_hat = x @ self.a
-        self.x, self.y = x, y
+        self.x, self.y, self.name = x, y, title
 
 
 def visualize_3d(model: RegressionModel, out_path: Path) -> None:
@@ -27,7 +26,7 @@ def visualize_3d(model: RegressionModel, out_path: Path) -> None:
 def build_model(data_dir: Path, out_dir: Path) -> RegressionModel:
     x = np.loadtxt(data_dir / "X.txt")
     y = np.loadtxt(data_dir / "y.txt")
-    model = RegressionModel(x, y)
+    model = RegressionModel(x, y, "initial")
     print_matrix(model.a.T, var_name="a")
 
     out_dir.mkdir(exist_ok=True)
@@ -76,8 +75,9 @@ def perform_analysis(model: RegressionModel) -> np.array:
     print_matrix(a_confidence_intervals.T,
                  var_name="confidence intervals for `a` with confidence level {}".format(gamma))
 
-    tau = np.sqrt(m / (1 - gamma))
-    a_joint_conf_intervals = np.array([model.a - s_a * tau, model.a + s_a * tau])
+    joint_alpha = (1 - gamma) / m
+    joint_quantile = stats.t(n - m).ppf((1 + joint_alpha) / 2)
+    a_joint_conf_intervals = np.array([model.a - s_a * joint_quantile, model.a + s_a * joint_quantile])
     print_matrix(a_joint_conf_intervals.T,
                  var_name="joint confidence intervals for `a` with confidence {}".format(gamma))
 
@@ -89,7 +89,7 @@ def perform_analysis(model: RegressionModel) -> np.array:
 
 def make_prediction(model: RegressionModel) -> None:
     # exclude the last sample and calculate forecast for it
-    incomplete_model = RegressionModel(model.x[:-1, :], model.y[:-1])
+    incomplete_model = RegressionModel(model.x[:-1, :], model.y[:-1], "incomplete")
     new_x, new_y = model.x[-1, :], model.y[-1]
     new_y_hat = incomplete_model.a @ new_x
     print("prediction for excluded sample: {:.1f}".format(new_y_hat))
@@ -108,29 +108,41 @@ def make_prediction(model: RegressionModel) -> None:
 
 def main():
     out_dir = Path("out")
-    model = build_model(Path("data"), out_dir)
-    maybezero_ids = perform_analysis(model=model)
-    make_prediction(model)
+    model_init = build_model(Path("data"), out_dir)
+    maybezero_ids = perform_analysis(model=model_init)
+    make_prediction(model_init)
 
-    models = [(model, "None")]
+    models = [(model_init, "None")]
     for factor_id in list(maybezero_ids) + list(np.array([maybezero_ids])):
-        reduced_x = np.delete(model.x, factor_id, axis=1)
-        reduced_model = RegressionModel(reduced_x, model.y)
+        reduced_x = np.delete(model_init.x, factor_id, axis=1)
+        reduced_model = RegressionModel(reduced_x, model_init.y, "reduced")
         print("\n reduced model: removed feature(s) No. {} \n".format(factor_id))
         perform_analysis(reduced_model)
         make_prediction(reduced_model)
         models.append((reduced_model, str(np.array(factor_id) + 1)))
 
+    model_refined = models[2][0]  # removed feature 4
+    model_refined.name = "refined"
+
     plt.figure()
-    t = np.arange(len(model.y))
-    for model, reduced_factors in models:
-        plt.plot(t, model.y_hat, label="prediction (removed factors: {})".format(reduced_factors))
+    t = np.arange(len(model_init.y))
+    for model in (model_init, model_refined):
+        plt.plot(t, model.y_hat, label="prediction (model: {})".format(model.name))
     plt.plot(model.y, label="ground truth values")
     plt.legend()
     plt.xlabel("index of sample")
     plt.ylabel("response")
     plt.title("responses from different models compared with ground truth values")
     plt.savefig(out_dir / "models_comparison_line.png")
+
+    for model in (model_init, model_refined):
+        residuals = model.y - model.y_hat
+        plt.figure()
+        plt.violinplot(residuals, showmedians=True, vert=False)
+        plt.title("residuals distribution")
+        plt.yticks([])
+        plt.scatter(residuals, np.ones(shape=residuals.shape), c="black")
+        plt.savefig(out_dir / "residuals_hist_{}.png".format(model.name))
 
 
 if __name__ == "__main__":
