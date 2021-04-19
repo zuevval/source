@@ -22,7 +22,7 @@ mexp886$processedArchive =
 mexp886$sdrf = "E-MEXP-886.sdrf.txt"
 mexp886$idf = "E-MEXP-886.idf.txt"
 mexp886$adf = "A-AFFY-23.adf.txt"
-aeset = ae2bioc(mageFiles = mexp886)
+ae2bioc(mageFiles = mexp886)
 AEset = aeset
 
 arrayQualityMetrics(expressionset = AEset, outdir = "QAraw",
