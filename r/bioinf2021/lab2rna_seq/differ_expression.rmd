@@ -1,0 +1,132 @@
+---
+title: "RNA-Seq part II / Differential expression analysis"
+author: Valerii Zuev
+date: 4/19/2021
+output:
+    html_notebook:
+        toc: true
+        includes:
+            in_header: header_favicon.html
+---
+
+## Introduction
+
+This script works with data obtained from the 2016 study "Candidate gene networks and blood biomarkers of
+methamphetamine-associated psychosis: an integrative
+RNA-sequencing report" ([doi:10.1038/tp.2016.67](https://doi.org/10.1038/tp.2016.67)).
+
+## System requirements
+
+The code was written and tested on a Windows 10 machine using R version 4.0.2 (2020-06-22) for x86_64-w64-mingw32 platform with BiocManager version 3.12.
+
+All commands were executed from within the [R plugin for PyCharm](https://www.jetbrains.com/help/pycharm/r-plugin-support.html) which offers some features that might not work in a standard R shell (e. g. accessing files by address relative to the Git root).
+
+## Setup
+
+Clone the repository from GitHub:
+
+```
+git clone https://github.com/zuevval/source.git
+```
+Then navigate to `r/bioinf2021/lab2rna_seq` directory which contains the source code for this script.
+
+The following files are necessary to reproduce our results:
+
+* `annot.csv` (already present in the `dataset` subdirectory)
+* `GSE74737_counts.txt`. This table may be retrieved from the first page of the .xls file available at [GEO site](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE74737) or directly downloaded from [azuev.ddns.net/~valera/stu/2021bio/rnaseq](http://azuev.ddns.net/~valera/stu/2021bio/rnaseq/)
+* `c5.go.v7.4.entrez.gmt` (all GO gene sets as NCBI (Entrez) gene IDs) and `c2.cp.kegg.v7.4.entrez.gmt` (KEGG gene sets as NCBI (Entrez) gene IDs).
+May be obtained from [gsea-msigdb.org](http://www.gsea-msigdb.org/gsea/downloads.jsp) or from [azuev.ddns.net/~valera/stu/2021bio/rnaseq](http://azuev.ddns.net/~valera/stu/2021bio/rnaseq/)
+
+You will need R packages listed below:
+
+* tidyverse (`install.packages("tidyverse")`)
+* here (`install.packages("here")`)
+* DESeq2 (`BiocManager::install("DESeq2")`)
+* AnnotationDbi (`BiocManager::install("AnnotationDbi")`)
+* org.Hs.eg.db (`BiocManager::install("org.Hs.eg.db")`)
+* fgsea (`BiocManager::install("fgsea")`)
+
+## Analysis
+
+### Preparing workspace
+
+first, we define the directory which contains `annot.csv` and `GSE74737_counts.txt`
+```{r message=F, warning=F, output=F}
+library(tidyverse)
+
+data_dir <- "r/bioinf2021/lab2rna_seq/dataset"
+abs_path <- function(path) here::here(data_dir, path)
+```
+Then we load these files into `data.frame` objects (and filter columns in Counts leaving only those present in `annot.csv` rows)
+
+```{r}
+coldata <- read.csv(abs_path("annot.csv"), row.names = 1) %>% mutate_all(as.factor)
+head(coldata)
+counts_df <- read.csv(abs_path("GSE74737_counts.txt"), sep = "\t", row.names = "Gene") %>%
+  select(rownames(coldata))
+head(counts_df)
+```
+### Processing RNA-seq data with DESeq2
+
+Genes in `GSE74737_counts.txt` are identified by HUGO gene symbols.
+We convert them to Entrez IDs (here's where you need `AnnotationDbi`)
+```{r message=F, warning=F, output=F}
+counts <- counts_df %>%
+  mutate(entrez = AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, rownames(counts_df), "ENTREZID", "SYMBOL")) %>%
+  filter(!is.na(entrez)) %>%
+  select(-entrez) %>%
+  as.matrix
+```
+```{r}
+head(as.data.frame(counts))
+```
+Performing a sanity check:
+```{r}
+assertthat::assert_that(all(rownames(coldata) == colnames(counts)))
+```
+Finally, we construct a `DESEqDataSet` object and feed it to `DESeq2::DESeq(...)` which perform the analysis.
+Since there is a single factor (condition), we use it as the only parameter for the model design.
+```{r message = F, warning = F}
+dds <- DESeq2::DESeqDataSetFromMatrix(countData = counts, colData = coldata, design = ~condition)
+dds_analysed <- DESeq2::DESeq(dds)
+deseq_res <- DESeq2::results(dds_analysed)
+deseq_res_df <- as.data.frame(deseq_res)
+head(deseq_res_df %>% arrange(padj))
+```
+None of the genes show an adjusted p-value lower than the threshold specified in the article (p-value < 0.01) ¯\\\_(ツ)\_/¯
+
+so we'll select and save those that are less than the 0.2 threshold:
+
+```{r message = F, warning = F, output = F}
+pval_thresh <- .2
+deseq_res_df$entrez <- AnnotationDbi::mapIds(org.Hs.eg.db::org.Hs.eg.db, rownames(deseq_res_df), "ENTREZID", "SYMBOL")
+diff_expr <- deseq_res_df %>% filter(padj < pval_thresh)
+devnull <- mapply(function(df = ? data.frame, filename = ? character) {
+  df %>%
+    select(entrez) %>%
+    unlist %>%
+    write.table(abs_path(paste0(filename, "_entrez.csv")), sep = ",", row.names = F, col.names = F, quote = F)
+  df %>%
+    rownames %>%
+    unlist %>%
+    write.table(abs_path(paste0(filename, "_symbols.csv")), sep = ",", row.names = F, col.names = F, quote = F)
+}, list(deseq_res_df, diff_expr), c("background", "diff_expr"))
+
+```
+### GO and KEGG enrichment analysis
+
+```{r}
+kegg_strlist <- strsplit(readLines(abs_path("c2.cp.kegg.v7.4.entrez.gmt")), "[[:space:]]+")
+kegg_pathways <- lapply(kegg_strlist, tail, n = -2)
+names(kegg_pathways) <- lapply(kegg_strlist, head, n = 1)
+```
+
+```{r}
+res_sorted <- deseq_res_df %>% arrange(log2FoldChange)
+ranks <- res_sorted$log2FoldChange
+names(ranks) <- res_sorted$entrez
+```
+> TODO the code below ran for an hour and produced no result
+```{r}
+# fgsea_res <- fgsea::fgsea(kegg_pathways, ranks, scoreType = "pos")
+```
