@@ -1,0 +1,204 @@
+\documentclass{article}
+\oddsidemargin=0cm
+\textwidth=17cm
+
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{graphicx}
+\graphicspath{{./img/}}
+\usepackage{float} % force pictures position with \begin{figure}[H]
+\newcommand{\myPictWidth}{.99\textwidth}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+\title{Processing microarray data}
+\author{Valerii Zuev}
+\maketitle
+
+\section{Task}
+
+Microarray analysis based on a study of patients with systematic lupus erythematosus and rheumatoid arthritis \cite{smiljanovich2012}.
+
+All necessary data used in this work is available at \href{https://www.ebi.ac.uk/arrayexpress/experiments/E-GEOD-38351/}{ArrayExpress} and \href{https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE38351}{GEO} sites.
+
+
+\section{Solution}
+
+Preparing workspace:
+<<cache=T>>=
+library(dplyr)
+data_dir <- "E:/Users/vzuev/github-zuevval/source/r/bioinf2021/lab1microarrays/out"
+setwd(data_dir)
+@
+
+Loading data (it consists of two assays, first is the result of AFFY-44 and second of AFFY-33 scan).
+<<computation,results=hide,cache=T>>=
+geod_list_filename <- "geod38351.RData"
+# geod38351 <- ArrayExpress::getAE("E-GEOD-38351", type = "full")
+# save(geod38351, file=geod_list_filename)
+load(geod_list_filename)
+aesets <- ArrayExpress::ae2bioc(mageFiles = geod38351)
+aeset1 <- aesets[[1]] # AFFY-44
+aeset2 <- aesets[[2]] # AFFY-33
+@
+
+Finding factor:
+<<cache=T>>=
+colnames1 <- colnames(pData(aeset1))
+fac <- colnames1[grep("Factor", colnames1)]
+fac
+@
+
+Assessing quality:
+<<cache=T>>=
+# devnull <- mapply(function(outdir = ? str, eset = ? ExpressionSet) {
+#  arrayQualityMetrics::arrayQualityMetrics(
+#    expressionset = eset,
+#    outdir = outdir,
+#    force = FALSE,
+#    do.logtransform = TRUE,
+#    intgroup = fac)
+#}, list("qaraw_geod_38351_1", "qaraw_geod_38351_2"), c(aeset1, aeset2))
+@
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{box1}
+        \caption{boxplot (assay 1)}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{box2}
+        \caption{boxplot (assay 2)}
+    \end{subfigure}
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{ma1}
+        \caption{MA plot (assay 1)}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{ma2}
+        \caption{MA plot (assay 2)}
+    \end{subfigure}
+\caption{Quality metrics}
+\end{figure}
+
+The set \texttt{aeset1} contains an outlier (sample  \textnumero 1).
+We'll drop this sample and concatenate two sets (they have different annotations, but it's OK (?)).
+
+<<computation,results=hide,cache=T>>=
+c_aeset1 <- oligo::rma(aeset1[, -1])
+c_aeset2 <- oligo::rma(aeset2)
+annotation(c_aeset1) <- "pd.hg.u133a" # TODO ask: is it right?
+c_aeset <- combine(c_aeset1, c_aeset2)
+@
+
+Changing groups names to feed them as factors for linear regression:
+
+<<cache=T>>=
+groups <- pData(c_aeset)[, fac]
+colnames(groups) <- c("stimulus", "disease")
+groups[groups == "incubated for 1.5 hour without any stimulation"] <- "st"
+groups[groups == "no incubation"] <- "none"
+groups[groups == "stimulated with IFN-gamma for 1.5 hour"] <- "st"
+groups[groups == "stimulated with IFN-alpha-2a for 1.5 hour"] <- "st"
+groups[groups == "stimulated with TNF-alpha for 1.5 hour"] <- "st"
+groups[groups == "rheumatoid arthritis"] <- "ill"
+groups[groups == "systemic lupus erythematosus"] <- "ill"
+print(groups) # TODO ask: no st:ill
+@
+
+Designing a model (here we use a single factor: disease (healthy or ill))
+
+<<cache=T>>=
+f_stimulus <- factor(groups$stimulus)
+f_disease <- factor(groups$disease)
+# design <- model.matrix(~0 + f_stimulus:f_disease)
+design <- model.matrix(~f_disease)
+colnames(design) <- colnames(design) %>% lapply(function(x) {
+  x_noprefixes = gsub("f_stimulus|f_disease", "", x)
+  gsub(":", "_", x_noprefixes)
+})
+print(design)
+limma::is.fullrank(design)
+@
+
+Fitting linear model and computing a set of statistics with \texttt{eBayes}:
+
+<<cache=T>>=
+fit <- limma::lmFit(c_aeset, design)
+# conmat <- limma::makeContrasts(none_normal - none_ill,
+#                                st_normal - st_ill, levels=design) # TODO
+# fitc <- limma::contrasts.fit(fit, conmat)
+fit2 <- limma::eBayes(fit)
+
+# par(mfrow = c(1, 2)) # TODO return it back
+# limma::volcanoplot(fit2, coef = "st_normal", highlight = 15)
+# limma::volcanoplot(fit2, coef = "none_normal", highlight = 15)
+limma::volcanoplot(fit2, coef = "normal", highlight = 15)
+@
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{volcanoplot_disease}
+    \caption{volcanoplot}
+\end{figure}
+
+Filtering genes by p-values:
+<<cache=T>>=
+results <- limma::topTable(fit2, coef = "normal", adjust = "BH", number = nrow(c_aeset))
+as.integer(results[, "P.Value"] < 1e-8) %>%
+  na.exclude %>%
+  sum
+topgenes <- results[results[, "P.Value"] < 1e-8,]
+@
+
+Drawing a heatmap:
+<<cache=T>>=
+diffexpr_ids <- rownames(topgenes)
+m <- exprs(c_aeset[diffexpr_ids,])
+ncol(m)
+colnames(m) <- 1:73
+heatmap(m)
+@
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{heatmap_disease}
+    \caption{heatmap}
+\end{figure}
+
+Dendrogram and heatmap after clustering:
+<<cache=T>>=
+plot(hclust(dist(m)))
+
+clust.genes <- amap::hcluster(x = m, method = "pearson", link = "average")
+clust.arrays <- amap::hcluster(x = t(m), method = "pearson", link = "average")
+
+heatcol <- colorRampPalette(c("Green", "Red"))(32)
+heatmap(x = as.matrix(m), Rowv = as.dendrogram(clust.genes),
+        Colv = as.dendrogram(clust.arrays), col = heatcol, margin = c(5, 8))
+@
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{heatmap_disease_hcluster}
+    \caption{heatmap with samples ordered by clustering}
+\end{figure}
+
+\section{Conclusion}
+
+One outlier has been found during quality analysis.
+
+\begin{thebibliography}{99}
+    \bibitem{smiljanovich2012} Smiljanovic, B., Grun, J.R., Biesen, R. et al. The multifaceted balance of TNF-$\alpha$ and type I/II interferon responses in SLE and RA: how monocytes manage the impact of cytokines. J Mol Med 90, 1295-1309 (2012). doi: \href{https://doi.org/10.1007/s00109-012-0907-y}{10.1007/s00109-012-0907-y}
+\end{thebibliography}
+
+\end{document}

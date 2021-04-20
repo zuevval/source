@@ -1,4 +1,4 @@
-setwd("D:/dataVal/Work/git/source/r/bioinf2021/lab1microarrays/data/out/")
+setwd("E:/Users/vzuev/github-zuevval/source/r/bioinf2021/lab1microarrays/out/example")
 # data loading alternative to `example_part2.R`: downloading files locally
 
 library("ArrayExpress")

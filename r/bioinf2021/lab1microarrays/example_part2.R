@@ -14,8 +14,7 @@
 # BiocManager::install("clusterProfiler")
 # install.packages("amap")
 
-setwd("D:/dataVal/Work/git/source/r/bioinf2021/lab1microarrays/data/out/") # change to your path
-
+setwd("E:/Users/vzuev/github-zuevval/source/r/bioinf2021/lab1microarrays/out/example")
 
 AEset = ArrayExpress::ArrayExpress("E-MEXP-886")
 colnames(pData(AEset))
