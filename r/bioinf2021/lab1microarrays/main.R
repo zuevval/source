@@ -9,13 +9,6 @@
 # BiocManager::install("ArrayExpress")
 # BiocManager::install("arrayQualityMetrics")
 # BiocManager::install("GSEABase")
-# BiocManager::install("moe430a.db")
-# BiocManager::install("KEGG.db") # TODO deprecated and will be removed
-# BiocManager::install("GOstats")
-# BiocManager::install("ReactomePA")
-# BiocManager::install("clusterProfiler")
-# BiocManager::install("pd.hg.u133a")
-# install.packages("amap")
 
 library(dplyr)
 data_dir <- "E:/Users/vzuev/github-zuevval/source/r/bioinf2021/lab1microarrays/out"
@@ -47,109 +40,103 @@ devnull <- mapply(function(outdir = ? str, eset = ? ExpressionSet) {
 # array 1 stands out!
 c_aeset1 <- oligo::rma(aeset1[, -1])
 c_aeset2 <- oligo::rma(aeset2)
-annotation(c_aeset1) <- "pd.hg.u133a" # TODO ask: is it right?
-c_aeset <- combine(c_aeset1, c_aeset2)
+c_aeset_colnames <- c("stimulus", "disease")
 
-groups <- pData(c_aeset)[, fac]
-colnames(groups) <- c("stimulus", "disease")
-groups[groups == "incubated for 1.5 hour without any stimulation"] <- "st"
-groups[groups == "no incubation"] <- "none"
-groups[groups == "stimulated with IFN-gamma for 1.5 hour"] <- "st"
-groups[groups == "stimulated with IFN-alpha-2a for 1.5 hour"] <- "st"
-groups[groups == "stimulated with TNF-alpha for 1.5 hour"] <- "st"
-groups[groups == "rheumatoid arthritis"] <- "ill"
-groups[groups == "systemic lupus erythematosus"] <- "ill"
-print(groups) # TODO ask: no st:ill
+groups1 <- pData(c_aeset1)[, fac]
+groups1[groups1 == "incubated for 1.5 hour without any stimulation"] <- "incub"
+groups1[groups1 == "no incubation"] <- "noincub"
+groups1[groups1 == "stimulated with IFN-gamma for 1.5 hour"] <- "ig"
+groups1[groups1 == "stimulated with IFN-alpha-2a for 1.5 hour"] <- "ia"
+groups1[groups1 == "stimulated with TNF-alpha for 1.5 hour"] <- "ta"
+groups1
+colnames(groups1) <- c_aeset_colnames
+c_aeset_stimulus <- c_aeset1[, groups1$disease == "normal"] # drop ill patients
+groups_stimulus <- groups1 %>%
+  filter(disease == "normal") %>% # drop ill patients
+  select(-disease)
 
-f_stimulus <- factor(groups$stimulus)
-f_disease <- factor(groups$disease)
-# design <- model.matrix(~0 + f_stimulus:f_disease)
-design <- model.matrix(~f_disease)
-colnames(design) <- colnames(design) %>% lapply(function(x) {
-  x_noprefixes = gsub("f_stimulus|f_disease", "", x)
-  gsub(":", "_", x_noprefixes)
-})
-print(design)
-limma::is.fullrank(design)
+groups2 <- pData(c_aeset2)[, fac]
+groups2[groups2 == "rheumatoid arthritis"] <- "ra"
+groups2[groups2 == "systemic lupus erythematosus"] <- "sl"
+colnames(groups2) <- c_aeset_colnames
+groups2
+c_aeset_disease <- c_aeset2 # just define a new name for convenience
+groups_disease <- groups2 %>% select(-stimulus)
 
-fit <- limma::lmFit(c_aeset, design)
-# conmat <- limma::makeContrasts(none_normal - none_ill,
-#                                st_normal - st_ill, levels=design) # TODO
-# fitc <- limma::contrasts.fit(fit, conmat)
-fit2 <- limma::eBayes(fit)
+# fitting linear model for stimulus
+f_stimulus <- factor(unlist(groups_stimulus))
+design_stimulus <- model.matrix(~f_stimulus)
+colnames(design_stimulus) <- colnames(design_stimulus) %>% lapply(function(x) gsub("f_stimulus", "", x))
+print(design_stimulus)
+print(limma::is.fullrank(design_stimulus)) # should be TRUE
 
-# par(mfrow = c(1, 2)) # TODO return it back
-# limma::volcanoplot(fit2, coef = "st_normal", highlight = 15)
-# limma::volcanoplot(fit2, coef = "none_normal", highlight = 15)
-limma::volcanoplot(fit2, coef = "normal", highlight = 15)
+fit_stimulus <- limma::lmFit(c_aeset_stimulus, design_stimulus)
+fit_stimulus2 <- limma::eBayes(fit_stimulus)
+head(fit_stimulus2$coefficients)
+png(filename = "./img/volcanoplot_stimulus.png")
+par(mfrow = c(1, 2))
+limma::volcanoplot(fit_stimulus2, coef = "ta", highlight = 15, main = "stimulus: TNF-alpha")
+limma::volcanoplot(fit_stimulus2, coef = "ig", highlight = 15, main = "stimulus: IFN-gamma")
+dev.off()
+
+# the same for disease
+f_disease <- factor(unlist(groups_disease))
+design_disease <- model.matrix(~f_disease)
+colnames(design_disease) <- colnames(design_disease) %>% lapply(function(x) gsub("f_disease", "", x))
+print(design_disease)
+print(limma::is.fullrank(design_disease)) # should be TRUE
+
+fit_disease <- limma::lmFit(c_aeset_disease, design_disease)
+fit_disease2 <- limma::eBayes(fit_disease)
+head(fit_disease2$coefficients)
+png(filename = "./img/volcanoplot_disease.png")
+par(mfrow = c(1, 2))
+limma::volcanoplot(fit_disease2, coef = "ra", highlight = 15, main = "rheumatoid arthritis")
+limma::volcanoplot(fit_disease2, coef = "sl", highlight = 15, main = "systemic lupus erythematosus")
+dev.off()
+
+draw_clust_heatmap <- function(c_aeset = ? data.frame,
+                               groups = ? data.frame,
+                               fit = ? limma::MArrayLM,
+                               pval_thresh = ? integer,
+                               coef = ? character,
+                               title = ? character){
+  results <- limma::topTable(fit, coef = coef, adjust = "BH", number = nrow(c_aeset))
+  print(as.integer(results[, "P.Value"] < pval_thresh) %>%
+          na.exclude %>%
+          sum) # how many differentially expressed genese were found?
+  topgenes <- results[results[, "P.Value"] < pval_thresh,]
+  diffexpr_ids <- rownames(topgenes)
+
+  diffexpr_ids %>%
+    unlist %>%
+    write.table(paste0("./genes_diffexpr_", title, ".csv"), sep = ",", row.names = F, col.names = F, quote = F)
+  results %>%
+    rownames %>%
+    unlist %>%
+    write.table(paste0("./genes_background_", title, ".csv"), sep = ",", row.names = F, col.names = F, quote = F)
+
+  m <- exprs(c_aeset[diffexpr_ids,])
+  ncol(m)
+  colnames(m) <- unlist(groups[1])
+  png(filename = paste0("./img/heatmap_", title, ".png"))
+  heatmap(m)
+  dev.off()
+} -> NULL
+
+c_aeset_ra <- c_aeset_disease[, groups_disease$disease != "sl"]
+c_aeset_sl <- c_aeset_disease[, groups_disease$disease != "ra"]
+groups_ra <- groups_disease %>% filter(disease != "sl")
+groups_sl <- groups_disease %>% filter(disease != "ra")
+
+devnull <- mapply(draw_clust_heatmap,
+                  list(c_aeset_stimulus, c_aeset_ra, c_aeset_sl),
+                  list(groups_stimulus, groups_ra, groups_sl),
+                  list(fit_stimulus2, fit_disease2, fit_disease2),
+                  list(1e-3, 5 * 1e-3, 2 * 1e-3),
+                  list("ig", "ra", "sl"),
+                  list("stimulus", "ra", "sl"))
 
 
-# results <- limma::topTable(fit2, coef = "st_normal", adjust = "BH", number = nrow(c_aeset)) # TODO return it
-results <- limma::topTable(fit2, coef = "normal", adjust = "BH", number = nrow(c_aeset))
-as.integer(results[, "P.Value"] < 1e-8) %>%
-  na.exclude %>%
-  sum # TODO ask: too small
-topgenes <- results[results[, "P.Value"] < 1e-8,]
-
-diffexpr_ids <- rownames(topgenes)
-# m <- rbind(exprs(c_aeset[diffexpr_ids[1],]), exprs(c_aeset[diffexpr_ids[1],])) # TODO ask: exprs(c_aeset[diffexpr_ids,])
-m <- exprs(c_aeset[diffexpr_ids,])
-ncol(m)
-colnames(m) <- 1:73
-heatmap(m)
-
-plot(hclust(dist(m)))
-
-clust.genes <- amap::hcluster(x = m, method = "pearson", link = "average")
-clust.arrays <- amap::hcluster(x = t(m), method = "pearson", link = "average")
-
-heatcol <- colorRampPalette(c("Green", "Red"))(32)
-heatmap(x = as.matrix(m), Rowv = as.dendrogram(clust.genes),
-        Colv = as.dendrogram(clust.arrays), col = heatcol, margin = c(5, 8))
-
-GSEABase::annotation(c_aeset)
-gsc <- GSEABase::GeneSetCollection(object = c_aeset, setType = GSEABase::GOCollection()) # TODO fails here
-Am <- GSEABase::incidence(gsc)
-dim(Am)
-nsF <- cAEset[colnames(Am),]
-rtt <- genefilter::rowttests(nsF, fac)
-rttStat <- rtt$statistic
-selectedRows <- (rowSums(Am) > 10)
-Am2 <- Am[selectedRows,]
-tA <- as.vector(Am2 %*% rttStat)
-tAadj <- tA / sqrt(rowSums(Am2))
-names(tA) <- names(tAadj) <- rownames(Am2)
-smPW <- which(tAadj == min(tAadj))
-pwName <- KEGG.db::KEGGPATHID2NAME[[names(smPW)]]
-pwName
-smPW <- which(tAadj == min(tAadj))
-par(mfrow = c(1, 1))
-annotate::KEGG2heatmap(names(smPW), nsF, "moe430a") # TODO color palette is hidden in PDF
-
-affyUniverse <- featureNames(c_aeset)
-uniId <- moe430a.db::moe430aENTREZID[affyUniverse] # TODO error
-entrezUniverse <- unique(as.character(uniId))
-affysub <- ID
-uniIdsub <- pd.hg.u133a::moe430aENTREZID[affysub]
-entrezsub <- unique(as.character(uniIdsub))
-
-params <- new("GOHyperGParams", # ? GOstats::GOHyperGParams
-              geneIds = entrezsub,
-              universeGeneIds = entrezUniverse,
-              annotation = "moe430a",
-              ontology = "BP",
-              pvalueCutoff = 0.05,
-              conditional = FALSE,
-              testDirection = "over")
-mfhyper <- GOstats::hyperGTest(params)
-mfhyper
-hist(pvalues(mfhyper), breaks = 50, col = "mistyrose")
-
-gcDyn <- list()
-gcDyn$h0 <- entrezsub
-
-library("ReactomePA")
-library("GO.db")
-# TODO clusterProfiler, not "clusterprofiler"
-dynTableGODB <- clusterProfiler::compareCluster(gcDyn, fun = "groupGO", organism = "mouse") # TODO other arguments are hidden in PDF
-
+GSEABase::annotation(c_aeset_stimulus)
+GSEABase::annotation(c_aeset_disease)

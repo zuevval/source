@@ -1,0 +1,611 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+
+\usepackage[]{graphicx}\usepackage[]{color}
+% maxwidth is the original width if it is less than linewidth
+% otherwise use linewidth (to make sure the graphics do not exceed the margin)
+\makeatletter
+\def\maxwidth{ %
+  \ifdim\Gin@nat@width>\linewidth
+    \linewidth
+  \else
+    \Gin@nat@width
+  \fi
+}
+\makeatother
+
+\definecolor{fgcolor}{rgb}{0.345, 0.345, 0.345}
+\newcommand{\hlnum}[1]{\textcolor[rgb]{0.686,0.059,0.569}{#1}}%
+\newcommand{\hlstr}[1]{\textcolor[rgb]{0.192,0.494,0.8}{#1}}%
+\newcommand{\hlcom}[1]{\textcolor[rgb]{0.678,0.584,0.686}{\textit{#1}}}%
+\newcommand{\hlopt}[1]{\textcolor[rgb]{0,0,0}{#1}}%
+\newcommand{\hlstd}[1]{\textcolor[rgb]{0.345,0.345,0.345}{#1}}%
+\newcommand{\hlkwa}[1]{\textcolor[rgb]{0.161,0.373,0.58}{\textbf{#1}}}%
+\newcommand{\hlkwb}[1]{\textcolor[rgb]{0.69,0.353,0.396}{#1}}%
+\newcommand{\hlkwc}[1]{\textcolor[rgb]{0.333,0.667,0.333}{#1}}%
+\newcommand{\hlkwd}[1]{\textcolor[rgb]{0.737,0.353,0.396}{\textbf{#1}}}%
+\let\hlipl\hlkwb
+
+\usepackage{framed}
+\makeatletter
+\newenvironment{kframe}{%
+ \def\at@end@of@kframe{}%
+ \ifinner\ifhmode%
+  \def\at@end@of@kframe{\end{minipage}}%
+  \begin{minipage}{\columnwidth}%
+ \fi\fi%
+ \def\FrameCommand##1{\hskip\@totalleftmargin \hskip-\fboxsep
+ \colorbox{shadecolor}{##1}\hskip-\fboxsep
+     % There is no \\@totalrightmargin, so:
+     \hskip-\linewidth \hskip-\@totalleftmargin \hskip\columnwidth}%
+ \MakeFramed {\advance\hsize-\width
+   \@totalleftmargin\z@ \linewidth\hsize
+   \@setminipage}}%
+ {\par\unskip\endMakeFramed%
+ \at@end@of@kframe}
+\makeatother
+
+\definecolor{shadecolor}{rgb}{.97, .97, .97}
+\definecolor{messagecolor}{rgb}{0, 0, 0}
+\definecolor{warningcolor}{rgb}{1, 0, 1}
+\definecolor{errorcolor}{rgb}{1, 0, 0}
+\newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
+
+\usepackage{alltt}
+\oddsidemargin=0cm
+\textwidth=17cm
+
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{graphicx}
+\graphicspath{{./img/}}
+\usepackage{float} % force pictures position with \begin{figure}[H]
+\newcommand{\myPictWidth}{.99\textwidth}
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\begin{document}
+
+\title{Анализ данных DNA-Seq}
+\author{Валерий Зуев, 3630102/70401}
+\maketitle
+
+\section{Задание}
+
+Необходимо выполнить манипуляции с данными об исследовании экспрессии генов по образцам РНК, выделенным из моноцитов
+\begin{enumerate}
+    \item взятых из крови людей, больных системной красной волчанкой (SLE) и ревматоидным артритом (RA)
+    \item взятых от здоровых пациентов, но обработанных в лабораторных условиях цитокинами
+    \begin{enumerate}
+        \item TNF-$\alpha$, который, как считается, отвечает за клиническое проявление ревматоидного артрита
+        \item интерфероны IFN-$\alpha/\gamma$, которые связывают с SLE.
+    \end{enumerate}
+\end{enumerate}
+
+В статье, где описываются результыты исследования \cite{smiljanovich2012}, утверждается, что пациенты с SLE и RA демонстрируют специфичные для болезни профили экспрессии генов, ответственных за синтез цитокинов: у пациентов, больных SLE, повышен уровень экспрессии многих генов, регулирующих синтез IFN-$\alpha$, у пациентов с ревматоидным артритом -- TNF-$\alpha$.
+
+В данной работе необходимо воспроизвести исследования, выполненные с лабораторными данными:
+
+\begin{enumerate}
+    \item Загрузить результаты экспериментов (артефакты работы сканеров Affymetrix) с сайтов \href{https://www.ebi.ac.uk/arrayexpress/experiments/E-GEOD-38351/}{ArrayExpress} и \href{https://www.ncbi.nlm.nih.gov/geo/download/?acc=GSE38351}{GEO}
+    \item Произвести оценку качества данных, при необходимости отсеять выбросы; произвести нормализацию.
+    \item Найти дифференциально экспрессирующиеся гены.
+    \item Провести кластеризацию профилей дифференциально экспрессирующихся генов в клетках пациентов, а также обработанных \textit{in vitro} клеток; построить тепловые карты.
+    \item Выполнить анализ обогащённости генов метаболическими путями из базы данных KEGG и Reactome
+    \item Сравнить результаты с результатами, полученными в статье \cite{smiljanovich2012}.
+\end{enumerate}
+
+\section{Ход работы}
+
+\subsection{Загрузка данных}
+
+Подготавливаем рабочее пространство (нужно изменить \texttt{data\_dir} на директорию, содержащую код на Вашем компьютере):
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlkwd{library}\hlstd{(dplyr)}
+\hlstd{data_dir} \hlkwb{<-} \hlstr{"E:/Users/vzuev/github-zuevval/source/r/bioinf2021/lab1microarrays/out"}
+\hlkwd{setwd}\hlstd{(data_dir)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Загружаем данные (они разделены на два массива, первый -- результат сканирования в формате AFFY-44, второй -- AFFY-33).
+
+Loading data (it consists of two assays, first is the result of AFFY-44 and second of AFFY-33 scan).
+
+Если Вы запускаетсе этот код первый раз, необходимо раскомментировать строки, в которых данные загружаются из базы.
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{geod_list_filename} \hlkwb{<-} \hlstr{"geod38351.RData"}
+\hlcom{# geod38351 <- ArrayExpress::getAE("E-GEOD-38351", type = "full")}
+\hlcom{# save(geod38351, file=geod_list_filename)}
+\hlkwd{load}\hlstd{(geod_list_filename)}
+\hlstd{aesets} \hlkwb{<-} \hlstd{ArrayExpress}\hlopt{::}\hlkwd{ae2bioc}\hlstd{(}\hlkwc{mageFiles} \hlstd{= geod38351)}
+\end{alltt}
+
+\begin{alltt}
+\hlstd{aeset1} \hlkwb{<-} \hlstd{aesets[[}\hlnum{1}\hlstd{]]} \hlcom{# AFFY-44}
+\hlstd{aeset2} \hlkwb{<-} \hlstd{aesets[[}\hlnum{2}\hlstd{]]} \hlcom{# AFFY-33}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Посмотрим, какие факторы поставлены в соответствие образцам:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{colnames1} \hlkwb{<-} \hlkwd{colnames}\hlstd{(}\hlkwd{pData}\hlstd{(aeset1))}
+\hlstd{fac} \hlkwb{<-} \hlstd{colnames1[}\hlkwd{grep}\hlstd{(}\hlstr{"Factor"}\hlstd{, colnames1)]}
+\hlstd{fac}
+\end{alltt}
+\begin{verbatim}
+## [1] "Factor.Value.stimulus." "Factor.Value.disease."
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Оценка качества}
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlcom{# devnull <- mapply(function(outdir = ? str, eset = ? ExpressionSet) \{}
+\hlcom{#  arrayQualityMetrics::arrayQualityMetrics(}
+\hlcom{#    expressionset = eset,}
+\hlcom{#    outdir = outdir,}
+\hlcom{#    force = FALSE,}
+\hlcom{#    do.logtransform = TRUE,}
+\hlcom{#    intgroup = fac)}
+\hlcom{#\}, list("qaraw_geod_38351_1", "qaraw_geod_38351_2"), c(aeset1, aeset2))}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{figure}[H]
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{box1}
+        \caption{boxplot (assay 1)}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{box2}
+        \caption{boxplot (assay 2)}
+    \end{subfigure}
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{ma1}
+        \caption{MA plot (assay 1)}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{ma2}
+        \caption{MA plot (assay 2)}
+    \end{subfigure}
+\caption{Метрики качества}
+\end{figure}
+
+Массив \texttt{aeset1} содержит выброс (образец  \textnumero 1).
+Уберём из данных это наблюдение и проведём нормализацию:
+
+% computation,results=hide,cache=T
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{c_aeset1} \hlkwb{<-} \hlstd{oligo}\hlopt{::}\hlkwd{rma}\hlstd{(aeset1[,} \hlopt{-}\hlnum{1}\hlstd{])}
+\hlstd{c_aeset2} \hlkwb{<-} \hlstd{oligo}\hlopt{::}\hlkwd{rma}\hlstd{(aeset2)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\subsection{Поиск дифференциально экспрессирующихся генов}
+
+Обучим линейные модели, описывающие зависимость факторов от профилей экспрессии.
+В первом массиве в основном профили клеток, стимулированных \textit{in vitro}, во втором -- пациентов, поэтому будем строить одну модель по первому массиву и одну по второму.
+
+Для удобства изменим имена факторов на более короткие:
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{c_aeset_colnames} \hlkwb{<-} \hlkwd{c}\hlstd{(}\hlstr{"stimulus"}\hlstd{,} \hlstr{"disease"}\hlstd{)}
+\hlstd{groups1} \hlkwb{<-} \hlkwd{pData}\hlstd{(c_aeset1)[, fac]}
+\hlstd{groups1[groups1} \hlopt{==} \hlstr{"incubated for 1.5 hour without any stimulation"}\hlstd{]} \hlkwb{<-} \hlstr{"incub"}
+\hlstd{groups1[groups1} \hlopt{==} \hlstr{"no incubation"}\hlstd{]} \hlkwb{<-} \hlstr{"noincub"}
+\hlstd{groups1[groups1} \hlopt{==} \hlstr{"stimulated with IFN-gamma for 1.5 hour"}\hlstd{]} \hlkwb{<-} \hlstr{"ig"}
+\hlstd{groups1[groups1} \hlopt{==} \hlstr{"stimulated with IFN-alpha-2a for 1.5 hour"}\hlstd{]} \hlkwb{<-} \hlstr{"ia"}
+\hlstd{groups1[groups1} \hlopt{==} \hlstr{"stimulated with TNF-alpha for 1.5 hour"}\hlstd{]} \hlkwb{<-} \hlstr{"ta"}
+\hlstd{groups1}
+\end{alltt}
+\begin{verbatim}
+##                                   Factor.Value.stimulus. Factor.Value.disease.
+## GSM940522_Un_0h_7_133P.CEL                       noincub                normal
+## GSM940521_Un_0h_6_133P.CEL                       noincub                normal
+## GSM940520_Un_0h_5_133P.CEL                       noincub                normal
+## GSM940519_Un_0h_4_133P.CEL                       noincub                normal
+## GSM940518_Un_0h_3_133P.CEL                       noincub                normal
+## GSM940517_Un_0h_2_133P.CEL                       noincub                normal
+## GSM940516_Un_0h_1_133P.CEL                       noincub                normal
+## GSM940515_Un_90min_11_133P.CEL                     incub                normal
+## GSM940514_Un_90min_10_133P.CEL                     incub                normal
+## GSM940513_Un_90min_9_133P.CEL                      incub                normal
+## GSM940512_Un_90min_8_133P.CEL                      incub                normal
+## GSM940511_Un_90min_7_133P.CEL                      incub                normal
+## GSM940510_Un_90min_6_133P.CEL                      incub                normal
+## GSM940509_Un_90min_5_133P.CEL                      incub                normal
+## GSM940508_Un_90min_4_133P.CEL                      incub                normal
+## GSM940507_Un_90min_3_133P.CEL                      incub                normal
+## GSM940506_Un_90min_2_133P.CEL                      incub                normal
+## GSM940505_Un_90min_1_133P.CEL                      incub                normal
+## GSM940504_IFNg_90min_7_133P.CEL                       ig                normal
+## GSM940503_IFNg_90min_6_133P.CEL                       ig                normal
+## GSM940502_IFNg_90min_5_133P.CEL                       ig                normal
+## GSM940501_IFNg_90min_4_133P.CEL                       ig                normal
+## GSM940500_IFNg_90min_3_133P.CEL                       ig                normal
+## GSM940499_IFNg_90min_2_133P.CEL                       ig                normal
+## GSM940498_IFNg_90min_1_133P.CEL                       ig                normal
+## GSM940497_IFNa2a_90min_7_133P.CEL                     ia                normal
+## GSM940496_IFNa2a_90min_6_133P.CEL                     ia                normal
+## GSM940495_IFNa2a_90min_5_133P.CEL                     ia                normal
+## GSM940494_IFNa2a_90min_4_133P.CEL                     ia                normal
+## GSM940493_IFNa2a_90min_3_133P.CEL                     ia                normal
+## GSM940492_IFNa2a_90min_2_133P.CEL                     ia                normal
+## GSM940491_IFNa2a_90min_1_133P.CEL                     ia                normal
+## GSM940490_TNF_90min_3_133P.CEL                        ta                normal
+## GSM940489_TNF_90min_2_133P.CEL                        ta                normal
+## GSM940488_TNF_90min_1_133P.CEL                        ta                normal
+## GSM940487_RA_98_Mo_test_133P.cel                    none  rheumatoid arthritis
+## GSM940486_RA_88_Mo_test_133P.cel                    none  rheumatoid arthritis
+## GSM940485_RA_18_Mo_test_133P.cel                    none  rheumatoid arthritis
+## GSM940484_RA_1_Mo_test_133P.cel                     none  rheumatoid arthritis
+\end{verbatim}
+\begin{alltt}
+\hlkwd{colnames}\hlstd{(groups1)} \hlkwb{<-} \hlstd{c_aeset_colnames}
+\hlstd{c_aeset_stimulus} \hlkwb{<-} \hlstd{c_aeset1[, groups1}\hlopt{$}\hlstd{disease} \hlopt{==} \hlstr{"normal"}\hlstd{]} \hlcom{# drop ill patients}
+\hlstd{groups_stimulus} \hlkwb{<-} \hlstd{groups1} \hlopt{%>%}
+  \hlkwd{filter}\hlstd{(disease} \hlopt{==} \hlstr{"normal"}\hlstd{)} \hlopt{%>%} \hlcom{# drop ill patients}
+  \hlkwd{select}\hlstd{(}\hlopt{-}\hlstd{disease)}
+
+\hlstd{groups2} \hlkwb{<-} \hlkwd{pData}\hlstd{(c_aeset2)[, fac]}
+\hlstd{groups2[groups2} \hlopt{==} \hlstr{"rheumatoid arthritis"}\hlstd{]} \hlkwb{<-} \hlstr{"ra"}
+\hlstd{groups2[groups2} \hlopt{==} \hlstr{"systemic lupus erythematosus"}\hlstd{]} \hlkwb{<-} \hlstr{"sl"}
+\hlkwd{colnames}\hlstd{(groups2)} \hlkwb{<-} \hlstd{c_aeset_colnames}
+\hlstd{groups2}
+\end{alltt}
+\begin{verbatim}
+##                                  stimulus disease
+## GSM940483_ND_114_Mo_133A.CEL         none  normal
+## GSM940482_ND_113_Mo_133A.CEL         none  normal
+## GSM940481_ND_24_Mo_133A.CEL          none  normal
+## GSM940480_ND_20_Mo_133A.CEL          none  normal
+## GSM940479_ND_18_Mo_133A.CEL          none  normal
+## GSM940478_ND_14_Mo_133A.CEL          none  normal
+## GSM940477_ND_13_Mo_133A.CEL          none  normal
+## GSM940476_ND_12_Mo_133A.CEL          none  normal
+## GSM940475_ND_11_Mo_133A.CEL          none  normal
+## GSM940474_ND_9_Mo_133A.CEL           none  normal
+## GSM940473_ND_7_Mo_133A.CEL           none  normal
+## GSM940472_ND_3_Mo_133A.CEL           none  normal
+## GSM940471_RA_11_Mo_133A.CEL          none      ra
+## GSM940470_RA_9_Mo_133A.CEL           none      ra
+## GSM940469_RA_7_Mo_133A.CEL           none      ra
+## GSM940468_RA_5_Mo_133A.CEL           none      ra
+## GSM940467_RA_4_Mo_133A.CEL           none      ra
+## GSM940466_RA_3_Mo_133A.CEL           none      ra
+## GSM940465_RA_2_Mo_133A.CEL           none      ra
+## GSM940464_RA_1_Mo_133A.CEL           none      ra
+## GSM940463_SL_21_Mo_test_133A.CEL     none      sl
+## GSM940462_SL_16_Mo_test_133A.CEL     none      sl
+## GSM940461_SL_14_Mo_test_133A.CEL     none      sl
+## GSM940460_SL_13_Mo_test_133A.CEL     none      sl
+## GSM940459_SL_11_Mo_test_133A.CEL     none      sl
+## GSM940458_SL_10_Mo_133A.CEL          none      sl
+## GSM940457_SL_9_Mo_133A.CEL           none      sl
+## GSM940456_SL_8_Mo_133A.CEL           none      sl
+## GSM940455_SL_7_Mo_133A.CEL           none      sl
+## GSM940454_SL_5_Mo_133A.CEL           none      sl
+## GSM940453_SL_4_Mo_133A.CEL           none      sl
+## GSM940452_SL_3_Mo_133A.CEL           none      sl
+## GSM940451_SL_2_Mo_133A.CEL           none      sl
+## GSM940450_SL_1_Mo_133A.CEL           none      sl
+\end{verbatim}
+\begin{alltt}
+\hlstd{c_aeset_disease} \hlkwb{<-} \hlstd{c_aeset2} \hlcom{# just define a new name for convenience}
+\hlstd{groups_disease} \hlkwb{<-} \hlstd{groups2} \hlopt{%>%} \hlkwd{select}\hlstd{(}\hlopt{-}\hlstd{stimulus)}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+Составив дизайн моделей, можно обучить их и вычислить набор статистик с помощью \texttt{eBayes}:
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{f_stimulus} \hlkwb{<-} \hlkwd{factor}\hlstd{(}\hlkwd{unlist}\hlstd{(groups_stimulus))}
+\hlstd{design_stimulus} \hlkwb{<-} \hlkwd{model.matrix}\hlstd{(}\hlopt{~}\hlstd{f_stimulus)}
+\hlkwd{colnames}\hlstd{(design_stimulus)} \hlkwb{<-} \hlkwd{colnames}\hlstd{(design_stimulus)} \hlopt{%>%} \hlkwd{lapply}\hlstd{(}\hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlkwd{gsub}\hlstd{(}\hlstr{"f_stimulus"}\hlstd{,} \hlstr{""}\hlstd{, x))}
+\hlkwd{print}\hlstd{(design_stimulus)}
+\end{alltt}
+\begin{verbatim}
+##    (Intercept) ig incub noincub ta
+## 1            1  0     0       1  0
+## 2            1  0     0       1  0
+## 3            1  0     0       1  0
+## 4            1  0     0       1  0
+## 5            1  0     0       1  0
+## 6            1  0     0       1  0
+## 7            1  0     0       1  0
+## 8            1  0     1       0  0
+## 9            1  0     1       0  0
+## 10           1  0     1       0  0
+## 11           1  0     1       0  0
+## 12           1  0     1       0  0
+## 13           1  0     1       0  0
+## 14           1  0     1       0  0
+## 15           1  0     1       0  0
+## 16           1  0     1       0  0
+## 17           1  0     1       0  0
+## 18           1  0     1       0  0
+## 19           1  1     0       0  0
+## 20           1  1     0       0  0
+## 21           1  1     0       0  0
+## 22           1  1     0       0  0
+## 23           1  1     0       0  0
+## 24           1  1     0       0  0
+## 25           1  1     0       0  0
+## 26           1  0     0       0  0
+## 27           1  0     0       0  0
+## 28           1  0     0       0  0
+## 29           1  0     0       0  0
+## 30           1  0     0       0  0
+## 31           1  0     0       0  0
+## 32           1  0     0       0  0
+## 33           1  0     0       0  1
+## 34           1  0     0       0  1
+## 35           1  0     0       0  1
+## attr(,"assign")
+## [1] 0 1 1 1 1
+## attr(,"contrasts")
+## attr(,"contrasts")$f_stimulus
+## [1] "contr.treatment"
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hlstd{(limma}\hlopt{::}\hlkwd{is.fullrank}\hlstd{(design_stimulus))} \hlcom{# should be TRUE}
+\end{alltt}
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+\begin{alltt}
+\hlstd{fit_stimulus} \hlkwb{<-} \hlstd{limma}\hlopt{::}\hlkwd{lmFit}\hlstd{(c_aeset_stimulus, design_stimulus)}
+\hlstd{fit_stimulus2} \hlkwb{<-} \hlstd{limma}\hlopt{::}\hlkwd{eBayes}\hlstd{(fit_stimulus)}
+\hlkwd{head}\hlstd{(fit_stimulus2}\hlopt{$}\hlstd{coefficients)}
+\end{alltt}
+\begin{verbatim}
+##           (Intercept)          ig       incub    noincub           ta
+## 1007_s_at    5.486107  0.13449020  0.03166571 -0.0767085  0.185413075
+## 1053_at      7.437284 -0.19053967 -0.24036103 -0.2383999 -1.260466493
+## 117_at       7.540072 -0.22570990  0.73219823  0.9689542 -0.365928565
+## 121_at       7.622349 -0.06832876 -0.18950035 -0.2561430 -0.445371906
+## 1255_g_at    2.581148  0.04617147 -0.13434369 -0.1802197 -0.001689818
+## 1294_at      8.192515 -0.19773569  0.03052780  0.1171849  0.247536641
+\end{verbatim}
+\begin{alltt}
+\hlkwd{png}\hlstd{(}\hlkwc{filename} \hlstd{=} \hlstr{"./img/volcanoplot_stimulus.png"}\hlstd{)}
+\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{2}\hlstd{))}
+\hlstd{limma}\hlopt{::}\hlkwd{volcanoplot}\hlstd{(fit_stimulus2,} \hlkwc{coef} \hlstd{=} \hlstr{"ta"}\hlstd{,} \hlkwc{highlight} \hlstd{=} \hlnum{15}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"stimulus: TNF-alpha"}\hlstd{)}
+\hlstd{limma}\hlopt{::}\hlkwd{volcanoplot}\hlstd{(fit_stimulus2,} \hlkwc{coef} \hlstd{=} \hlstr{"ig"}\hlstd{,} \hlkwc{highlight} \hlstd{=} \hlnum{15}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"stimulus: INF-gamma"}\hlstd{)}
+\hlkwd{dev.off}\hlstd{()}
+\end{alltt}
+\end{kframe}
+\end{knitrout}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{volcanoplot_stimulus}
+    \caption{график-вулкан (моноциты, стимулированные в лабораторных условиях)}
+\end{figure}
+
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{f_disease} \hlkwb{<-} \hlkwd{factor}\hlstd{(}\hlkwd{unlist}\hlstd{(groups_disease))}
+\hlstd{design_disease} \hlkwb{<-} \hlkwd{model.matrix}\hlstd{(}\hlopt{~}\hlstd{f_disease)}
+\hlkwd{colnames}\hlstd{(design_disease)} \hlkwb{<-} \hlkwd{colnames}\hlstd{(design_disease)} \hlopt{%>%} \hlkwd{lapply}\hlstd{(}\hlkwa{function}\hlstd{(}\hlkwc{x}\hlstd{)} \hlkwd{gsub}\hlstd{(}\hlstr{"f_disease"}\hlstd{,} \hlstr{""}\hlstd{, x))}
+\hlkwd{print}\hlstd{(design_disease)}
+\end{alltt}
+\begin{verbatim}
+##    (Intercept) ra sl
+## 1            1  0  0
+## 2            1  0  0
+## 3            1  0  0
+## 4            1  0  0
+## 5            1  0  0
+## 6            1  0  0
+## 7            1  0  0
+## 8            1  0  0
+## 9            1  0  0
+## 10           1  0  0
+## 11           1  0  0
+## 12           1  0  0
+## 13           1  1  0
+## 14           1  1  0
+## 15           1  1  0
+## 16           1  1  0
+## 17           1  1  0
+## 18           1  1  0
+## 19           1  1  0
+## 20           1  1  0
+## 21           1  0  1
+## 22           1  0  1
+## 23           1  0  1
+## 24           1  0  1
+## 25           1  0  1
+## 26           1  0  1
+## 27           1  0  1
+## 28           1  0  1
+## 29           1  0  1
+## 30           1  0  1
+## 31           1  0  1
+## 32           1  0  1
+## 33           1  0  1
+## 34           1  0  1
+## attr(,"assign")
+## [1] 0 1 1
+## attr(,"contrasts")
+## attr(,"contrasts")$f_disease
+## [1] "contr.treatment"
+\end{verbatim}
+\begin{alltt}
+\hlkwd{print}\hlstd{(limma}\hlopt{::}\hlkwd{is.fullrank}\hlstd{(design_disease))} \hlcom{# should be TRUE}
+\end{alltt}
+\begin{verbatim}
+## [1] TRUE
+\end{verbatim}
+\begin{alltt}
+\hlstd{fit_disease} \hlkwb{<-} \hlstd{limma}\hlopt{::}\hlkwd{lmFit}\hlstd{(c_aeset_disease, design_disease)}
+\hlstd{fit_disease2} \hlkwb{<-} \hlstd{limma}\hlopt{::}\hlkwd{eBayes}\hlstd{(fit_disease)}
+\hlkwd{head}\hlstd{(fit_disease2}\hlopt{$}\hlstd{coefficients)}
+\end{alltt}
+\begin{verbatim}
+##           (Intercept)          ra           sl
+## 1007_s_at    8.798228 -0.08031188 -0.148079381
+## 1053_at      7.547945  0.03210987 -0.024725947
+## 117_at       9.509895  0.06833807  0.114255460
+## 121_at       9.982004 -0.11442005 -0.283091830
+## 1255_g_at    5.185456  0.01852113 -0.009584626
+## 1294_at      9.620198  0.20138900  0.174358416
+\end{verbatim}
+\begin{alltt}
+\hlkwd{png}\hlstd{(}\hlkwc{filename} \hlstd{=} \hlstr{"./img/volcanoplot_disease.png"}\hlstd{)}
+\hlkwd{par}\hlstd{(}\hlkwc{mfrow} \hlstd{=} \hlkwd{c}\hlstd{(}\hlnum{1}\hlstd{,} \hlnum{2}\hlstd{))}
+\hlstd{limma}\hlopt{::}\hlkwd{volcanoplot}\hlstd{(fit_disease2,} \hlkwc{coef} \hlstd{=} \hlstr{"ra"}\hlstd{,} \hlkwc{highlight} \hlstd{=} \hlnum{15}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"rheumatoid arthritis"}\hlstd{)}
+\hlstd{limma}\hlopt{::}\hlkwd{volcanoplot}\hlstd{(fit_disease2,} \hlkwc{coef} \hlstd{=} \hlstr{"sl"}\hlstd{,} \hlkwc{highlight} \hlstd{=} \hlnum{15}\hlstd{,} \hlkwc{main} \hlstd{=} \hlstr{"systemic lupus erythematosus"}\hlstd{)}
+\hlkwd{dev.off}\hlstd{()}
+\end{alltt}
+\begin{verbatim}
+## pdf
+##   2
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{volcanoplot_disease}
+    \caption{график-вулкан (пациенты,больные RA / SLE)}
+\end{figure}
+
+Отфильтруем гены по значению $ p-value $ сверхпредставленности (для наборов \texttt{c\_aeset\_stimulus}, \texttt{c\_aeset\_ra}, \texttt{c\_aeset\_sl} -- в образцах, обработанных INF-$\gamma$, взятых у пациентов с RA, взятых у пациентов с SLE соответственно) и изобразим тепловые карты профилей генов, которые демонстрируют дифференциальную экспрессию:
+\begin{knitrout}
+\definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
+\begin{alltt}
+\hlstd{draw_clust_heatmap} \hlkwb{<-} \hlkwa{function}\hlstd{(}\hlkwc{c_aeset}\hlstd{,} \hlkwc{groups}\hlstd{,} \hlkwc{fit}\hlstd{,} \hlkwc{pval_thresh}\hlstd{,} \hlkwc{coef}\hlstd{,} \hlkwc{title}\hlstd{)\{}
+  \hlstd{results} \hlkwb{<-} \hlstd{limma}\hlopt{::}\hlkwd{topTable}\hlstd{(fit,} \hlkwc{coef} \hlstd{= coef,} \hlkwc{adjust} \hlstd{=} \hlstr{"BH"}\hlstd{,} \hlkwc{number} \hlstd{=} \hlkwd{nrow}\hlstd{(c_aeset))}
+  \hlkwd{print}\hlstd{(}\hlkwd{as.integer}\hlstd{(results[,} \hlstr{"P.Value"}\hlstd{]} \hlopt{<} \hlstd{pval_thresh)} \hlopt{%>%}
+          \hlstd{na.exclude} \hlopt{%>%}
+          \hlstd{sum)} \hlcom{# how many differentially expressed genese were found?}
+  \hlstd{topgenes} \hlkwb{<-} \hlstd{results[results[,} \hlstr{"P.Value"}\hlstd{]} \hlopt{<} \hlstd{pval_thresh,]}
+  \hlstd{diffexpr_ids} \hlkwb{<-} \hlkwd{rownames}\hlstd{(topgenes)}
+
+  \hlstd{diffexpr_ids} \hlopt{%>%}
+    \hlstd{unlist} \hlopt{%>%}
+    \hlkwd{write.table}\hlstd{(}\hlkwd{paste0}\hlstd{(}\hlstr{"./genes_diffexpr_"}\hlstd{, title,} \hlstr{".csv"}\hlstd{),}
+                \hlkwc{sep} \hlstd{=} \hlstr{","}\hlstd{,} \hlkwc{row.names} \hlstd{= F,} \hlkwc{col.names} \hlstd{= F,} \hlkwc{quote} \hlstd{= F)}
+  \hlstd{results} \hlopt{%>%}
+    \hlstd{rownames} \hlopt{%>%}
+    \hlstd{unlist} \hlopt{%>%}
+    \hlkwd{write.table}\hlstd{(}\hlkwd{paste0}\hlstd{(}\hlstr{"./genes_background_"}\hlstd{, title,} \hlstr{".csv"}\hlstd{),}
+                \hlkwc{sep} \hlstd{=} \hlstr{","}\hlstd{,} \hlkwc{row.names} \hlstd{= F,} \hlkwc{col.names} \hlstd{= F,} \hlkwc{quote} \hlstd{= F)}
+
+  \hlstd{m} \hlkwb{<-} \hlkwd{exprs}\hlstd{(c_aeset[diffexpr_ids,])}
+  \hlkwd{ncol}\hlstd{(m)}
+  \hlkwd{colnames}\hlstd{(m)} \hlkwb{<-} \hlkwd{unlist}\hlstd{(groups[}\hlnum{1}\hlstd{])}
+  \hlkwd{png}\hlstd{(}\hlkwc{filename} \hlstd{=} \hlkwd{paste0}\hlstd{(}\hlstr{"./img/heatmap_"}\hlstd{, title,} \hlstr{".png"}\hlstd{))}
+  \hlkwd{heatmap}\hlstd{(m)}
+  \hlkwd{dev.off}\hlstd{()}
+\hlstd{\}}
+
+\hlstd{c_aeset_ra} \hlkwb{<-} \hlstd{c_aeset_disease[, groups_disease}\hlopt{$}\hlstd{disease} \hlopt{!=} \hlstr{"sl"}\hlstd{]}
+\hlstd{c_aeset_sl} \hlkwb{<-} \hlstd{c_aeset_disease[, groups_disease}\hlopt{$}\hlstd{disease} \hlopt{!=} \hlstr{"ra"}\hlstd{]}
+\hlstd{groups_ra} \hlkwb{<-} \hlstd{groups_disease} \hlopt{%>%} \hlkwd{filter}\hlstd{(disease} \hlopt{!=} \hlstr{"sl"}\hlstd{)}
+\hlstd{groups_sl} \hlkwb{<-} \hlstd{groups_disease} \hlopt{%>%} \hlkwd{filter}\hlstd{(disease} \hlopt{!=} \hlstr{"ra"}\hlstd{)}
+
+\hlstd{devnull} \hlkwb{<-} \hlkwd{mapply}\hlstd{(draw_clust_heatmap,}
+                  \hlkwd{list}\hlstd{(c_aeset_stimulus, c_aeset_ra, c_aeset_sl),}
+                  \hlkwd{list}\hlstd{(groups_stimulus, groups_ra, groups_sl),}
+                  \hlkwd{list}\hlstd{(fit_stimulus2, fit_disease2, fit_disease2),}
+                  \hlkwd{list}\hlstd{(}\hlnum{1e-7}\hlstd{,} \hlnum{5} \hlopt{*} \hlnum{1e-3}\hlstd{,} \hlnum{2} \hlopt{*} \hlnum{1e-3}\hlstd{),}
+                  \hlkwd{list}\hlstd{(}\hlstr{"ig"}\hlstd{,} \hlstr{"ra"}\hlstd{,} \hlstr{"sl"}\hlstd{),}
+                  \hlkwd{list}\hlstd{(}\hlstr{"stimulus"}\hlstd{,} \hlstr{"ra"}\hlstd{,} \hlstr{"sl"}\hlstd{))}
+\end{alltt}
+\begin{verbatim}
+## [1] 1732
+## [1] 723
+## [1] 1056
+\end{verbatim}
+\end{kframe}
+\end{knitrout}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{heatmap_stimulus}
+    \caption{тепловая карта (различные виды стимуляции в лаборатории)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{heatmap_sl}
+    \caption{тепловая карта (пациенты с SLE и здоровые)}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{heatmap_ra}
+    \caption{тепловая карта (пациенты с RA и здоровые)}
+\end{figure}
+
+\subsection{ Анализ обогащённости }
+
+Произведена функциональная аннотация найденных дифференциально экспрессирующихся генов с помощью инструмента \href{https://david.ncifcrf.gov/}{DAVID}.
+
+Для этого полученные списки дифференциально экспрессирующихся генов были выгружены в формате \texttt{AFFYMETRIX\_\-3PRIME\_\-IVT\_\-ID}
+и подверглись анализу функциональной обогащённости путями KEGG и Reactome (фоновый набор генов -- Homo Sapiens).
+
+Были найдены два метаболических пути из базы Reactome, значимо обогащённые генами, дифференциально экспрессирующимися при стимулировании белком INF-$\gamma$:
+\begin{enumerate}
+    \item \href{http://www.reactome.org/content/detail/R-HSA-877300}{R-HSA-877300} (interferon gamma signaling), $p-adjusted \approx 1.5\cdot 10^{-5}$
+    \item \href{http://www.reactome.org/content/detail/R-HSA-909733}{R-HSA-909733} (interferon alpha/beta signaling), $p-adjusted \approx 1.5\cdot 10^{-5}$
+\end{enumerate}
+
+В базе данных KEGG также были найдены несколько метаболических путей, но они, по-видимому, не имеют прямого отношения к экспериментальному воздействию.
+Среди прочих найдена сверхпредставленность генов из пути "TNF signaling pathway"
+($p-adjusted \approx 0.05$).
+
+Для пациентов с волчанкой в базе данных Reactome найдены те же два пути R-HSA-877300 и R-HSA-909733   $p-adjusted \approx 4.2\cdot 10^{-5}$ и $1\cdot 10^{-12}$ соответственно).
+
+В клетках, взятых у пациентов с артритом, не нашлось значимо обогащённых путей из базы Reactome, но в базе данных KEGG показана свехпредставленность генов из пути "TNF signaling pathway".
+Впрочем, значимость этого наблюдения невысока ($p-adjusted \approx 0.1$).
+
+\section{Выводы}
+
+После фильтрации данных были построены тепловые карты, на которых отчётливо заметно  различие в экспрессии некоторых генов между пациентами с артритом и здоровыми людьми; между пациентами с волчанкой и здоровыми людьми; между группами клеток, обработанных разными веществами.
+Такое же чёткое разделение было получено и авторами статьи.
+
+Функциональная аннотация дифференциально экспрессирующихся генов выявила сверхпредставленность генов из путей, регулирующих синтез соответствующих цитокинов (как и в статье); в большей степени это заметно в случае волчанки, чем в случае ревматоидного артрита.
+
+\begin{thebibliography}{99}
+    \bibitem{smiljanovich2012} Smiljanovic, B., Grun, J.R., Biesen, R. et al. The multifaceted balance of TNF-$\alpha$ and type I/II interferon responses in SLE and RA: how monocytes manage the impact of cytokines. J Mol Med 90, 1295-1309 (2012). doi: \href{https://doi.org/10.1007/s00109-012-0907-y}{10.1007/s00109-012-0907-y}
+\end{thebibliography}
+
+\end{document}
