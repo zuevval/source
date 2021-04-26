@@ -25,7 +25,7 @@ def visualize_3d(model: RegressionModel, out_path: Path) -> None:
 
 def build_model(data_dir: Path, out_dir: Path) -> RegressionModel:
     x = np.loadtxt(data_dir / "X.txt")
-    y = np.loadtxt(data_dir / "y.txt")
+    y = np.loadtxt(data_dir / "y7.txt")[:,6]
     model = RegressionModel(x, y, "initial")
     print_matrix(model.a.T, var_name="a")
 
@@ -69,7 +69,7 @@ def perform_analysis(model: RegressionModel) -> np.array:
     r2n = 1 - (sum_errs2 / (n - m)) / (sum_y2_centered / (n - 1))
     print("R_n^2 = {:.4f}".format(r2n))
 
-    gamma = .9
+    gamma = .95
     quantile = stats.t(n - m).ppf((1 + gamma) / 2)
     a_confidence_intervals = np.array([model.a - s_a * quantile, model.a + s_a * quantile])
     print_matrix(a_confidence_intervals.T,
@@ -101,7 +101,7 @@ def make_prediction(model: RegressionModel) -> None:
     new_y_hat_s = s2 * (new_x.T @ incomplete_model.inv_xx @ new_x + 1)
     print("estimate of variance of excluded sample prediction: {:.2f}".format(new_y_hat_s))
 
-    gamma = 0.9
+    gamma = 0.95
     quantile = stats.t(n - m).ppf((1 + gamma) / 2)
     print("confidence interval (gamma={}): [{:.1f}, {:.1f}]".format(gamma, new_y_hat - quantile, new_y_hat + quantile))
 
