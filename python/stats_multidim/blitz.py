@@ -5,14 +5,14 @@ from scipy import stats
 
 def first():
     x = np.array([[2, .5]]).T
-    s = np.array([[0, 2], [2, 0]])
+    s = np.array([[2, 0], [0, 2]])
     s_inv = np.linalg.inv(s)
     m = np.array([[1, 2], [1, 1], [2, 1]])
     for i in range(len(m)):
         mi = m[i]
         ai = np.array([s_inv @ mi])
         print(ai)
-        gamma_i = mi.T @ s_inv @ mi
+        gamma_i = - .5 * mi.T @ s_inv @ mi
         # print(gamma_i)
         # print(i + 1)
         print(ai @ x + gamma_i)
