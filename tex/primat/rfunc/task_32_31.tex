@@ -1,0 +1,135 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{pdfpages} % insert pdf pages, e.g. scans
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{mdframed}
+\usepackage{graphicx}
+\usepackage{color}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\usepackage[left=20mm, top=20mm, right=20mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.99\textwidth}
+\newcommand{\phm}{\phantom{-}}
+\newcommand{\defeq}{\overset{def}=}
+
+\begin{document}
+
+\title{Задача 32.31}
+\author{Валерий Зуев}
+\maketitle
+
+\section{Постановка}
+\[ \dot Z(t) + a^2 [1 + Y(t)]Z(t) = X(t) \]
+$X$, $Y$ независимые, стационарные, нормальные; $\bar x = \bar y = 0$;
+известны $K_x(\tau)$, $K_y(\tau)$; $Z(0)\equiv0$.
+
+Найти $D[z(t)]$.
+
+\begin{leftbar}
+    Ответ:
+    \begin{equation} \label{eq:ans}
+        D[Z] = \int_{0}^{t} \int_{0}^{t} \exp\left( a^2(\tau_1+\tau_2) + \frac{a^2}{4} [ 3 \phi(\tau_1) + 3 \phi(\tau_2) - \phi(\tau_2-\tau_1) ] \right) K_x(\tau_2 - \tau_1) d\tau_1 d\tau_2
+    \end{equation}
+    где $ \phi(\tau) = 2 \int_{0}^{\tau} (\tau - \tau_1) K_y(\tau_1) d \tau_1 $
+\end{leftbar}
+
+\section{Решение}
+
+\[\begin{cases}
+    \dot Z + a^2(1-Y) Z = X \\
+    Z(0)=0
+\end{cases}\]
+Представим решение в виде суммы общего решения однородного уравнения и частного решения неоднородного с однородными начальными условиями:
+ \[Z=Z_0 + Z_*\]
+Ищем общее решение $Z_0$.
+\begin{gather*}
+    \dot Z_0 + a^2(1-Y)Z_0 = 0 \\
+    \dot Z_0 = -a^2(1-Y(t))Z_0 \\
+\end{gather*}
+Это линейная система первого порядка, следовательно, $ Z_0 = c_1 z_1 $, $ Z_1 = k \cdot (...) $, $k$ выбирается из условия $ W = Z_1(0) = 1 $.
+Выражение вида $ z_1 = k \exp\left(- a^2 \int_{0}^{t} (1+Y(s)) ds \right) $ удовлетворяет решению:
+\[ \dot Z_0 = c_1 k \exp \left(- a^2 \int_{0}^{t} (1+Y(s)) ds \right) \cdot \left(- a^2 \frac{d}{dt} \left( \int_{0}^{t} (1+Y(s)) ds \right) \right) = c_1 k (...) \cdot (- a^2(1+Y(t))) \]
+\[ \begin{cases}
+    Z_0(0)=0 \\
+    Z_1(0)=1
+\end{cases} \Rightarrow
+\begin{cases}
+    k = 1 \\
+    c_1 = 0
+\end{cases} \Rightarrow
+\begin{cases}
+    Z_1 = \exp \left( - a^2 \int_{0}^{t} (1+Y(s)) ds \right) \\
+    Z_0 \equiv 0
+\end{cases} \]
+Т. о. $ Z = Z_* $.
+Частное решение $Z_*$ ищем в виде интеграла:
+\begin{gather*}
+    \begin{cases}
+        Z = \int_{0}^{t} p(t, \tau) X(\tau) d \tau \\
+        p(t,\tau) = \frac{Z_1(t)}{Z_1(\tau)} = \exp \left( - a^2 \int_{\tau}^{t} (1+Y(s)) ds \right)
+    \end{cases} \\
+    \boxed{ Z = \int_{0}^{t} \left[ \exp \left( - a^2 \int_{\tau}^{t} (1+Y(s)) ds \right) X(\tau) \right] d \tau } \\
+    D[Z] = \int_{0}^{t} \int_{0}^{t} \left[
+        \exp \left(- a^2 \int_{\tau_1}^{t} (1+Y(s)) ds \right) \cdot
+        \exp \left(- a^2 \int_{\tau_2}^{t} (1+Y(s)) ds \right) K_x(\tau_2-\tau_2) \right] d\tau_1 d\tau_2 \\
+\end{gather*}
+\begin{equation}\label{eq:var}
+    D[Z] = \int_{0}^{t} \int_{0}^{t} \left[
+    \exp \left(- a^2 \left (\int_{\tau_1}^{t} (1+Y(s)) ds + \int_{\tau_2}^{t} (1+Y(s)) ds \right) \right) \cdot
+    K_x(\tau_2-\tau_2) \right] d\tau_1 d\tau_2
+\end{equation}
+
+\section{Сомнения}
+
+Сравним показатели экспонент в \eqref{eq:ans} и \eqref{eq:var}.
+Обозначим их $ p_{ans} $ и $p$ соответственно.
+Подставим $\phi(\tau)$ в \eqref{eq:ans}:
+\[ \frac{p_{ans}}{a^2} = \tau_1 + \tau_2 + \frac{1}{2} \left[
+    3 \int_{0}^{\tau_1} (\tau_1 - \tau) K_y(\tau) d\tau +
+    3 \int_{0}^{\tau_2} (\tau_2 - \tau) K_y(\tau) d\tau -
+    \int_{0}^{\tau_2-\tau_1} ((\tau_2-\tau_1) - \tau) K_y(\tau) d\tau \right] \]
+В то же время
+\begin{align*}
+    \frac{p}{a^2} & = - \left[ \int_{\tau_1}^{t} ds + \int_{\tau_2}^{t} ds + 2 \int_{0}^{t} Y(s) ds - \left( \int_{0}^{\tau_1} Y(s) ds + \int_{0}^{\tau_2} Y(s) ds \right) \right] \\
+    & = -2t + \tau_1 + \tau_2 - 2 \int_0^t Y(s) ds + \left( + \int_{0}^{\tau_1} Y(s) ds + \int_{0}^{\tau_2} Y(s) ds \right)
+\end{align*}
+\[  \]
+Сравниваем два выражения:
+\begin{gather*}
+    -2 \left(t+\int_{0}^{t} Y(s) ds \right) + \int_{0}^{\tau_1} Y(s) ds + \int_{0}^{\tau_2} Y(s) ds \overset{?}= \\
+    \frac{1}{2} \left[
+        3 \int_{0}^{\tau_1} (\tau_1 - \tau) K_y(\tau) d\tau +
+        3 \int_{0}^{\tau_2} (\tau_2 - \tau) K_y(\tau) d\tau -
+        \int_{0}^{\tau_2-\tau_1} ((\tau_2-\tau_1) - \tau) K_y(\tau) d\tau \right]
+\end{gather*}
+
+Левая часть зависит от $t$, в то время как правая не зависит.
+Например, в предельном случае при $ Y \equiv 0 $ $ K_y \equiv 0 $, и мы имеем
+\[ -2t \overset{?}= 0 \]
+что, очевидно, при $t \ne 0$ не выполняется.
+
+\end{document}

@@ -164,7 +164,7 @@ $ ] L : Lx(t) = L_0 x(t) + F(t) $ (неоднородный оператор; $ 
 
 Если $ X(t) $ -- нормальная стационарная и $ Y = sign(t) $, то
 $$ K_y(\tau) = \frac{2}{\pi} \arcsin k_x(\tau) $$
-где $ k_x(\tau) = e^{- \alpha |\tau|} \left( \cos \beta \tau - \frac{\alpha}{\beta} sin \beta |\tau| \right) $
+где $ k_x(\tau) = e^{- \alpha |\tau|} \left( \cos \beta \tau - \frac{\alpha}{\beta} \sin \beta |\tau| \right) $
 
 \subsection{Дифференцирование случайных  функций}
 
@@ -175,7 +175,7 @@ $$ K_y(\tau) = \frac{2}{\pi} \arcsin k_x(\tau) $$
 \textbf{ Понятие производной: }
 
 \begin{align*}
-    V(t) & = \dot X(t) \defeq \underset{\Delta t \to 0}{l.i.m.} \frac{Delta X}{\Delta t} \\
+    V(t) & = \dot X(t) \defeq \underset{\Delta t \to 0}{l.i.m.} \frac{\Delta X}{\Delta t} \\
          & = \lim\limits_{\Delta t \to 0} \frac{1}{\Delta t} [ X(t + \Delta t) - X(t) ]
 \end{align*}
 
@@ -287,7 +287,7 @@ $ c_i $ -- случайные постоянные, известны $ \bar c_i 
 \end{vmatrix}  \]
 
 Если $ \{ y_i(t) \} $ -- ФСР, то
-\[ W(t) = \begin{vmatrix}
+\[ W(t)|_{t=0} = \begin{vmatrix}
     1 & 0 & \dots & 0 \\
     0 & 1 & \dots & 0 \\
     \vdots & & & \vdots \\
@@ -322,7 +322,7 @@ $ c_i $ -- случайные постоянные, известны $ \bar c_i 
 
 \begin{align*}
      \bar y(t) & = \sum_{i=1}^{n} \bar c_i y_i(t) + \int_{0}^{t} p(t, t_1) \bar x(t_1) d t_1 \\
-    K_y(t_1, t_2) & = \sum_{i=1}^{n} \sum_{i=1}^{n} K_{ij} y_i(t_1) y_j(t_2) + \\
+    K_y(t_1, t_2) & = \sum_{i=1}^{n} \sum_{j=1}^{n} K_{ij} y_i(t_1) y_j(t_2) + \\
     & + \iint_{0,0}^{t_1, t_2} p(t_1, s_1) p(t_2, s_2) K_x(s_1, s_2) d s_1 d s_2
 \end{align*}
 
@@ -330,6 +330,29 @@ $ c_i $ -- случайные постоянные, известны $ \bar c_i 
 \[ \bar y = \frac{1}{a_n} \bar x \]
 \[ K_y(\tau) = \iint_{0,0}^{\infty, \infty} K_x(|\tau| - s_1 + s_2) p(s_1)p(s_2) ds_1 ds_2 \]
 Устойчивость можно проверить, к примеру, по критерию Гурвица (привет МТУ).
+
+\section{ Спектральное разложение стационарных с. ф. }
+Материал \textsection 34 Свешникова. \\
+
+Всякая стационарная функция $ X(t) $ м. б. представлена в виде
+\[ \mathring X(t) = \int_{-\infty}^{\infty} e^{i\omega t} d \Phi(\omega) \]
+Если $ \int_{-\infty}^{\infty} |K_x(\tau)| d\tau < \infty $, то
+\[ M[d \Phi(\omega)] = 0, M[d \Phi^*(\omega) d\Phi(\omega_1)] = S_x(\omega) \delta(\omega - \omega_1) d \omega d \omega_1 \]
+
+где $ S_x(\omega) $ -- \emph{ спектральная плотность } $ X(t) $.
+
+\textbf{ Связь между корреляционной функцией и спектральной плотностью: }
+\[ K_x(\tau) = \int_{-\infty}^{\infty} e^{i \omega \tau} S_x(\omega) d \omega, S_x(\omega) = \frac{1}{2 \pi} \int_{-\infty}^{\infty} e^{- i \omega \tau} K_x(\tau) d\tau \]
+(взаимно обратные преобразования Фурье).
+В частности, при $ \tau = 0 $
+\[ K_x(0) = D[X(t)] = \int_{-\infty}^{\infty} S_x(\omega) d \omega \]
+
+\textbf{ Свойства спектральной плотности: }
+\begin{align*}
+    & S_x(\omega) \ge 0 \\
+    & S_x(\omega) = S_x(-\omega) \\
+    & \\
+\end{align*}
 
 
 \section{ Теория выбросов }

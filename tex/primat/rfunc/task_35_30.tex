@@ -1,0 +1,133 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{pdfpages} % insert pdf pages, e.g. scans
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{mdframed}
+\usepackage{graphicx}
+\usepackage{color}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\usepackage[left=20mm, top=20mm, right=20mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.99\textwidth}
+\newcommand{\phm}{\phantom{-}}
+\newcommand{\defeq}{\overset{def}=}
+
+\begin{document}
+
+\title{Задача 35.30}
+\author{Валерий Зуев}
+\maketitle
+
+\section{Постановка}
+
+\[\begin{cases}
+    \ddot Y + 2 h_1 \dot Y + k_1^2 Y = k_1^2 X \\
+    \ddot Z + 2 h_2 \dot Z + k_2^2 Z = k_2^2 X
+\end{cases}\]
+$X$ -- нормальный стационарный центрированный процесс, $K_x(\tau) \sim \delta(\tau)$, $S_x(\omega)=c^2$ (<<белый шум>>); $k_1 > h_1 > 0$, $k_2>h_2>0$.
+
+Найти $R_{yz}(\tau)$.
+
+
+\begin{leftbar}
+    Ответ:
+    \begin{gather*}
+        \tau \ge 0 \Rightarrow R_{yz}(\tau) = \frac{2\pi (k_1 k_2 c)^2}{\omega_2} \cdot e^{-h_2 \tau} \cdot \frac{2 \omega_2 (h_1+h_2) \cos \omega_2 \tau - [\omega_2^2 - \omega_1^2 - (h_1+h_2)^2] \sin \omega_2 \tau}{[(\omega_2 - \omega_1)^2 + (h_1+h_2)^2][(\omega_2 + \omega_1)^2 + (h_1+h_2)^2]} \\
+        \tau < 0 \Rightarrow R_{yz}(\tau) = \frac{2\pi (k_1 k_2 c)^2}{\omega_1} \cdot e^{h_1 \tau} \cdot \frac{2 \omega_1 (h_1+h_2) \cos \omega_1 \tau - [\omega_2^2 - \omega_1^2 + (h_1+h_2)^2] \sin \omega_1 \tau}{[(\omega_2 - \omega_1)^2 + (h_1+h_2)^2][(\omega_2 + \omega_1)^2 + (h_1+h_2)^2]}
+    \end{gather*}
+
+    где $ \omega_1 = \sqrt{k_1^2 - h_1^2} $, $ \omega_2 = \sqrt{k_2^2 - h_2^2} $
+\end{leftbar}
+
+\section{Решение}
+
+Обозначим $ X_1 := k_1^2 X $, $ X_2 := k_2^2 X $.
+Тогда
+
+\begin{gather}
+    R_{yz}(\tau) \overset{\text{задачник Свешникова, с. 279}}= \int_{-\infty}^\infty e^{i\omega \tau} S_{yz}(\omega) d \omega \label{eq:ryz} \\
+    S_{yz}(\omega) \overset{\text{Свешников с. 289, 292}}= \frac{A_{11}^* A_{12} S_{x_1}(\omega) + A_{11}^* A_{22} S_{x_1 x_2}(\omega) + A_{21}^* A_{12} S_{x_2 x_1}(\omega) + A_{21}^* A_{22} S_{x_2}(\omega)}{|\Delta \omega|^2} \label{eq:syz}
+\end{gather}
+где $ \Delta w $ -- определитель системы при замене оператора дифференцирования на $i \omega$, $ A_{ij} $ -- миноры $w$ , $ A_{ij}^* $ -- комплексно сопряжённые с ними величины.
+
+\begin{gather*}
+    \begin{cases}
+        (i\omega)^2 Y + 2 h_1 \cdot i\omega Y + k_1^2 Y = k_1^2 X \\
+        (i\omega)^2 Z + 2 h_2 \cdot i\omega Z + k_2^2 Z = k_2^2 X
+    \end{cases} \\
+    \Delta w = \begin{vmatrix}
+        - \omega^2 + 2 h_1 i \omega + k_1^2 & 0 \\
+        0 & - \omega^2 + 2 h_2 i \omega + k_2^2
+    \end{vmatrix} = (- \omega^2 + 2 h_1 i \omega + k_1^2)(- \omega^2 + 2 h_2 i \omega + k_2^2) \\
+    \begin{cases}
+        A_{11} = - \omega^2 + 2 h_2 i \omega + k_2^2 \\
+        A_{12} = 0 \\
+        A_{21} = 0 \\
+        A_{22} = - \omega^2 + 2 h_1 i \omega + k_1^2
+    \end{cases}
+\end{gather*}
+
+Т. о. в формуле \eqref{eq:ryz} все слагаемые в числителе обращаются в ноль, за исключением $ A_{11}^* A_{22} S_{x_1 x_2}(\omega)$.
+
+Найдём $ S_{x_1 x_2}(\omega) $, используя \eqref{eq:syz}.
+
+\begin{gather*}
+    K_x(\tau) = A \delta(\tau), \thickspace A = ? \\
+    S_x(\omega) = \frac{1}{2 \pi} \int_{-\infty}^\infty e^{- i \omega \tau} K_x(\tau) d \tau = \frac{1}{2 \pi} \int_{-\infty}^\infty e^{- \omega \tau} A \delta(\tau) d \tau = \frac{A}{2 \pi} = c^2 \Rightarrow \boxed{K_x(\tau) = 2 \pi c^2 \delta(\tau)} \\
+    \begin{cases}
+        K_{x_1}(\tau) = k_1^4 \cdot K_x(\tau) = 2 \pi c^2 k_1^4 \delta(\tau) \\
+        K_{x_2}(\tau) = k_2^4 \cdot K_x(\tau) = 2 \pi c^2 k_2^4 \delta(\tau)
+    \end{cases} \Rightarrow
+\end{gather*}
+\begin{gather*}
+    S_{x_1 x_2}(\omega) = \frac{1}{2\pi}  \int_{-\infty}^\infty e^{- i \omega \tau} R_{x_1 x_2}(\tau) d \tau \\
+    R_{x_1 x_2}(\tau) \overset{X_1,X_2\text{ независимы}}= \sqrt{K_{x_1}(\tau) K_{x_2}(\tau)} = 2 \pi c^2 k_1^2 k_2^2 \delta(\tau) \\
+    \boxed{S_{x_1 x_2}(\omega) = c^2 k_1^2 k_2^2}
+\end{gather*}
+
+Наконец, подставляем в \eqref{eq:syz} и затем в \eqref{eq:ryz}:
+
+\begin{align*}
+    S_{yz}(\omega) & =  \frac{A_{11}^* A_{22} S_{x_1 x_2}(\omega)}{|\Delta \omega|^2} = c^2 k_1^2 k_2^2 \frac{(- \omega^2 - 2 h_2 i \omega + k_2^2)(- \omega^2 + 2 h_1 i \omega + k_1^2)}{(- \omega^2 + 2 h_1 i \omega + k_1^2)^2(- \omega^2 + 2 h_2 i \omega + k_2^2)^2} \\
+    & = c^2 k_1^2 k_2^2 \frac{(- \omega^2 - 2 h_2 i \omega + k_2^2)}{(- \omega^2 + 2 h_1 i \omega + k_1^2)(- \omega^2 + 2 h_2 i \omega + k_2^2)^2}
+\end{align*}
+
+\begin{equation}
+    R_{yz}(t) \overset{\eqref{eq:ryz}}= c^2 k_1^2 k_2^2 \int_{-\infty}^\infty e^{i\omega t} \frac{(\omega^2 + 2 h_2 i \omega - k_2^2)}{(\omega^2 - 2 h_1 i \omega - k_1^2)(\omega^2 - 2 h_2 i \omega - k_2^2)^2} d \omega \label{eq:ryz_int}
+\end{equation}
+
+Заметим:
+\begin{gather*}
+    \omega^2 + 2 h_2 i \omega - k_2^2: roots = -ih_2 \pm \sqrt{k_2^2-h_2^2} = -ih_2 \pm \omega_2 \\
+    \omega^2 - 2 h_2 i \omega - k_2^2: roots = ih_2 \pm \sqrt{k_2^2-h_2^2} = ih_2 \pm \omega_2 \\
+    \omega^2 - 2 h_1 i \omega - k_1^2: roots = ih_1 \pm \sqrt{k_1^2-h_1^2} = ih_1 \pm \omega_1 \\
+\end{gather*}
+
+Тогда \eqref{eq:ryz_int} можно переписать так:
+\[ R_{yz}(t) = c^2 k_1^2 k_2^2 \int_{-\infty}^\infty \frac{[(\omega + ih_2)^2 - \omega_2^2] e^{i\omega t}}{(\omega - h_1 i - \omega_1)(\omega - h_1 i + \omega_1)(\omega - h_2 i - \omega_2)^2 (\omega - h_2 i + \omega_2)^2} d \omega \]
+
+\end{document}
