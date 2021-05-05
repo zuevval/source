@@ -1,0 +1,163 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{listings}
+\lstset{
+    language=bash,
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    commentstyle=\color{red},
+    keywordstyle=\color{blue},
+    breaklines=true,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\usepackage[left=25mm, top=20mm, right=25mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.7\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\subfile{titlepage}
+
+\section{Постановка задачи}
+
+Даны две таблицы: файл \texttt{Transferrin\_males\_chr1.vcf} содержит информацию о найденных однонуклеотидных полиморфизмах в лабораторных пробах ДНК различных организмов; файл \texttt{Tr\_males.pheno} -- уровень экспрессии трансферрина в тех же организмов в формате <<ID семьи, ID таксона, уровень экспрессии>>.
+
+Необходимо провести анализ ассоциации, выявив полиморфизмы, наличие которых коррелирует с уровнем экспрессии трансферрина.
+
+\section{Ход работы}
+
+\subsection{Фильтрация полиморфизмов}
+
+С помощью утилиты \href{https://zzz.bwh.harvard.edu/plink/download.shtml}{PLINK} выбраны только полиморфизмы с частотой минорного аллеля $ >3\% $ и более $90\%$ всех значений в строке таблицы присутствуют:
+
+\begin{lstlisting}
+./plink --vcf ../Transferrin_males_chr1.vcf --maf 0.03 --geno 0.1 --make-bed --out tr_males_chr1_filtered
+\end{lstlisting}
+
+Вывод программы:
+
+\begin{verbatim}
+<...>
+21078 variants loaded from .bim file.
+1589 people (0 males, 0 females, 1589 ambiguous) loaded from .fam.
+<...>
+Total genotyping rate is 0.99941.
+0 variants removed due to missing genotype data (--geno).
+66 variants removed due to minor allele threshold(s)
+(--maf/--max-maf/--mac/--max-mac).
+21012 variants and 1589 people pass filters and QC.
+\end{verbatim}
+
+Отсеяны 66 SNP (менее $1\%$), т. е. данные качественные.
+После фильтрации на выходе получается набор из .bed, .bim и .bam-файлов, которые мы снова преобразуем в .vcf:
+
+\begin{lstlisting}
+./plink --bfile tr_males_chr1_filtered --recode vcf --out tr_males_chr1_filtered
+\end{lstlisting}
+
+\subsection{Поиск генов, значимо ассоциированных с фенотипом}
+
+Проведём полногеномный анализ ассоциаций с помощью TASSEL \cite{tassel}.
+
+\subsubsection{Предобработка файла фенотипов}
+
+Составим программу на языке R, которая переводит файл фенотипа в формат, соответствующий vcf-файлу (объединим ID семьи и ID вида, добавим необходимые для TASSEL метаданные):
+
+\begin{lstlisting}[language=R]
+library(dplyr)
+pheno <- read.csv("Tr_males.pheno", header = F, sep = "\t")
+colnames(pheno) <- c("familyid", "taxid", "ph")
+out_filename <- "tr_males_tassel.pheno"
+cat( "<phenotype>\ntaxa\tdata\n", file = out_filename)
+pheno %>%
+   transmute(taxid = paste0(familyid, "_", taxid), ph = ph) %>%
+   write.table("tr_males_tassel.pheno", sep = "\t", quote = F, row.names = F, append = T)
+\end{lstlisting}
+
+\subsubsection{Работа в TASSEL}
+
+Построим смешанную линейную модель, используя матрицу сходства и данные в пространстве пяти первых главных компонент.
+
+\begin{enumerate}[noitemsep]
+    \item Загрузим данные в рабочее пространство TASSEL GUI: File $\rightarrow$ Open as $\rightarrow$ ok $\rightarrow$ выбираем файлы .pheno и .vcf
+    \item По vcf-таблице построим матрицу сходства (Analysis $\rightarrow$ Relatedness $\rightarrow$ Kinship)
+    \item Вычислим главные компоненты той же таблицы (Analysis $\rightarrow$ Relatedness $\rightarrow$ PCA)
+    \item Построим пересечение результата PCA с данными о фенотипе и генотипе (Data $\rightarrow$ IntersectJoin)
+    \item Построим линейную модель, используя матрицу сходства и таблицу, полученную на предыдущем шаге (Analysis $\rightarrow$ Association $\rightarrow$ MLM).
+\end{enumerate}
+
+\subsubsection{Анализ зависимости между полиморфизмами и фенотипом}
+
+В результате подбора линейной модели, описывающей связь генотипа с фенотипом, были получены $p-values$ гипотезы о сцепленности каждого полиморфизма с проявлением признака (экспрессия трансферрина).
+
+Проведём поправку на множественное тестирование методом Бенджамини-Хохберга:
+
+\begin{lstlisting}[language=R]
+library(dplyr)
+mlm_res <- read.csv("mlm_results.txt", sep = "\t") %>%
+   na.omit %>%
+   select(p, Marker)
+mlm_res$padj <- p.adjust(mlm_res$p, method = "BH")
+xtable::xtable(head(mlm_res %>% arrange(padj), 3),
+               display = list("d", "e", "s", "f"))
+\end{lstlisting}
+
+Результат -- список SNP с самым низким значением скорректированных $p-value$.
+\begin{table}[H]
+    \centering
+    \caption{Полиморфизмы с наиболее низкими значениями $p_{adj}$}
+    \begin{tabular}{rrlr}
+        \hline
+        & p & Marker & padj \\
+        \hline
+        1 & 1.17e-05 & rs12079041 & 0.25 \\
+        2 & 3.72e-02 & rs3737728 & 0.97 \\
+        3 & 2.59e-02 & rs3736330 & 0.97 \\
+        \hline
+    \end{tabular}
+    \label{tab:snp}
+\end{table}
+
+Необходимо отобрать те SNP, у которых скорректированное значение $p-value$ меньше порогового: $ p_{adj} < 0.05 $.
+Таких полиморфизмов не оказалось, как видно из табл. \ref{tab:snp}.
+
+\begin{thebibliography}{99}
+    \bibitem{tassel} Bradbury PJ, Zhang Z, Kroon DE, Casstevens TM, Ramdoss Y, Buckler ES. (2007) TASSEL: Software for association mapping of complex traits in diverse samples. Bioinformatics 23:2633-2635. doi: \href{https://doi.org/10.1093/bioinformatics/btm308}{10.1093/bioinformatics/btm308}
+\end{thebibliography}
+
+\end{document}
