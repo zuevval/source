@@ -31,3 +31,5 @@ ggplot(data = genes_filtered, aes(Gene.Name, count)) +
   theme_bw() +
   theme(plot.title = element_text(hjust = .5))
 ggsave("snp_hist.jpeg", scale = .3)
+
+xtable::xtable(genes_filtered %>% select(Gene.Name, Product, count))

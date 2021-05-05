@@ -1,0 +1,176 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{listings}
+\lstset{
+    language=bash,
+    basicstyle=\ttfamily,
+    showstringspaces=false,
+    commentstyle=\color{red},
+    keywordstyle=\color{blue},
+    breaklines=true,
+    postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+    columns=fullflexible
+}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\usepackage[left=25mm, top=20mm, right=25mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.9\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\subfile{titlepage}
+
+\section{Постановка задачи}
+
+Необходимо провести манипуляции с короткими последовательностями, полученными в результате секвенирования генома \textit{Escherichia coli} (\href{https://www.ncbi.nlm.nih.gov/sra/?term=SRR1770413}{NCBI: SRR1770413}), а именно
+\begin{enumerate}[noitemsep]
+    \item Выровнять прочтения на референсный геном (\href{https://www.ncbi.nlm.nih.gov/nuccore/NC_000913.3}{NCBI: NC\_000913.3})
+    \item Выполнить поиск вариабельных позиций
+    \item Посмотреть, как выявленные варианты распределены по генам (аннотация SNP).
+\end{enumerate}
+
+\section{Ход работы}
+
+\subsection{Подготовка данных}
+Парные прочтения в формате FASTQ были загружены при помощи утилиты \href{https://github.com/ncbi/sra-tools/wiki/01.-Downloading-SRA-Toolkit}{SRA-Toolkit}:
+\begin{lstlisting}
+    ../sratoolkit.2.11.0-win64/bin/fasterq-dump --split-files SRR1770413
+\end{lstlisting}
+Референсный геном в формате FASTA можно скачать через веб-интерфейс сайта NCBI.
+
+\subsection{Выравнивание}
+
+Выравнивание осуществлено с помощью программы \href{https://sourceforge.net/projects/bowtie-bio/files/bowtie2/}{Bowtie2}.
+
+Сперва на основе FASTA-файла строится индекс референсного генома:
+
+\begin{lstlisting}
+./bowtie2-build ../lab1_snp/nc_000913_3_ref.fasta ../lab1_snp/ref_index
+\end{lstlisting}
+
+Затем производится выравнивание, на выходе которого генерируется файл с расширением sam:
+
+\begin{lstlisting}
+../bowtie2-2.3.3.1-mingw-x86_64/bowtie2 -x ref_index -1 SRR1770413_1.fastq -2 SRR1770413_2.fastq -S alignments.sam
+\end{lstlisting}
+
+Примерно $71\%$ прочтений удалось выровнять (ниже показан вывод программы):
+
+\begin{verbatim}
+643253 reads; of these:
+643253 (100.00%) were paired; of these:
+561440 (87.28%) aligned concordantly 0 times
+79980 (12.43%) aligned concordantly exactly 1 time
+1833 (0.28%) aligned concordantly >1 times
+----
+561440 pairs aligned concordantly 0 times; of these:
+359323 (64.00%) aligned discordantly 1 time
+----
+202117 pairs aligned 0 times concordantly or discordantly; of these:
+404234 mates make up the pairs; of these:
+374955 (92.76%) aligned 0 times
+11532 (2.85%) aligned exactly 1 time
+17747 (4.39%) aligned >1 times
+70.85% overall alignment rate
+\end{verbatim}
+
+\subsection{Поиск полиморфизмов}
+
+Для поиска структурных вариантов были применены программы SAMtools и BCFtools.
+
+Вначале преобразуем sam-файл, оставив только выровненные последовательности, и отсортируем его:
+
+\begin{lstlisting}
+samtools view -b -F 4 alignments.sam > mapped.bam
+samtools sort mapped.bam --reference nc_000913_3_ref.fasta > sorted.bam
+\end{lstlisting}
+
+Затем определим степень правдоподобия наличия полиморфизма в каждой позиции генома и классифицируем позиции (SNP / не SNP):
+
+\begin{lstlisting}
+bcftools mpileup -Ou -f nc_000913_3_ref.fasta sorted.bam | bcftools call -mv -Ov -o variant_calls.vcf
+\end{lstlisting}
+
+\subsection{Аннотация полиморфизмов}
+
+После нахождения структурных вариантов осуществлён поиск генов, обогащённых вариабельными позициями (код программы на языке R приведён в приложении).
+Для этого использован список генов \textit{E. coli} (\href{https://biocyc.org/group?id=biocyc13-24029-3731963750}{K-12 MG1655}).
+
+Выявлены 12 генов, в которых встречается не менее двух SNP (табл. \ref{tab:snp}, рис. \ref{fig:hist})
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Wed May 05 07:05:00 2021
+\begin{table}[H]
+    \centering
+    \caption{Гены, в которых найдены 2 полиморфизма и более}
+    \begin{tabular}{rllr}
+        \hline
+        & Gene.Name & Product & count \\
+        \hline
+        1 & ybfQ & inactive transposase YbfQ &  11 \\
+        2 & ychS & putative uncharacterized protein YchS &   9 \\
+        3 & ybcV & DLP12 prophage; DUF1398 domain-containing protein YbcV &   6 \\
+        4 & nohD & DLP12 prophage; putative DNA-packaging protein NohD &   6 \\
+        5 & borD & DLP12 prophage; prophage lipoprotein BorD &   5 \\
+        6 & yhgF & putative RNA-binding protein YhgF &   3 \\
+        7 & oppA & oligopeptide ABC transporter periplasmic binding protein &   3 \\
+        8 & rpoD & RNA polymerase, sigma 70 (sigma D) factor &   2 \\
+        9 & fliC & flagellar filament structural protein &   2 \\
+        10 & nuoL & NADH:quinone oxidoreductase subunit L &   2 \\
+        11 & ylcI & DLP12 prophage; DUF3950 domain-containing protein YlcI &   2 \\
+        12 & rttR & small RNA RttR &   2 \\
+        \hline
+    \end{tabular}
+    \label{tab:snp}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\myPictWidth]{snp_hist}
+    \caption{Распределение числа полиморфизма в генах (показаны гены, в которых найдено не менее 2 полиморфизмов)}
+    \label{fig:hist}
+\end{figure}
+
+
+\begin{thebibliography}{99}
+    \bibitem{bowtie} Langmead, B., Salzberg, S. Fast gapped-read alignment with Bowtie 2. Nat Methods 9, 357–359 (2012). doi: \href{https://doi.org/10.1038/nmeth.1923}{10.1038/nmeth.1923}
+\end{thebibliography}
+
+\section{Приложение. Код программы, выполняющей аннотацию полиморфизмов}
+
+\lstinputlisting[language=R, deletekeywords={count}]{E:/Users/vzuev/github-zuevval/source/r/bioinf2021/ab_lab1_snp/vcf_annotator.R}
+
+\end{document}
