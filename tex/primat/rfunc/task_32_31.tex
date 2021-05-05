@@ -28,7 +28,7 @@
 \floatstyle{plaintop} % force caption on top
 \usepackage{enumitem} % itemize and enumerate with [noitemsep]
 \setlength{\parindent}{0pt} % no indents!
-\usepackage[left=20mm, top=20mm, right=20mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+\usepackage[left=10mm, top=20mm, right=10mm, bottom=20mm, nohead, footskip=10mm]{geometry}
 
 % misc
 \graphicspath{{./img/}}
@@ -52,9 +52,9 @@ $X$, $Y$ независимые, стационарные, нормальные;
 \begin{leftbar}
     Ответ:
     \begin{equation} \label{eq:ans}
-        D[Z] = \int_{0}^{t} \int_{0}^{t} \exp\left( a^2(\tau_1+\tau_2) + \frac{a^2}{4} [ 3 \phi(\tau_1) + 3 \phi(\tau_2) - \phi(\tau_2-\tau_1) ] \right) K_x(\tau_2 - \tau_1) d\tau_1 d\tau_2
+        D[Z] = \int_{0}^{t} \int_{0}^{t} \exp\left( a^2(\tau_1+\tau_2) + \frac{a^4}{4} [ 3 \phi(\tau_1) + 3 \phi(\tau_2) - \phi(\tau_2-\tau_1) ] \right) K_x(\tau_2 - \tau_1) d\tau_1 d\tau_2
     \end{equation}
-    где $ \phi(\tau) = 2 \int_{0}^{\tau} (\tau - \tau_1) K_y(\tau_1) d \tau_1 $
+    где $ \phi(s) = 2 \int_0^s (s-\tau) K_y(\tau) d \tau $
 \end{leftbar}
 
 \section{Решение}
@@ -93,43 +93,55 @@ $X$, $Y$ независимые, стационарные, нормальные;
         p(t,\tau) = \frac{Z_1(t)}{Z_1(\tau)} = \exp \left( - a^2 \int_{\tau}^{t} (1+Y(s)) ds \right)
     \end{cases} \\
     \boxed{ Z = \int_{0}^{t} \left[ \exp \left( - a^2 \int_{\tau}^{t} (1+Y(s)) ds \right) X(\tau) \right] d \tau } \\
-    D[Z] = \int_{0}^{t} \int_{0}^{t} \left[
-        \exp \left(- a^2 \int_{\tau_1}^{t} (1+Y(s)) ds \right) \cdot
-        \exp \left(- a^2 \int_{\tau_2}^{t} (1+Y(s)) ds \right) K_x(\tau_2-\tau_2) \right] d\tau_1 d\tau_2 \\
+    D[Z(t)] = K_z(t,t) \\
+    K_z(t_1,t_2) = \iint_{0,0}^{t_1,t_2} M\left[
+        \exp \left(- a^2 \int_{\tau_1}^{t_1} (1+Y(s)) ds \right) \cdot
+        \exp \left(- a^2 \int_{\tau_2}^{t_2} (1+Y(s)) ds \right)\right] K_x(\tau_2-\tau_2) d\tau_1 d\tau_2 \\
 \end{gather*}
 \begin{equation}\label{eq:var}
-    D[Z] = \int_{0}^{t} \int_{0}^{t} \left[
-    \exp \left(- a^2 \left (\int_{\tau_1}^{t} (1+Y(s)) ds + \int_{\tau_2}^{t} (1+Y(s)) ds \right) \right) \cdot
-    K_x(\tau_2-\tau_2) \right] d\tau_1 d\tau_2
+    K_z(t_1, t_2) = e^{-a^2(t_1+t_2)} \int_0^{t_1} \int_0^{t_2} e^{a^2(\tau_1+\tau_2)} M\left[ \exp \left(- a^2 \left(\int_{\tau_1}^{t_1}Y(s)ds+\int_{\tau_2}^{t_2}Y(s)ds\right)\right)\right] K_x(\tau_2-\tau_2) d\tau_1 d\tau_2
 \end{equation}
-
-\section{Сомнения}
-
-Сравним показатели экспонент в \eqref{eq:ans} и \eqref{eq:var}.
-Обозначим их $ p_{ans} $ и $p$ соответственно.
-Подставим $\phi(\tau)$ в \eqref{eq:ans}:
-\[ \frac{p_{ans}}{a^2} = \tau_1 + \tau_2 + \frac{1}{2} \left[
-    3 \int_{0}^{\tau_1} (\tau_1 - \tau) K_y(\tau) d\tau +
-    3 \int_{0}^{\tau_2} (\tau_2 - \tau) K_y(\tau) d\tau -
-    \int_{0}^{\tau_2-\tau_1} ((\tau_2-\tau_1) - \tau) K_y(\tau) d\tau \right] \]
-В то же время
-\begin{align*}
-    \frac{p}{a^2} & = - \left[ \int_{\tau_1}^{t} ds + \int_{\tau_2}^{t} ds + 2 \int_{0}^{t} Y(s) ds - \left( \int_{0}^{\tau_1} Y(s) ds + \int_{0}^{\tau_2} Y(s) ds \right) \right] \\
-    & = -2t + \tau_1 + \tau_2 - 2 \int_0^t Y(s) ds + \left( + \int_{0}^{\tau_1} Y(s) ds + \int_{0}^{\tau_2} Y(s) ds \right)
-\end{align*}
-\[  \]
-Сравниваем два выражения:
+Теперь необходимо найти величину
+\[ \mu = M\left[ \exp \left(- a^2 \left(\int_{\tau_1}^{t_1}Y(s)ds+\int_{\tau_2}^{t_2}Y(s)ds\right)\right)\right] \]
+Обозначим показатель экспоненты за $\frac{\Theta}{i}$, т. е. $ \mu = M[\exp(i\Theta)] $.
+Тогда
 \begin{gather*}
-    -2 \left(t+\int_{0}^{t} Y(s) ds \right) + \int_{0}^{\tau_1} Y(s) ds + \int_{0}^{\tau_2} Y(s) ds \overset{?}= \\
-    \frac{1}{2} \left[
-        3 \int_{0}^{\tau_1} (\tau_1 - \tau) K_y(\tau) d\tau +
-        3 \int_{0}^{\tau_2} (\tau_2 - \tau) K_y(\tau) d\tau -
-        \int_{0}^{\tau_2-\tau_1} ((\tau_2-\tau_1) - \tau) K_y(\tau) d\tau \right]
+    \begin{cases}
+        E_\Theta(u) = M[e^{i\Theta u}] \\
+        \Theta \text{ нормальная, центрированная}
+    \end{cases} \\
+    \mu = E_\Theta(u)|_{u=1} = e^{-\frac{1}{2}\sigma_{\theta}^2 u^2}|_{u=1} = e^{-\frac{1}{2}\sigma_{\theta}^2}
 \end{gather*}
 
-Левая часть зависит от $t$, в то время как правая не зависит.
-Например, в предельном случае при $ Y \equiv 0 $ $ K_y \equiv 0 $, и мы имеем
-\[ -2t \overset{?}= 0 \]
-что, очевидно, при $t \ne 0$ не выполняется.
+Найдём величину $ \sigma_\theta^2 = D[\Theta] $ ($ \Theta $, заметим, есть случайная величина, зависящая от $t_1, t_2, \tau_1$ и $\tau_2$).
+
+\begin{gather*}
+    i\Theta = -a^2 \left(\int_{\tau_1}^{t_1}Y(s)ds+\int_{\tau_2}^{t_2}Y(s)ds\right) \\
+    \Theta = ia^2 \left(\int_{\tau_1}^{t_1}Y(s)ds+\int_{\tau_2}^{t_2}Y(s)ds\right) \\
+    \sigma_\Theta^2 = -a^4 M\left[ \left(\int_{\tau_1}^{t_1}Y(s)ds+\int_{\tau_2}^{t_2}Y(s)ds\right)^2 \right]
+\end{gather*}
+Заметим, что в силу стационарности $Y(t)$ $\int_{\tau_k}^{t_k}Y(s)ds = \int_0^{t_k-\tau_k}Y(s)ds$.
+Обозначим $\psi(t):= \int_0^{t}Y(s)ds$.
+Поскольку $\bar y(t) \equiv 0$, то и $ \bar \psi(t) \equiv 0 $.
+Тогда
+\begin{align*}
+    -\frac{\sigma_\Theta^2}{a^4} &= M\left[ (\psi(t_1-\tau_1)+\psi(t_2-\tau_2))^2 \right] = M[\psi^2(t_1-\tau_1)] + M[\psi^2(t_2-\tau_2)] + 2M[\psi(t_1-\tau_1)\psi(t_2-\tau_2)] \\
+    &= K_\psi(t_1-\tau_1, t_1-\tau_1) + K_\psi(t_2-\tau_2, t_2-\tau_2) + 2K_\psi(t_1-\tau_1, t_2-\tau_2)
+\end{align*}
+
+Притом по формуле для корреляционной функции интеграла от стационарной с. ф.
+\[ K_\psi(s_1,s_2) = \int_0^{s_1}(s_1-\tau)K_y(\tau)d\tau + \int_0^{s_2}(s_2-\tau)K_y(\tau)d\tau - \int_0^{|s_2-s_1|}(|s_2-s_1|-\tau)K_y(\tau)d\tau \]
+Обозначив $ \phi(s) := 2 \int_0^s (s - \tau) K_y(\tau) d \tau $, получим
+\[ K_\psi(s_1,s_2) = \frac{1}{2}(\phi(s_1)+\phi(s_2) - \phi(|s_2-s_1|)) \]
+откуда
+\[ -\frac{\sigma_\Theta^2}{a^4} = \frac{1}{2}(2\phi(t_1-\tau_1) + 0) + \frac{1}{2}(2\phi(t_2-\tau_2) + 0) + 2 \cdot \frac{1}{2}(\phi(t_1-\tau_1)+\phi(t_2-\tau_2)-\phi(|t_1-\tau_1-t_2+\tau_2|)) \]
+
+\[ \mu = \exp\left(\frac{a^4}{2} \left( 2\phi(t_1-\tau_1) + 2\phi(t_2-\tau_2) - \phi(|t_1-\tau_1-t_2+\tau_2|) \right) \right)  \]
+
+Окончательно получаем:
+\begin{align*}
+    D[Z(t)] &= K_z(t,t) = e^{-2a^2 t} \iint_{0,0}^{t,t} e^{a^2(\tau_1+\tau_2)} \mu K_x(\tau_2-\tau_1) d\tau_1 d\tau_2 \\
+    &= e^{-2a^2 t} \iint_{0,0}^{t,t} \exp\left(a^2(\tau_1+\tau_2) + \frac{a^4}{2} \left( 2\phi(t-\tau_1) + 2\phi(t-\tau_2) - \phi(|\tau_2-\tau_1|) \right) \right)  K_x(\tau_2-\tau_1) d\tau_1 d\tau_2
+\end{align*}
 
 \end{document}
