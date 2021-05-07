@@ -112,13 +112,8 @@ $X$ -- нормальный стационарный центрированны�
 Наконец, подставляем в \eqref{eq:syz} и затем в \eqref{eq:ryz}:
 
 \begin{align*}
-    S_{yz}(\omega) & =  \frac{A_{11}^* A_{22} S_{x_1 x_2}(\omega)}{|\Delta \omega|^2} = c^2 k_1^2 k_2^2 \frac{(- \omega^2 - 2 h_2 i \omega + k_2^2)(- \omega^2 + 2 h_1 i \omega + k_1^2)}{(- \omega^2 + 2 h_1 i \omega + k_1^2)^2(- \omega^2 + 2 h_2 i \omega + k_2^2)^2} \\
-    & = c^2 k_1^2 k_2^2 \frac{(- \omega^2 - 2 h_2 i \omega + k_2^2)}{(- \omega^2 + 2 h_1 i \omega + k_1^2)(- \omega^2 + 2 h_2 i \omega + k_2^2)^2}
+    S_{yz}(\omega) & =  \frac{A_{11}^* A_{22} S_{x_1 x_2}(\omega)}{|\Delta \omega|^2} = c^2 k_1^2 k_2^2 \frac{(- \omega^2 - 2 h_2 i \omega + k_2^2)(- \omega^2 + 2 h_1 i \omega + k_1^2)}{|(- \omega^2 + 2 h_1 i \omega + k_1^2)^2(- \omega^2 + 2 h_2 i \omega + k_2^2)^2|}
 \end{align*}
-
-\begin{equation}
-    R_{yz}(t) \overset{\eqref{eq:ryz}}= c^2 k_1^2 k_2^2 \int_{-\infty}^\infty e^{i\omega t} \frac{(\omega^2 + 2 h_2 i \omega - k_2^2)}{(\omega^2 - 2 h_1 i \omega - k_1^2)(\omega^2 - 2 h_2 i \omega - k_2^2)^2} d \omega \label{eq:ryz_int}
-\end{equation}
 
 Заметим:
 \begin{gather*}
@@ -127,7 +122,79 @@ $X$ -- нормальный стационарный центрированны�
     \omega^2 - 2 h_1 i \omega - k_1^2: roots = ih_1 \pm \sqrt{k_1^2-h_1^2} = ih_1 \pm \omega_1 \\
 \end{gather*}
 
-Тогда \eqref{eq:ryz_int} можно переписать так:
-\[ R_{yz}(t) = c^2 k_1^2 k_2^2 \int_{-\infty}^\infty \frac{[(\omega + ih_2)^2 - \omega_2^2] e^{i\omega t}}{(\omega - h_1 i - \omega_1)(\omega - h_1 i + \omega_1)(\omega - h_2 i - \omega_2)^2 (\omega - h_2 i + \omega_2)^2} d \omega \]
+Тогда знаменатель спектральной плотности
+\begin{align*}
+den(S_{yz}) &= |(\omega^2 - 2 h_1 i \omega - k_1^2)(\omega^2 - 2 h_2 i \omega - k_2^2)|^2 \\
+&= |(\omega-ih_1-\omega_1)(\omega-ih_1+\omega_1)(\omega-ih_2-\omega_2)(\omega-ih_2+\omega_2)|^2 \\
+&= [(\omega-\omega_1)^2+h_1^2][(\omega+\omega_1)^2+h_1^2][(\omega-\omega_2)^2+h_2^2][(\omega+\omega_2)^2+h_2^2] \\
+&= (\omega-\omega_1-ih_1)(\omega-\omega_1+ih_1)(\omega+\omega_1-ih_1)(\omega+\omega_1+ih_1) \cdot \\
+& \cdot (\omega-\omega_2-ih_2)(\omega-\omega_2+ih_2)(\omega+\omega_2-ih_2)(\omega+\omega_2+ih_2)
+\end{align*}
+
+а числитель
+\begin{align*}
+    \frac{num(S_{yz})}{c^2k_1^2k_2^2} &= (- \omega^2 - 2 h_2 i \omega + k_2^2)(- \omega^2 + 2 h_1 i \omega + k_1^2) \\
+    &= (\omega+ih_2+\omega_2)(\omega+ih_2-\omega_2)(\omega-ih_1-\omega_1)(\omega-ih_1+\omega_1)
+\end{align*}
+
+откуда
+\[ S_{yz} = \frac{c^2k_1^2k_2^2}{(\omega-\omega_1+ih_1)(\omega+\omega_1+ih_1)(\omega-\omega_2-ih_2)(\omega+\omega_2-ih_2)} \]
+
+Тогда
+\begin{equation}
+    R_{yz}(\tau) \overset{\eqref{eq:ryz}}= c^2 k_1^2 k_2^2 \int_{-\infty}^\infty  \frac{e^{i\omega \tau} d \omega}{(\omega-\omega_1+ih_1)(\omega+\omega_1+ih_1)(\omega-\omega_2-ih_2)(\omega+\omega_2-ih_2)}  \label{eq:ryz_int}
+\end{equation}
+
+Воспользуемся формулами теории вычетов.
+Обозначим
+\[f(\omega):=\left[(\omega-\omega_1+ih_1)(\omega+\omega_1+ih_1)(\omega-\omega_2-ih_2)(\omega+\omega_2-ih_2)\right]^{-1}\]
+Пусть $\{\lambda_k\}$ -- корни $f(\omega)$.
+Тогда верно следующее:
+\[\begin{cases}
+    \tau \ge 0 \Rightarrow R_{yz}(\tau) = 2\pi i c^2 k_1^2 k_2^2 \sum_{\lambda_k : \Im \lambda_k > 0} Res_{\lambda_k}(f(\omega) e^{i\omega \tau}) \\
+    \tau < 0 \Rightarrow R_{yz}(\tau) = -2\pi i c^2 k_1^2 k_2^2 \sum_{\lambda_k : \Im \lambda_k < 0} Res_{\lambda_k}(f(\omega) e^{i\omega \tau})
+\end{cases}\]
+
+Рассмотрим случаи.
+\begin{enumerate}
+    \item $\tau \ge 0  \Rightarrow \lambda_{12} = \pm \omega_2 + ih_2$
+    \begin{gather*}
+        res_1 = Res_{\lambda_1}(f(\omega) e^{i\omega \tau}) = \frac{e^{(i\omega_2-h_2)\tau}}{[\omega_2-\omega_1+i(h_1+h_2)][\omega_2+\omega_1+i(h_1+h_2)] \cdot 2\omega_2} \\
+        res_2 = Res_{\lambda_2}(f(\omega) e^{i\omega \tau}) = \frac{e^{-(i\omega_2+h_2)\tau}}{[-\omega_2-\omega_1+i(h_1+h_2)][-\omega_2+\omega_1+i(h_1+h_2)] \cdot (-2\omega_2)} \\
+        res_1+res_2 = \\
+        \hspace{-2.5cm}
+        = \frac{e^{-h_2\tau}}{2\omega_2} \left[ \frac{e^{i\omega_2\tau} [-(\omega_1+\omega_2)+i(h_1+h_2)][\omega_1-\omega_2+i(h_1+h_2)]-e^{-i\omega_2\tau}[\omega_2-\omega_1+i(h_1+h_2)][\omega_2+\omega_1+i(h_1+h_2)] }{ [(\omega_1+\omega_2)^2+(h_1+h_2)^2][(\omega_1-\omega_2)^2+(h_1+h_2)^2] } \right]
+    \end{gather*}
+    Числитель получившейся дроби
+    \begin{gather*}
+        e^{i\omega_2\tau}[(-\omega_2+i(h_1+h_2))^2-\omega_1^2]-e^{-i\omega_2\tau}[(\omega_2+i(h_1+h_2))^2-\omega_1^2] = \\
+        = [\cos \omega_2\tau + i \sin \omega_2\tau][\omega_2^2-\omega_1^2-(h_1+h_2)^2-2i\omega_2(h_1+h_2)]- \\
+        - [\cos \omega_2\tau - i \sin \omega_2\tau][\omega_2^2-\omega_1^2-(h_1+h_2)^2+2i\omega_2(h_1+h_2)] = \\
+        = \cos \omega_2\tau \cdot (-4i\omega_2(h_1+h_2)) + 2i \sin \omega_2\tau \cdot (\omega_2^2-\omega_1^2-(h_1+h_2)^2)
+    \end{gather*}
+    Окончательно получаем
+    \[ \boxed{ R_{yz}(\tau) = 2\pi c^2 k_1^2 k_2^2 \frac{e^{-h_2\tau}}{\omega_2} \left[ \frac{ 2\omega_2(h_1+h_2) \cos \omega_2\tau + (\omega_2^2-\omega_1^2-(h_1+h_2)^2) \sin \omega_2\tau}{ [(\omega_1+\omega_2)^2+(h_1+h_2)^2][(\omega_1-\omega_2)^2+(h_1+h_2)^2] } \right] } \]
+
+    \item $\tau < 0  \Rightarrow \lambda_{12} = \pm \omega_1 - ih_1$
+    \begin{gather*}
+        res_1 = Res_{\lambda_1}(f(\omega) e^{i\omega \tau}) = \frac{e^{(i\omega_1+h_1)\tau}}{ 2 \omega_1 [\omega_1-\omega_2-i(h_1+h_2)][\omega_1+\omega_2-i(h_1+h_2)] } \\
+        res_2 = Res_{\lambda_2}(f(\omega) e^{i\omega \tau}) = \frac{e^{(-i\omega_1+h_1)\tau}}{ -2 \omega_1 [-\omega_1-\omega_2-i(h_1+h_2)][-\omega_1+\omega_2-i(h_1+h_2)] } \\
+        res_1+res_2 = \\
+        \hspace{-3cm}
+        = -\frac{e^{h_1\tau}}{2\omega_1} \left[ \frac{e^{i\omega_1\tau} [-(\omega_1+\omega_2)-i(h_1+h_2)][-\omega_1+\omega_2-i(h_1+h_2)]-e^{-i\omega_1\tau}[\omega_1-\omega_2-i(h_1+h_2)][\omega_1+\omega_2-i(h_1+h_2)] }{ [(\omega_1+\omega_2)^2+(h_1+h_2)^2][(\omega_1-\omega_2)^2+(h_1+h_2)^2] } \right]
+    \end{gather*}
+    % TODO
+    Числитель дроби в квадратных скобках
+    \begin{gather*}
+        e^{i\omega_1\tau}[(-\omega_1-i(h_1+h_2))^2-\omega_2^2]-e^{-i\omega_1\tau}[(\omega_1-i(h_1+h_2))^2-\omega_2^2] = \\
+        = [\cos \omega_1\tau + i \sin \omega_1\tau][\omega_1^2-\omega_2^2-(h_1+h_2)^2+2i\omega_1(h_1+h_2)]- \\
+        - [\cos \omega_1\tau - i \sin \omega_1\tau][\omega_1^2-\omega_2^2-(h_1+h_2)^2-2i\omega_1(h_1+h_2)] = \\
+        = \cos \omega_1\tau \cdot (4i\omega_1(h_1+h_2)) + 2i \sin \omega_2\tau \cdot (\omega_1^2-\omega_2^2-(h_1+h_2)^2)
+    \end{gather*}
+    Умножив всё выражение на $- 2\pi i c^2 k_1^2 k_2^2  $, получаем
+    \[ \boxed{ R_{yz}(\tau) = 2\pi c^2 k_1^2 k_2^2 \frac{e^{h_1\tau}}{\omega_1} \left[ \frac{ 2\omega_1(h_1+h_2) \cos \omega_1\tau - (\omega_2^2-\omega_1^2+(h_1+h_2)^2) \sin \omega_1\tau}{ [(\omega_1+\omega_2)^2+(h_1+h_2)^2][(\omega_1-\omega_2)^2+(h_1+h_2)^2] } \right] } \]
+\end{enumerate}
+
+Найденные выражения совпадают с ответом. $\square$
 
 \end{document}
