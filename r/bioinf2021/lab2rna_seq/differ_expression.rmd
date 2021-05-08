@@ -19,7 +19,7 @@ RNA-sequencing report" ([doi:10.1038/tp.2016.67](https://doi.org/10.1038/tp.2016
 
 The code was written and tested on a Windows 10 machine using R version 4.0.2 (2020-06-22) for x86_64-w64-mingw32 platform with BiocManager version 3.12.
 
-All commands were executed from within the [R plugin for PyCharm](https://www.jetbrains.com/help/pycharm/r-plugin-support.html) which offers some features that might not work in a standard R shell (e. g. accessing files by address relative to the Git root).
+Substitute the path in `abs_path` function with an appropriate path in your environment.
 
 ## Setup
 
@@ -53,9 +53,7 @@ You will need R packages listed below:
 first, we define the directory which contains `annot.csv` and `GSE74737_counts.txt`
 ```{r message=F, warning=F, output=F}
 library(tidyverse)
-
-data_dir <- "r/bioinf2021/lab2rna_seq/dataset"
-abs_path <- function(path) here::here(data_dir, path)
+abs_path <- function(path) paste0("E:/Users/vzuev/github-zuevval/source/r/bioinf2021/lab2rna_seq/dataset/",path)
 ```
 Then we load these files into `data.frame` objects (and filter columns in Counts leaving only those present in `annot.csv` rows)
 
@@ -115,18 +113,49 @@ devnull <- mapply(function(df = ? data.frame, filename = ? character) {
 ```
 ### GO and KEGG enrichment analysis
 
-```{r}
-kegg_strlist <- strsplit(readLines(abs_path("c2.cp.kegg.v7.4.entrez.gmt")), "[[:space:]]+")
-kegg_pathways <- lapply(kegg_strlist, tail, n = -2)
-names(kegg_pathways) <- lapply(kegg_strlist, head, n = 1)
-```
+Loading the abovementioned pathways:
 
 ```{r}
-res_sorted <- deseq_res_df %>% arrange(log2FoldChange)
-ranks <- res_sorted$log2FoldChange
-names(ranks) <- res_sorted$entrez
+parse_gmt <- function(gmt_filename = ? character){
+  strlist <- strsplit(readLines(abs_path(gmt_filename)), "[[:space:]]+")
+  pathways <- lapply(strlist, tail, n = -2)
+  names(pathways) <- lapply(strlist, head, n = 1)
+  pathways
+}
+kegg_pathways <- parse_gmt("c2.cp.kegg.v7.4.entrez.gmt")
+go_pathways <- parse_gmt("c5.go.v7.4.entrez.gmt")
 ```
-> TODO the code below ran for an hour and produced no result
+
+Creating ranks:
+
 ```{r}
-# fgsea_res <- fgsea::fgsea(kegg_pathways, ranks, scoreType = "pos")
+res_sorted <- deseq_res_df %>% arrange(padj)
+ranks <- res_sorted$padj
+names(ranks) <- res_sorted$entrez
+save(ranks, file=abs_path("ranks.RData"))
+```
+
+Running FGSEA:
+
+```{r message = F, warning = F}
+load(abs_path("ranks.RData"))
+fgsea_kegg_res <- fgsea::fgsea(kegg_pathways, ranks, scoreType = "pos")
+fgsea_kegg_res %>% arrange(padj) %>% head
+
+fgsea_go_res <- fgsea::fgsea(go_pathways, ranks, scoreType = "pos")
+fgsea_go_res %>% arrange(padj) %>% head
+```
+
+Saving filtered pathways (associated with our gene set with adjusted p-value < 0.05):
+
+```{r}
+padj_pathways_thresh <- .05
+devnull <- mapply(function(df = ? data.frame, filename = ? character) {
+  df %>%
+    select(pathway, padj) %>%
+    arrange(padj) %>%
+    filter(padj < padj_pathways_thresh) %>%
+    write.table(abs_path(paste0(filename, "_pathways.csv")), sep = ",", row.names = F, quote = F)
+}, list(fgsea_go_res, fgsea_kegg_res), c("go", "kegg"))
+
 ```
