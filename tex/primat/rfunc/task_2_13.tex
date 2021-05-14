@@ -1,0 +1,187 @@
+% compile with XeLaTeX or LuaLaTeX
+
+\documentclass[a4paper,14pt]{extarticle}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{pdfpages} % insert pdf pages, e.g. scans
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{mdframed}
+\usepackage{graphicx}
+\usepackage{color}
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\usepackage[left=10mm, top=20mm, right=10mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.7\textwidth}
+\newcommand{\phm}{\phantom{-}}
+\newcommand{\defeq}{\overset{def}=}
+
+\begin{document}
+
+\title{Задача II.13}
+\author{Валерий Зуев}
+\maketitle
+
+\section{Постановка}
+
+\newcommand{\al}{\alpha}
+\newcommand{\g}{\gamma}
+\newcommand{\s}{\sigma}
+\newcommand{\z}{\zeta}
+
+Процесс $U$ определяется уравнением
+\[ \dot U + \al U = \sqrt{2\al} \s \xi(t) \]
+$U(0)=U_0$, $U_0 \sim \mathcal{N}(0,\s_0)$, $\xi(t)$ -- стандартный белый шум; $U$, $\xi$ независимы.
+\begin{gather*}
+    V(t) = \int_0^t U(s)ds \\
+    a(t) = t^\nu
+\end{gather*}
+
+Найти $\bar m_a(t)$ -- среднее число пересечений процессом $V(t)$ уровня $a(t)$ в промежутке $ t \in [1;T] $.
+Построить графики $\bar m_a(1,T)$ как функции $T$ при $\al=\s=1$, $ \nu \in \{ 0.5, 1, 1.5, 2, 2.5, 3 \} $, $T \in \{ 2;5\}$.
+
+\section{Аналитическое решение}
+
+Рассмотрим $ Y(t) := \int_0^t U(s)ds \Rightarrow $ задачу можно сформулировать как подсчёт среднего числа пересечений $Y(t)$ и $b(t) := t^{\nu+1}$.
+
+\begin{gather*}
+    \bar m_b(1,T) = \int_1^T \mu_b(t) dt \\
+    \mu_b(t) = \int_{-\infty}^\infty |v-\dot b(t)| f_{y \dot y} (b(t),v(t);t) dv \\
+    f_{y \dot y}(y,y_1;t) = ?
+\end{gather*}
+
+Заметим: $U$ есть процесс Уленбека-Орнштейна, поэтому
+\begin{gather*}
+    \bar u(t) = \bar u_0 e^{-\al t} = 0 \\
+    K_u(t_1,t_2) = \s^2 e^{-\al |t_1-t_2|} +(\s_0^2-\s^2)e^{-\al(t_1+t_2)}
+\end{gather*}
+Процесс Уленбека-Орнштейна гауссовский $\Rightarrow$
+\[ f_{y \dot y}(y,y_1;t) \sim \mathcal{N}\left( \begin{pmatrix}
+    0 \\ 0
+\end{pmatrix},
+\begin{pmatrix}
+    D[Y(t)] & K_{y \dot y}(t) \\
+    K_{y \dot y}(t) & D[\dot Y(t)]
+\end{pmatrix} \right) \]
+
+Найдём элементы матрицы корреляции.
+\begin{gather*}
+    \boxed{\s^2_{\dot y} = [D(\dot Y(t))] = K_u(t,t) = \s^2 + (\s_0^2-\s^2)e^{-2\al t}} \\
+    \begin{aligned}
+        \s_y^2 &= D[Y(t)] = \iint_{0,0}^{t,t} \left[ \s^2 e^{-\al |\tau_1-\tau_2|} +(\s_0^2-\s^2)e^{-\al(\tau_1+\tau_2)} \right]d\tau_1d\tau_2 \\
+        &= \s^2 \underbrace{\iint_{0,0}^{t,t} e^{-\al |\tau_1-\tau_2|} d\tau_1d\tau_2}_{\text{обозн. }J_1} + (\s^2-\s_0^2) \underbrace{\iint_{0,0}^{t,t} e^{-\al(\tau_1+\tau_2)} d\tau_1d\tau_2}_{\text{обозн. }J_2}
+    \end{aligned}
+    \shortintertext{По формуле для корреляционной функции стационарного процесса}
+    J_1=2\int_0^t(t-\tau)e^{-\al|\tau|}d\tau = 2 t\int_0^t e^{-\al \tau}d\tau - 2\underbrace{\int_0^t \tau e^{-\al \tau}d\tau}_{\text{обозн. }J_3} = 2\left[ \frac{t}{\al}(1-e^{-\al t})-J_3 \right] \\
+    J_3= -\frac{1}{\al}\int_0^t \tau de^{-\al \tau} = -\frac{1}{\al}\left[ te^{-\al t} - \frac{1}{\al}[1-e^{-\al t}] \right]\\
+    J_1 = 2\left[ \frac{t}{\al}(1-e^{-\al t}) + \frac{t}{\al}e^{-\al t} = \frac{1-e^{-\al t}}{\al^2} \right] = 2 \frac{e^{-\al t} + t\al - 1}{\al^2}\\ % checked with WA
+    J_2 = \int_0^te^{-\al \tau_2} \left[ \int_0^t e^{-\al \tau_1} d\tau_1 \right] d\tau_2 = \int_0^t e^{-\al \tau_2} \cdot \frac{1}{\al} [1-e^{-\al t}] d\tau_2 = \left(\frac{1-e^{-\al t}}{\al}\right)^2 \\
+    \boxed{\s_y^2 = 2\s^2 \cdot \frac{e^{-\al t} + t\al - 1}{\al^2} + (\s^2-\s_0^2) \cdot \frac{(1-e^{-\al t})^2}{\al^2}} \\
+    \begin{aligned}
+        K_{y \dot y}(t) & = M[Y(t) \dot Y(t)] = M\left[ \int_0^t U(s) ds \cdot U(t) \right] = \int_0^t M[U(\tau)U(t)] d\tau \\
+        &\overset{U \text{центрир.}}= \int_0^t K_u(\tau, t) dt = \int_0^t \left[ \s^2 e^{-\al |t-\tau|} + (\s_0^2-\s^2)e^{-\al(t+\tau)} \right] d\tau \\
+        &= \s^2 e^{-\al t} \int_0^t e^{\al \tau} d\tau +(\s_0^2-\s^2)e^{-\al t} \int_0^t e^{-\al \tau} d\tau \\
+        &= \frac{\s^2 e^{-\al t}}{\al} (e^{\al t} - 1) + \frac{(\s_0^2-\s^2)e^{-\al t}}{\al} (1 - e^{-\al t}) \\ % partially verified with WA
+    \end{aligned} \\
+    \boxed{K_{y \dot y}(t) = \frac{(1 - e^{-\al t})}{\al} \left( \s^2 + (\s_0^2-\s^2)e^{-\al t} \right)}
+\end{gather*}
+Запишем совместную плотность распределения $Y$ и $U$ ($ r_{y \dot y} = \frac{K_{y \dot y}}{\s_y \s_{\dot y}} $), используя их центрированность:
+\begin{align*}
+    f_{y\dot y}(y,v,t) &= \frac{1}{2\pi \s_y \s_{\dot y} \sqrt{1-r_{y \dot y}^2}} \exp \left( - \frac{1}{2(1-r_{y \dot y}^2)} \left[ \frac{y^2}{\s_y^2} + \frac{v^2}{\s_{\dot y}^2} - \frac{2 r_{y \dot y} yv}{\s_y \s_{\dot y}} \right] \right) \\
+    &= \frac{1}{2\pi \sqrt{\s_y^2 \s_{\dot y}^2 -K_{y \dot y}^2}} \exp \left( - \frac{1}{2(\s_y^2 \s_{\dot y}^2 -K_{y \dot y}^2)} \left[ \s_y^2 y^2 + \s_{\dot y}^2 v^2 - 2 K_{y \dot y}(t) yv \right] \right) \\
+\end{align*}
+
+Средняя интенсивность выбросов в момент $t$
+
+\begin{align*}
+    \mu_b(t) &= \int_{-\infty}^\infty |v-\dot b(t)| f_{y \dot y} (b(t),v(t);t) dv = \frac{1}{2\pi \sqrt{\s_y^2 \s_{\dot y}^2 -K_{y \dot y}^2}} \times \\
+    & \times  \int_{-\infty}^\infty |v-(\nu+1)t^\nu| \exp\left( -\frac{1}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)} \left( \s_{\dot y}^2 t^{2 (\nu+1)} + \s_y^2 v^2 - 2 K_{y \dot y}(t) v t^{\nu+1}\right) \right) dv \\
+    & = \underbrace{\frac{\exp\left( -\frac{ t^{2(\nu+1)} }{2\left( \s_y^2-\frac{K_{y \dot y}^2}{\s_{\dot y}^2} \right)} \right)}{2\pi \sqrt{\s_y^2 \s_{\dot y}^2 -K_{y \dot y}^2}} }_{\text{обозн. }k} \times \int_{-\infty}^\infty |v-\underbrace{(\nu+1)t^\nu}_{\text{обозн. }\beta}| \exp \left( \frac{2K_{y \dot y}(t)vt^{\nu+1} - \s_y^2 v^2}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)} \right) dv
+\end{align*}
+Сделаем замену:
+\[ z := |v-(\nu+1)t^\nu| \Rightarrow v = \begin{cases}
+    z+\beta, z \ge \beta \\
+    \beta-z, z < \beta
+\end{cases} \]
+Тогда интеграл разбивается на два:
+\begingroup
+\allowdisplaybreaks
+\begin{align*}
+    \mu_b(t) &= k \left[ \int_0^\infty z \exp \left( \frac{2K_{y \dot y}(t)(z+\beta)t^{\nu+1} - \s_y^2 (z+\beta)^2}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)} \right) dz + \right. \\
+    &\left.+ \int_0^\infty z \exp \left( \frac{2K_{y \dot y}(t)(\beta-z)t^{\nu+1} - \s_y^2 (\beta-z)^2}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)} \right) dz \right] \\
+    &= k \left[ \underbrace{ \int_0^\infty z \exp \left( \frac{-\s_y^2 z^2 + 2(K_{y \dot y}(t)t^{\nu+1} - \s_y^2\beta)z + \left( 2K_{y \dot y}\beta t^{\nu+1} - \s_y^2 \beta^2 \right) }{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)} \right) dz }_{\text{обозн. }J_4} + \right. \\
+    &\left.+  \underbrace{ \int_0^\infty z \exp \left( \frac{-\s_y^2 z^2 - 2(K_{y \dot y}(t)t^{\nu+1} - \s_y^2\beta)z + \left( 2K_{y \dot y}\beta t^{\nu+1} - \s_y^2 \beta^2 \right)}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)} \right) dz }_{\text{обозн. }J_5} \right]
+\end{align*}
+\endgroup
+
+Для краткости введём обозначения: $\g := \frac{\s_y^2}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)}$, $\eta := \frac{K_{y \dot y}(t)t^{\nu+1} - \s_y^2\beta}{\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2}$, $\zeta := \frac{2K_{y \dot y}\beta t^{\nu+1} - \s_y^2 \beta^2}{\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2}$.
+Вычислим интегралы $J_4$, $J_5$:
+
+\begin{gather*}
+    J_4 = \int_0^\infty z \exp \left( - \frac{1}{2} \left[ \left(\sqrt{2\g}z\right)^2 - 2\sqrt{2\g}z \cdot \frac{\eta}{\sqrt{2\g}} + \frac{\eta^2}{2\g} \right] + \frac{\eta^2}{4\g} + \z \right) dz \\
+    \shortintertext{Сделаем замену:}
+    \begin{cases}
+        s = \sqrt{2\g}z - \frac{\eta}{\sqrt{2\g}} \\
+        z = \frac{s+\frac{\eta}{\sqrt{2\g}}}{\sqrt{2\g}}
+    \end{cases} \\
+    J_4 = \int_0^\infty \frac{s+\frac{\eta}{\sqrt{2\g}}}{\sqrt{2\g}} \exp \left(-\frac{s^2}{2} + \frac{\eta^2}{4\g} + \z \right) ds \\
+    \shortintertext{Введём обозначение для краткости:}
+    \chi := \frac{\eta}{\sqrt{2\g}} \\
+    \boxed{J_4 = \frac{\exp(\chi^2+\z)}{2\g} \int_{-\chi}^\infty (s+\chi)e^{-\frac{s^2}{2}}ds}
+\end{gather*}
+
+\begin{gather*}
+    J_5 = \int_0^\infty z \exp \left( - \frac{1}{2} \left[ \left(\sqrt{2\g}z\right)^2 + 2\sqrt{2\g}z \cdot \frac{\eta}{\sqrt{2\g}} + \frac{\eta^2}{2\g} \right] + \frac{\eta^2}{4\g} + \z \right) dz \\
+    \begin{cases}
+        \tau = \sqrt{2\g}z+\chi \\
+        z = \frac{\tau-\chi}{\sqrt{2\g}}
+    \end{cases} \\
+    J_5 = \int_0^\infty \frac{\tau-\chi}{\sqrt{2\g}} \exp \left(-\frac{\tau^2}{2} + \chi^2 + \z \right) d\tau \\
+    \boxed{J_5 = \frac{\exp(\chi^2+\z)}{2\g} \int_{\chi}^\infty (\tau-\chi)e^{-\frac{\tau^2}{2}}d\tau}
+\end{gather*}
+
+Итак, интенсивность пересечений
+\begin{align*}
+    \mu_a(t) &= \mu_b(t) = k(J_4+J_5)=\frac{k\exp(\chi^2+\z)}{2\g} \left[ \int_{-\chi}^\infty (s+\chi)e^{-\frac{s^2}{2}}ds + \int_{\chi}^\infty (s-\chi)e^{-\frac{s^2}{2}}ds  \right] = \\
+    &= \frac{k\exp(\chi^2+\z)}{2\g} \left[ 2e^{-\frac{\chi^2}{2}} + \chi\left( \int_{-\chi}^\infty e^{-\frac{s^2}{2}} ds - \int_{\chi}^\infty e^{-\frac{s^2}{2}} ds \right) \right] \overset{\text{подинтегральная ф-я чётная}}= \\
+    &= \frac{k\exp(\chi^2+\z)}{\g} \left[ e^{-\frac{\chi^2}{2}} + \chi \int_0^\chi e^{-\frac{s^2}{2}}ds \right] = \frac{k\exp(\chi^2+\z)}{\g} \left[ e^{-\frac{\chi^2}{2}} + \sqrt{\frac{\pi}{2}} \chi \Phi(\chi) \right]
+\end{align*}
+Здесь $\Phi(x)$ -- интеграл Лапласа:
+\[ \Phi(x) = \sqrt{\frac{2}{\pi}} \]
+Учитывая, что $\chi=\frac{\eta}{\sqrt{2\g}}$, получаем:
+\[ \boxed{\mu_a(t) = \frac{k\exp(\frac{\eta^2}{2\g}+\z)}{\g} \left[ \exp\left(-\frac{\eta^2}{4\g}\right) + \sqrt{\frac{\pi}{\g}} \eta \Phi\left(\frac{\eta}{\sqrt{2\g}}\right) \right]} \]
+
+Среднее число пересечений уровня
+\begin{gather*}
+    \boxed{ \bar m_a(1,T) = \int_1^T \mu_a(t) dt } \\
+    \shortintertext{где}
+    \mu_a(t) = \frac{k\exp(\frac{\eta^2}{2\g}+\z)}{\g} \left[ \exp\left(-\frac{\eta^2}{4\g}\right) + \sqrt{\frac{\pi}{\g}} \eta \Phi\left(\frac{\eta}{\sqrt{2\g}}\right) \right] \\
+    k = \frac{\exp\left( -\frac{ t^{2(\nu+1)} }{2\left( \s_y^2-\frac{K_{y \dot y}^2}{\s_{\dot y}^2} \right)} \right)}{2\pi \sqrt{\s_y^2 \s_{\dot y}^2 -K_{y \dot y}^2}} \\
+    \g = \frac{\s_y^2}{2(\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2)}, \thickspace \eta = \frac{K_{y \dot y}(t)t^{\nu+1} - \s_y^2\beta}{\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2}, \thickspace \z = \frac{2K_{y \dot y}\beta t^{\nu+1} - \s_y^2 \beta^2}{\s_y^2 \s_{\dot y}^2 - K_{y \dot y}^2} \\
+    \beta = (\nu+1)t^\nu \\
+    \s_{\dot y}^2 = \s^2 + (\s_0^2 - \s^2) e^{-2\al t} \\
+    \s_y^2 = 2\s^2 \cdot \frac{e^{-\al t} + t\al - 1}{\al^2} + (\s^2-\s_0^2) \cdot \frac{(1-e^{-\al t})^2}{\al^2} \\
+    K_{y \dot y}(t) = \frac{(1 - e^{-\al t})}{\al} \left( \s^2 + (\s_0^2-\s^2)e^{-\al t} \right)
+\end{gather*}
+
+\end{document}
