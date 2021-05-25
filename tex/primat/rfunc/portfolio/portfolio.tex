@@ -1,0 +1,20 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+
+\usepackage{pdfpages}
+
+\begin{document}
+    \input{titlepage.tex}
+
+    \includepdf[pages=-]{first_five}
+    \includepdf[pages=-]{32_38}
+    \includepdf[pages=-]{zuev_task_32_31_v3}
+    \includepdf[pages=-]{zuev_task_35_30_v2}
+    \includepdf[pages=-]{zuev_task_1_19}
+    \includepdf[pages=-]{zuev_task_2_13}
+\end{document}
