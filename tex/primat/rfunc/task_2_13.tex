@@ -53,7 +53,7 @@
 \[ \dot U + \al U = \sqrt{2\al} \s \xi(t) \]
 $U(0)=U_0$, $U_0 \sim \mathcal{N}(0,\s_0)$, $\xi(t)$ -- стандартный белый шум; $U$, $\xi$ независимы.
 \begin{gather*}
-    V(t) = \int_0^t U(s)ds \\
+    V(t) = \frac{1}{t} \int_0^t U(s)ds \\
     a(t) = t^\nu
 \end{gather*}
 
@@ -167,7 +167,7 @@ $U(0)=U_0$, $U_0 \sim \mathcal{N}(0,\s_0)$, $\xi(t)$ -- стандартный �
     &= \frac{k\exp(\chi^2+\z)}{\g} \left[ e^{-\frac{\chi^2}{2}} + \chi \int_0^\chi e^{-\frac{s^2}{2}}ds \right] = \frac{k\exp(\chi^2+\z)}{\g} \left[ e^{-\frac{\chi^2}{2}} + \sqrt{\frac{\pi}{2}} \chi \Phi(\chi) \right]
 \end{align*}
 Здесь $\Phi(x)$ -- интеграл Лапласа:
-\[ \Phi(x) = \sqrt{\frac{2}{\pi}} \]
+\[ \Phi(x) = \sqrt{\frac{2}{\pi}} \int_0^x e^{-\frac{t^2}{2}} dt \]
 Учитывая, что $\chi=\frac{\eta}{\sqrt{2\g}}$, получаем:
 \[ \boxed{\mu_a(t) = \frac{k\exp(\frac{\eta^2}{2\g}+\z)}{\g} \left[ \exp\left(-\frac{\eta^2}{4\g}\right) + \sqrt{\frac{\pi}{\g}} \eta \Phi\left(\frac{\eta}{\sqrt{2\g}}\right) \right]} \]
 
