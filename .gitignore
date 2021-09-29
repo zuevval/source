@@ -1,3 +1,6 @@
+# MacOS
+.DS_Store
+
 #special
 python/stu_labs/lab3blosum/alignments/**
 
