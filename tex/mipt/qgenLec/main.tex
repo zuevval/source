@@ -1,7 +1,7 @@
 % !TeX spellcheck = en_US
 % !TeX program = xelatex
 
-\documentclass[a4paper,12pt]{report}
+\documentclass[a4paper,12pt]{article}
 \usepackage[utf8]{inputenc} % russian, do not change
 \usepackage[T2A, T1]{fontenc} % russian, do not change
 \usepackage[english, russian]{babel} % russian, do not change
@@ -27,7 +27,8 @@
 \usepackage{subcaption} % captions for subfigures
 \usepackage{color}
 \usepackage{chngcntr} % change counters
-% \counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+\usepackage{theorem}
 
 
 % styling
@@ -40,28 +41,13 @@
 \graphicspath{{./img/}}
 \newcommand{\myPictWidth}{.95\textwidth}
 \newcommand{\phm}{\phantom{-}}
-\newcommand{\defeq}{\overset{def}=}
 
 \begin{document}
-
-\subfile{titlepage}
-\tableofcontents
-%\newpage
-\chapter{Python}
-\subfile{parts/lec0}
-\subfile{parts/lec1}
-\subfile{parts/lec2}
-\subfile{parts/lec3}
-% \subfile{parts/lec4}
-% \subfile{parts/lec5}
-% \subfile{parts/lec6}
-% \subfile{parts/lec7}
-% \subfile{parts/lec10}
-% \subfile{parts/lec11}
-
-\chapter{JavaScript}
-
-\subfile{parts/js_lec1}
-\subfile{parts/js_lec2_2021_10_07}
-
+	
+	\title{}
+	\maketitle
+	\tableofcontents
+	\newpage
+	\subfile{parts/2021_10_07}
+	
 \end{document}

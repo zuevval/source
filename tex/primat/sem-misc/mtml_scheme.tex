@@ -1,0 +1,135 @@
+% !TeX spellcheck = en_US
+% !TeX program = xelatex
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{chngcntr} % change counters
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+\usepackage{theorem}
+
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+	
+\begin{gather*}
+	\eta = B \eta + \Pi g + \varepsilon \\
+	p = \Lambda \eta + K y + \delta
+\end{gather*}
+
+\begin{gather*}
+\begin{pmatrix}
+	\eta_1 \\
+	\eta_2 \\
+	\eta_3
+\end{pmatrix} =
+ \begin{pmatrix}
+ 	0 & 0 & 0 \\
+ 	b_{21} & 0 & 0 \\
+ 	b_{31} & b_{32} & 0
+ \end{pmatrix}
+\begin{pmatrix}
+	\eta_1 \\
+	\eta_2 \\
+	\eta_3
+\end{pmatrix} + 
+\begin{pmatrix}
+	\pi_{11} & \pi_{12} & \pi_{32} & 0 & 0 & 0 \\
+	0 & 0 & 0 & \pi_{24} & 0 & 0 \\
+	0 & 0 & 0 & 0 & \pi_{35} & \pi_{36}
+\end{pmatrix}
+\begin{pmatrix}
+	g_1 \\ g_2 \\ g_3 \\ g_4 \\ g_5 \\ g_6
+\end{pmatrix} +
+\begin{pmatrix}
+	e_{11} & e_{12} & e_{13} \\
+	e_{21} & e_{22} & e_{23} \\
+	e_{31} & e_{32} & e_{33}
+\end{pmatrix} \\
+\begin{pmatrix}
+	p_1 \\ p_2 \\ p_3 \\ p_4 \\ p_5 \\ p_6 \\ p_7
+\end{pmatrix} =
+\begin{pmatrix}
+	\lambda_{11} & 0 & 0 \\
+	\lambda_{21} & 0 & 0 \\
+	\lambda_{31} & \lambda_{32} & 0 \\
+	0 & \lambda_{42} & 0 \\
+	0 & \lambda_{52} & 0 \\
+	0 & 0 & \lambda_{63} \\
+	0 & 0 & \lambda_{73} \\
+\end{pmatrix} 
+\begin{pmatrix}
+	\eta_1 \\
+	\eta_2 \\
+	\eta_3
+\end{pmatrix} + 
+\begin{pmatrix}
+	k_{11} & k_{12} & 0 & 0 & 0 & 0 \\
+	0 & 0 & k_{23} & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 0 \\
+	0 & 0 & 0 & k_{54} & 0 & 0 \\
+	0 & 0 & 0 & 0 & k_{65} & 0 \\
+	0 & 0 & 0 & 0 & 0 & k_{76} \\
+\end{pmatrix}
+\begin{pmatrix}
+	y_1 \\ y_2 \\ y_3 \\ y_4 \\ y_5 \\ y_6
+\end{pmatrix} + \delta
+\end{gather*}
+
+Не может ли какой-то SNP влиять на $p_i$ как посредством латентных переменных, так и напрямую? \\
+
+LISREL:
+
+\begin{verbatim}
+	# structural part
+	eta1 ~~ g1 + g2 + g3
+	eta2 ~~ eta1 + g4
+	eta3 ~~ eta1 + eta2 + g5 + g6
+	
+	#  measurement part (not sure about it)
+	eta1 =~ p1 + p2 + p3
+	eta2 =~ p3 + p4 + p5
+	eta3 =~ p6 + p7
+	y1 =~ p1
+	y2 =~ p2
+	y3 =~ p2
+	y4 =~ p5
+	y5 =~ p6
+	y6 =~ p7
+\end{verbatim}
+
+	
+\end{document}
