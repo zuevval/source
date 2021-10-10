@@ -39,6 +39,68 @@ To annotate genes, we may first mask the repeats (using, for example, the Repeat
 Then we sequence the \emph{transcriptome} (all RNA molecules) and try to map them back to genome. It becomes increasingly clear, however, that \textbf{not everything that is transcribed is a gene}, for example, promoters and enhancers generate small transcripts when they are active.
 
 Identifying gene switches is much more complicated.
-One technique for finding gene switches is // 5:36
+One technique for finding gene switches is comparison of highly conserved genome elements by comparing genomes across species (if the part of genome is conserved, it is likely very important, i.e. a switch).
+
+Of course, there are some switches specific to human, so there are other methods to identify switches.
+The first is \textbf{ChIP-seq} (Chromatin ImmunoPrecipitation) identifies all the gene switches to which a specific transcription factor is binded.
+We cut the regions to which the TF is binded from the DNA (using antibodies to the TF), put them into NGS scanner, then map the fragments back to the human genome.
+But this can work only for well-known TFs to which we can obtain antibodies.
+There are alternative methods: (1) using antibodies not to TFs but to histones ends (this way we can recognize enhancers, silencers and promotors by means of the histone code). Applying HMMs to the histone code, we can identify active enhancers, poised enhancers, silenced enhancers, etc.
+
+The chromatin around regulatory elements is usually more open. In \texttt{DNase-seq} or \emph{ATAC-seq}, in-vitro generated transposons are integrated into genome; they are incorporated usually into places where the chromatin is more open.
+
+Absence of necessity of finding the TF helps, but sometimes we want to know which TFs bind to a specific site.
+This is done by \emph{footprinting}: during mapping to the genome in the DNase-seq experiments, not all bases are equally covered.
+Those that are covered less are protected from sequencing and therefore might contain TF binding sites.
+
+One more technique is the \emph{chromatin confirmation capture with HI-C}.
+When a gene switch is active, distant parts (promotor + enhancer) of the genome are bound by \emph{looping}, so we can try to identify these parts.
+
+\subsection{Genetic Polymorphism}
+
+A \emph{haplotype} is a set of  specific co-inherited alleles (typically they are present in neighboring loci).
+Homozygous, heterozygous organisms.
+Transitions: A-T, C-G; transversion: A-C / A-G / T-C / T-G; most common are transitions. \\
+
+Genetic variants (genetic polymorphisms): the most common are SNPs.
+In addition to SNPs, there are small insertions and deletions; variations in number of segmental duplications; reciprocal translocations and so on.
+
+Where this variance comes from?
+It's the result of balance between generation of new mutations VS loss of mutations in the population.
+Approximately 40 new mutations from father and 20 from mother will come to a child (generation of mutations).
+Some variances are not selected for the next generation (random genetic drift, loss of the mutation).
+
+\subsubsection{Linkage disequilibrium and haplotype blocks}
+
+A haplotype is a combination of markers (say, $A_1 B_1$) brought by sperm or oocyte.
+If $A_1$ and $B_1$ are encountered more frequently together than it is expected by chance, we say that they are in the \emph{linkage disequilibrium}.
+
+Genomes are split into \emph{haplotype blocks} within which SNPs are highly linked, whereas between the blocks they are less linked.
+
+Genome variants may occur in evolutionary non-constrained parts or in constrained parts (so-called \emph{causative variants}); later are divided into \emph{coding} and \emph{non-coding} (occurring in genetic switches) variants.
+Some mutations lead to a loss of function, whereas other might lead to a gain of function.
+Interestingly, humans have much more mutations leading to loss of function than it might be expected in theory for normal living.
+
+Aside from germ-line, there are \emph{somatic} mutations which occur during the mitosis.
+Cancer is a result of accumulation of multiple mutations.
+
+\subsection{Interrogating Genetic Variation}
+
+A \emph{restriction enzyme} ("DNA is the king in a bacterium; if a foreign king invades the bacterium, this servant can cut him in small fragments, but he does not do any harm to his own king").
+Southern blot is a method allowing to detect the presence of a specific sequence in a DNA sample (based on hybridization principle).
+Electrophoresis. \\
+
+1980, RFLP (Restriction Fragment Length Polymorphism) allowed to build first human linkage maps. % TODO what is meant by genetic linkage maps?
+DNAs are extracted, cleaved with a restriction enzyme, separated by gel electrophoresis, and then by the process of Southern blotting we find fragments corresponding to specific locations (usually marked by radioactive markers).
+This was a very hard and tedious procedure.
+
+Mini-satellites were discovered; then micro-satellites + PCR.
+This allowed to build sophisticated genome linkage maps and to identify genes associated with many Mendelian diseases.
+
+Still, the capabilities of electrophoresis were limiting. Affymetrix and Illumina developed various chips (SNP arrays).
+
+You can only find an SNP in an array if you know its location previously because you have to design an array!
+A substantial number of disorders are caused by low-frequency SNPs, so to discover them, we need to sequence the whole genome of the patient (and perhaps his parents).
+Fortunately, \textbf{sequencing is advancing extremely fast, outpacing the Moore's law} (that is, the cost of sequencing is decreasing rapidly).
 
 \end{document}
