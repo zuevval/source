@@ -1,0 +1,104 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+
+\section{Introduction to evolutionary genomics}
+
+Once we have genes, we may start a phylogenetic analysis.
+Then we may go further and find the population selection.
+…
+
+Cheng-Ruei Lee
+PhD: Duke Univercity, USA
+Postdoc: Gregor Mendel Institute, Austria
+Polina Novikova, now in Germany, is my colleague.
+Taiwan
+
+My interests were primarily in ecology and evolution.
+I try to combine ecology, genetics and molecular biology.
+
+\subsection{Lecture 1: sequencing}
+
+What is a gene?
+Rice is diploid, having 12 chromosome pairs.
+DNA double helix is wrapped around histone proteins which are packed.
+Normally chromosomes are latched in many threads.
+Our goal for today is to understand how scientists assembled the genome.
+
+It started from a human genome project (3 Gb haploid genome): 1990 to 2003, \$5 billion.
+Sanger capillary sequencing. How do we know the sequencing? Amplify it, then sequence it.
+How do we amplify the sequence? When the cell wants to replicate, the double helix will be unwinded and strands replicated. One original DNA will be replicated.
+Nucleotide are connected by their phosphate groups.
+But how human do it? In laboratory, we use PCR (polymerase chain reaction). We cannot simply generate copies of known regions of DNA because we have to design primers.
+PCR changes free floating nucleotides into assembled DNA.
+PCR is a very …
+During the pandemic, people use quantitative PCR. The difference is that we use a chemical that would glow after the replication.
+
+Normal PCR uses dNTP. Sanger reaction uses dNTP and ddNTP-color (the later are nucleotides that are (1) attached to glowing chemical and (2) are not attached to OH groups). These are the two properties that we use in the Sanger sequencing.
+…
+In Sanger sequencing, we generate FASTA file.
+Each FASTA file can have one or multiple sequences.
+
+Problems:
+\begin{enumerate}[noitemsep]
+    \item PRC \& Sanger can sequence $ < 10^3 $ bp (1 kb)
+    \item Human chromosome: $ 5 $ to $ 25 x 10^7 $ bp
+\end{enumerate}
+
+How do we shear the DNA?
+\begin{itemize}[noitemsep]
+    \item Mechanical forces: pressure through a thin pore, ultrasonic shearing…
+    \item Restriction enzyme (cuts in specific position) // q: when we cut this way, may we expect cuts in precisely the same locations than those recognised by the enzyme? As far as I know we have to unwind the chromatin and it may damage the DNA
+    For example, 6-cutter ($ 4^6 $); 4-cutter ($ 4^4 $) % TODO repeat, not very clear
+\end{itemize}
+
+We want to use microbes to replicate DNA. We have commercially designed vectors (plasmids) cut by EcoRI.
+Incorporate human genome into the plasmid. Bacteria may have no plasmid, original plasmid or a plasmid with the human genome fragment. We put antibiotics into the tube. Each tube contains bacterias with DNA from one piece of a human genome (BAC - bacterial artificial chromosome).
+// q: what’s the advantage of replication in bacteria over the PCR? A: we can amplify only 2-3 Kb (and we need primers for each!), with plasmids we can amplify 150 Kb fragments.
+
+For Sanger sequencing, we need primers.
+…
+Shotgun sequencing: we do not have to sequence the whole 150 Kb fragment, only parts of them close to the end; then, if we have many of them (and we know the ), we know the
+This process is very slow and money consuming.
+You need a lot of space, a lot of tubes.
+CELERA — used shotgun sequencing.
+
+Illumina sequencing: we have DNA that is sheared into small fragments.
+Flow cell: a glass slide + little primers (adapters).
+PCR is done locally! Local bridge PCR.
+They have a high resolution camera; one cycle, they wash the chemicals away, then another cycle.
+The result is millions of short reads (100-150 bp) in a fastq format. The first and the third line contains some meta information; second - the sequence; the fourth line contains error rates for each base pair in ASCII code.
+What is Illumina good for? The reads are short reads. They have to be aligned.
+
+This is how we publish in genetics: we sequence some genome, compare it to the reference genome.
+
+De novo assembly: reads -> contains -> scaffolds.
+How do we connect contigs into scaffolds? We use mate-pair library: … // actually we do not do it now because we have third generation sequencing.
+
+The biggest problem of short-read assembly: repetitive regions.
+Having mate-pairs assemblies, we can find lengths of repeats, but not the sequence within.
+
+Things are improving, and they are evolving rapidly. They still need good software for assembly. 10 years ago there were a few companies with 2nd generation sequencing; by the end, only Illumina remained. Now there are two major players in 3rd generation sequencing: Oxford nanopore and PacBio.
+
+PacBio: generate amplicon; ligate adaptors; sequence; analyse data. We do not need to do mate-pair assemblies (5 to 20 kb, long enough for de novo assembly!! And high accuracy). Higher accuracy comes from sequencing the same region of DNA multiple times.
+
+Nanopore: they detect changes in ion current in the membrane. But it is not so accurate as Sanger or even Illumina.
+In theory, there is no upper limit for the length!! (PacBio: too long reads will not form circles).
+In practice: proteins consume ATP.
+
+The nice thing about PacBio and Nanopore is that they use the same fastq format; and they are improving rapidly. But in terms of the cost per base pair, Illumina is still the cheapest.
+
+Long-read assembly: a very new field.
+
+\subsubsection{Case study: glucosinolate}
+
+Ancestral gene: in chromosome 2 - prefers MET as a precursor
+Duplicated and transposed genes: in chromosome 7.
+After gene duplication, the gene underwent a rapid amino acid evolution.
+
+A dot plot of a sequence to itself.
+Tandem repeat, inverted repeat may be identified.
+We identified how many copies of the gene are in the genome. Our goal is to determine
+
+
+
+\end{document}
