@@ -1,3 +1,4 @@
+from scipy.stats import ortho_group
 from numpy import random
 import numpy as np
 
@@ -6,7 +7,7 @@ from python.sem.trace.trace_approx import tr_approx
 
 def rand_positive_definite_mtx(size: int, seed: int):
     random.seed(seed)
-    q = random.randn(size, size)
+    q = ortho_group.rvs(dim=size)
     eigvals = np.abs(random.randn(size)) + 1e-3  # random positive numbers
     return q @ np.diag(eigvals) @ q.T
 
