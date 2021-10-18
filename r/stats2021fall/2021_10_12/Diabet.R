@@ -1,16 +1,7 @@
 #
-dd <- read.table(here::here("r/stats2021fall/2021_10_12/Diabet/diabetes.csv"),
-                 header = T, sep = ";", dec = ",", stringsAsFactors = T)
+source(here::here("r/stats2021fall/2021_10_12/loadDiabetData.r"))
+dd <- diabetData
 head(dd)
-dd$height <- dd$height * 2.54 / 100 # meters
-dd$weight <- dd$weight * 0.45359237 # kilograms
-
-dd$bmi <- dd$weight / dd$height^2 # body mass index
-dd$bmif <- NA
-dd$bmif[dd$bmi < 19] <- "Under"
-dd$bmif[dd$bmi >= 19 & dd$bmi < 25] <- "Normal"
-dd$bmif[dd$bmi >= 25 & dd$bmi < 30] <- "Over"
-dd$bmif[dd$bmi >= 30] <- "Obesity"
 
 # Chol  / location, gender, frame, bmi
 dd.c <- dd[, c("chol", "location", "gender", "frame", "bmif")]
