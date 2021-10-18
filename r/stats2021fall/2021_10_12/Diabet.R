@@ -53,7 +53,7 @@ lapply(lv.bmif, function(ff = ? factor) {
 library(pwr)
 pwr.c <- pwr.t2n.test()
 ## tests chol - location
-qp.c <- t.test(chol ~ location, data = dd.c)
+qp.c <- t.test(chol ~ location, data = dd.c) # Welch test
 qnp.c <- wilcox.test(chol ~ location, data = dd.c, conf.int = TRUE)
 lv <- levels(as.factor(dd.c$location))
 ksp.c <- ks.test(dd.c$chol[dd.c$location == lv[1]], dd.c$chol[dd.c$location == lv[2]])
@@ -104,6 +104,6 @@ boxplot(dd.d$bp.1d ~ dd.d$location + dd.g$gender, na.rm = TRUE, xlab = "Location
 boxplot(dd.d$bp.1d ~ dd.d$bmif, na.rm = TRUE, xlab = "Body index", ylab = "SBP", col = c("yellow", "green", "blue", "red"))
 ####### 
 
-# Построить доверительный интервал для разности средних по группам с различным Location (без учёта пола)
-# Построить совместные доверительные интервалы по разности средних (по BMIF) - три разных: между высоким ростом и высоким весом; ...
+# Построить доверительный интервал для разности средних по группам с различным Location (без учёта пола) и сравнить с тем, что даёт критерий Велча.
+# Построить совместные доверительные интервалы для разности средних (по BMIF) - три разных: между ожирением и высоким весом; высоким весом и нормальным весом; нормальным весом и недовесом
 # Это показать
