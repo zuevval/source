@@ -1,0 +1,175 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+\section{Omics}
+
+How do we "annotate" the genome?
+
+\begin{enumerate}[noitemsep]
+	\item Computational prediction: We know that a "coding sequence" of a protein-coding gene starts with ATG and ends with TAA, TAG, or TGA.
+	\item % TODO a bit
+\end{enumerate}
+
+\subsubsection{Codon and translation}
+
+Different types of proteins are just different combinations of amino acids.
+Three base pair per unit.
+TRNA grabs a codon...
+Every protein starts from Met (ATG)
+
+These are protein coding genes.
+But the structure is much more complicated.
+
+Not the whole primary RNA (pre-mRNA) transcript is used to code a protein.
+Moreover, our genome is not packed with a lot of genes.
+Only 3\% of our genome are coding proteins, other do not; they might carry some function (for example, control when a gene is turned on or off).
+
+\subsubsection{How to sequence mRNA?}
+
+We build a library of cDNA (complementary DNA).
+Reverse transcription is used, for example, in RNA viruses that reverse-transcribe their genes into DNA.
+
+We need primers to sequence the cDNA.
+A rule: when a polymerase makes mRNA, it adds many A in the end (poly-A end).
+
+Then they need a lot of cDNA, a lot of 
+
+If a gene is expressed 
+This is a problem of cDNA library.
+
+Next generation sequencing changed everything.
+% TODO a bit
+
+\subsubsection{Then what?}
+
+Traditional cDNA library + Sanger sequencing:
+
+Next-gen / third-gen -- two strategies:
+
+Thick parts on the picture are exons, thin are introns.
+Grey: depth.
+Blue: previously predicted genes.
+
+\subsubsection{Alternative splicing}
+
+When we make RNA out of this DNA, in some cases (e.g. in different cells in different tissues) we choose different exons (so we have various proteins).
+
+This is why we use third-generation sequencing more and more:
+
+\subsection{Amino acids}
+
+Different amino acids differ in R-groups.
+They can be divided in some groups, e.g. some acids are hydrophobic or not.
+Based on their properties, we may guess which amino acid is likely to occur in which part of the protein.
+
+Based on the DNA code, we may predict the protein structure.
+
+A few months ago, there was a software called AlphaFold released.
+It is very difficult.
+
+\subsection{Gene duplication and gene family}
+
+A chunk of DNA may become duplicated.
+
+Suppose there is an ancestral gene which has four functions.
+After the 
+
+Subfunctionalization, neofunctionalization, loss of function / gene loss, degeneration.
+
+\emph{Gene family}: ...
+
+Orthologous genes (orthologs) -- originated from a single gene and are in different species.
+Paralogous genes (paralogs) -- 
+
+Whole genome duplication:
+Bread wheat -- 6x
+
+\subsubsection{How do we infer and date whole-genome duplication?}
+
+If we compare orthologs and paralogs, we can find that their times of divergence is different.
+
+Basically every paper on plant genomics have this kind of graph (a phylogenetic tree).
+
+If two population have no common genome duplication peaks in some period, we may conclude that  by this time they are 
+
+\subsubsection{ The globin gene family }
+
+Myoglobin: obsorbs oxygen in muscules.
+In different human age we have different genes respobsible for hemoglobin.
+Why do we do this?
+A fetus (=baby still in the womb) cannot directly exchange oxygen with the mother.
+Its globin has more affinity to the oxygen.
+
+In amphibian there is only one copy of the globin gene.
+Marsupials (kangaroo, ...): only three copies of the hemoglobin gene; % why cannot they get away with three copies?
+one of the reasons that allowed mammals is a fourth copy of the hemoglobin gene.
+
+\subsubsection{Another good example: primate opsins}
+
+In new world monkeys, there are three different alleles which result in different types of color blindness (in X chromosome).
+Females in these species are trichromats if they are heterozygous; males are always dichromats!
+
+\subsubsection{Duplication can result in a gene with multiple domains}
+
+A special case is when the duplicated gene results not in many copies
+
+\subsubsection{Protein swapping}
+
+Proteins can evolve by swapping domains.
+For example, zink fingers: they may duplicate many types.
+
+This may happen due to gene exon shuffling during recombination.
+
+\subsection{title}
+
+10 last years: we learn more about other genes.
+
+rRNA = ribosomal NRNA; tRNA = transfer RNA; miRNA = microRNA; ...
+
+microRNA is a small piece of RNA (about 50 base pairs).
+The first and the second part are reverse-compelmentary.
+
+microRNA
+
+long non-coding RNA and flowering time: a plant cannot flower when an FLC gene is expressed.
+Cold temperature in winter suppresses FLC expression, and after winter
+
+COLDAIR, COOLAIR RNA...
+
+These things are still studied...
+
+\subsubsection{Epigenetic change}
+
+DNA methylation: the rule of thumb is that it happens only in Cytosine (C) base.
+
+In a normal C there is a hydrogen; in methylated C there is an $H_3 C$ group.
+It is \textbf{the most important information} in our genome despite the AGTC code itself: metylated parts are not expressed.
+
+Next generation bisulfite sequencing: if we treat our DNA with sodium bisulfite, it changes un-methylated C into U(T).
+
+\subsubsection{Histone modification}
+
+We see a chromosome only when a cell wants to divide so it is easy to carry.
+Usually the chromatin is open, not packed.
+
+We have four different subunits in each histone.
+Modification may happen on amino acids of histones.
+
+The "chromatin landscape": a cell wants to decide which region is 
+
+ATAC-seq: enzymes that can cut DNA here and there.
+We can actually deduct more and more out of our DNA structure
+
+HIV virus is an RNA virus.
+Transponsable elements: are basically parasites.
+We should not allow them to jump much.
+
+Our genome is very-very dynamic!
+
+There are ancient remainders of genes of viruses in our chromosomes!
+
+We should suppress the expression, otherwise it will be bad.
+
+Natural selection does not always give us the best thing.
+It only gives us what lets us survive.
+
+\end{document}
