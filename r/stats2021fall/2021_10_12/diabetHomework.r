@@ -25,7 +25,7 @@ st.loc <- lv.loc %>%
       ci.naive.upper = mean.i.chol + delta.i.naive,
       ci.bnfnaive.lower = mean.i.chol - delta.i.corrected,
       ci.bnfnaive.upper = mean.i.chol + delta.i.corrected,
-      ni <- n.i
+      ni = n.i
     )
   } -> data.frame) %>%
   bind_rows
@@ -35,10 +35,30 @@ st.loc.meanDiffConfBand <- sqrt(sum(st.loc$mse^2 / st.loc$ni))
 mean.diff <- st.loc$mean[1] - st.loc$mean[2]
 mean.diff.confInterval <- c(mean.diff - st.loc.meanDiffConfBand, mean.diff + st.loc.meanDiffConfBand)
 
-t.test(chol ~ location, data = dd)
+t.test(chol ~ location, data = dd) # Welch test
 
 # ----------------------------------------------
 # --------------  part 2  ----------------------
 # ----------------------------------------------
 
+lv.bmif <- levels(as.factor(dd$bmif))
 
+st.bmif <- lv.bmif %>% # per BMI group statistics
+  lapply(function(ff = ? factor) {
+    dd.i <- dd %>% filter(bmif == ff, !is.na(chol))
+    data.frame(bmif = ff, mean = mean(dd.i$chol), mse = sqrt(var(dd.i$chol)), ni = nrow(dd.i))
+  } -> data.frame) %>%
+  bind_rows
+
+pairs.bmif <- data.frame(first = c("Over", "Obesity", "Normal"), second = c("Obesity", "Normal", "Under"))
+bnf.bmif <- length(pairs.bmif) # denominator for the Bonferroni correction
+
+st.pairs.bmif <- pairs.bmif %>% # joint confidence intervals for the difference between the BMI group means
+  apply(1, function(pair = ? character) {
+    st.pair.i <- st.bmif %>% filter(bmif %in% pair)
+    st.bmif.meanDiffConfWidth <- sqrt(sum(st.pair.i$mse^2 / st.pair.i$ni)) / bnf.bmif # corrected width
+    mean.diff <- st.pair.i$mean[1] - st.pair.i$mean[2]
+    data.frame(lower = mean.diff - st.bmif.meanDiffConfWidth, upper = mean.diff + st.bmif.meanDiffConfWidth)
+  } -> data.frame) %>%
+  bind_rows %>%
+  bind_cols(pairs.bmif)
