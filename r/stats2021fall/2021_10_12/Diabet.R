@@ -54,11 +54,37 @@ library(pwr)
 pwr.c <- pwr.t2n.test()
 ## tests chol - location
 qp.c <- t.test(chol ~ location, data = dd.c) # Welch test
-qnp.c <- wilcox.test(chol ~ location, data = dd.c, conf.int = TRUE)
-lv <- levels(as.factor(dd.c$location))
-ksp.c <- ks.test(dd.c$chol[dd.c$location == lv[1]], dd.c$chol[dd.c$location == lv[2]])
-## tests chol - bmi
 
+# Lecture 19-oct-2021
+
+qnp.c <- wilcox.test(chol ~ location, data = dd.c, conf.int = TRUE) # Wilcoxon (wɪlˈkɒksən)
+lv <- levels(as.factor(dd.c$location))
+ksp.c <- ks.test(dd.c$chol[dd.c$location == lv[1]], dd.c$chol[dd.c$location == lv[2]]) # Kolmogorov-Smirnov
+# Kolmogorov does not work for discrete distributions; when distributions are continuous and variables are independent,
+# the probability of two samples to be the same equals ZERO.
+# Kolmogorov criteria is not very powerful (though it is universal)
+
+## tests chol - bmi
+dd.c$bmi2 <- "NORMAL"
+dd.c$bmi2[dd.c$bmif %in% c("Obesity", "Over")] <- "OVER"
+boxplot(dd.c$chol ~ dd.c$bmi2, na.rm = TRUE, xlab = "Body index", ylab = "Cholesterol", col = c("yellow", "green"))
+
+# now we compare m1-m2, m2-m3, m1-m3, ... (6 tests) and apply Bonferroni correction
+
+lv <- as.factor(c("Over", "Obesity", "Normal", "Under"))
+
+alj <- alpha / 6
+st2.bmi <- data.frame(g1 = character(), g2 = character(), pv = double(), stat = double(), ci_up = double(), ci_low = double())
+for (i in 1:(n.factors - 1)) { # TODO some other number instead of `n.factors`?
+  for (j in (i+1):4) {
+      # TODO t.test
+  }
+}
+
+dd$gl
+
+# TODO homework: the same for glucoze, HDL, glyhb
+# diabet: glyhb > 7; find out whether glyhb depends on the BMI
 
 # Glucose /
 dd.g <- dd[, c("stab.glu", "location", "gender", "frame", "bmif")]

@@ -31,7 +31,7 @@ st.loc <- lv.loc %>%
   bind_rows
 
 z <- 1.96 # confidence level 0.95
-st.loc.meanDiffConfBand <- sqrt(sum(st.loc$mse^2 / st.loc$ni))
+st.loc.meanDiffConfBand <- z * sqrt(sum(st.loc$mse^2 / st.loc$ni))
 mean.diff <- st.loc$mean[1] - st.loc$mean[2]
 mean.diff.confInterval <- c(mean.diff - st.loc.meanDiffConfBand, mean.diff + st.loc.meanDiffConfBand)
 
@@ -52,11 +52,12 @@ st.bmif <- lv.bmif %>% # per BMI group statistics
 
 pairs.bmif <- data.frame(first = c("Over", "Obesity", "Normal"), second = c("Obesity", "Normal", "Under"))
 bnf.bmif <- length(pairs.bmif) # denominator for the Bonferroni correction
+z.bmif <- 2.33 # parameter for significance level 0.02 (~0.5/3)
 
 st.pairs.bmif <- pairs.bmif %>% # joint confidence intervals for the difference between the BMI group means
   apply(1, function(pair = ? character) {
     st.pair.i <- st.bmif %>% filter(bmif %in% pair)
-    st.bmif.meanDiffConfWidth <- sqrt(sum(st.pair.i$mse^2 / st.pair.i$ni)) / bnf.bmif # corrected width
+    st.bmif.meanDiffConfWidth <- z.bmif * sqrt(sum(st.pair.i$mse^2 / st.pair.i$ni))
     mean.diff <- st.pair.i$mean[1] - st.pair.i$mean[2]
     data.frame(lower = mean.diff - st.bmif.meanDiffConfWidth, upper = mean.diff + st.bmif.meanDiffConfWidth)
   } -> data.frame) %>%
