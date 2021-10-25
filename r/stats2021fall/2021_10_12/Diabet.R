@@ -71,15 +71,18 @@ boxplot(dd.c$chol ~ dd.c$bmi2, na.rm = TRUE, xlab = "Body index", ylab = "Choles
 
 # now we compare m1-m2, m2-m3, m1-m3, ... (6 tests) and apply Bonferroni correction
 
-lv <- as.factor(c("Over", "Obesity", "Normal", "Under"))
+alpha <- .5
+bmif.lv <- levels(as.factor(dd.c$bmif))
+n.pairs <- choose(length(bmif.lv), 2)
 
-alj <- alpha / 6
-st2.bmi <- data.frame(g1 = character(), g2 = character(), pv = double(), stat = double(), ci_up = double(), ci_low = double())
-for (i in 1:(n.factors - 1)) { # TODO some other number instead of `n.factors`?
-  for (j in (i+1):4) {
-      # TODO t.test
-  }
-}
+alj <- alpha / n.pairs
+st.bmi <- data.frame(g1 = character(), g2 = character(), pv = double(), stat = double(), ci_up = double(), ci_low = double())
+st.bmi <- apply(combn(bmif.lv, 2), 2, function(lv.pair = ? character) {
+  g1 <- lv.pair[1] # group 1
+  g2 <- lv.pair[2] # group 2
+  t.res <- t.test(chol ~ bmif, data = dd.c %>% filter(bmif %in% lv.pair))
+  data.frame(g1 = g1, g2 = g2, pv = t.res$p.value, stat = t.res$statistic, ci_lw = t.res$conf.int[1], ci_up = t.res$conf.int[2])
+} -> data.frame) %>% bind_rows
 
 dd$gl
 
