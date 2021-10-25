@@ -1,0 +1,129 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+\section{Lecture 3.  Phylogenetics and molecular evolution}
+Oct 25, 2021
+
+In the second lecture we discussed annotation.
+Today we will focus mostly on protein coding genes.
+
+\subsection{Phylogenetic tree}
+
+These three trees on the picture are completely identical.
+Branches can be rotated.
+
+\emph{External node}: each external node is connected to a single (internal) node.
+A \emph{clade} is a group in the tree.
+
+"E" is a \emph{"basal group"}.
+"E" is not necessairly more ancient than other populations, it is just the most distant from other.
+
+Which state is "ancestral"?
+For convenience, many biologists use a single outgroup.
+The correct way to build the tree is to add multiple outgroups.
+% TODO  ask: what's the problem with the outgroup? Why adding multiple G helps us to reconstruct a correct ancestral state?
+
+Trees may be \emph{rooted} or \emph{unrooted}.
+Unrooted trees do not give us direction of evolution, only relationship: which are closer to each other.
+
+How do we find a root?
+We add an outgroup!
+Without outgroup, we should not draw a root of the tree.
+
+How to make a phylogenetic tree?
+The most simple way is to compare DNA sequences directly (measure similarity).
+
+Recall that there are many gene duplications in the genome.
+After gene duplication, subfunctionalization, neofunctialization, or degeneration may occur.
+
+Remember that two genes derived from a single gene are \emph{homologs}.
+Out of them, \emph{orthologs} are those diverged during the \emph{speciation} (species creation) and \emph{paralogs} are those 
+Duplications sometimes distort the way we can reconstruct the tree.
+This is why many evolution biologists emphasize that they use only single-copy genes to calculate similarities.
+
+BLAST search genes:
+we can search sequences similar to our input sequence.
+The most common is \texttt{blastn} (search a nucleotide sequence in the database).
+
+\subsection{DNA sequence alignment}
+
+Because of indels, we cannot calculate similarities between sequences directly: we first need to construct the \emph{alignment}.
+
+If we are dealing with protein coding sequences, we
+\begin{enumerate}[noitemsep]
+	\item Translate to protein an align with protein, then untranslate back
+	\item Align using codons as units 
+\end{enumerate}
+
+When we do a next-gen sequencing (Illumina), we "map" short reads to the reference genome (this is a kind of alignment).
+
+Software: MEGA (everybody use it, you just click buttons!)
+We can translate genes to proteins, align sequences.
+
+CLSUSTAL-W / MUSCLE: different algorithms for alignment.
+Nevertheless, manual adjustment is better (and it is easy to manually adjust alignments using MEGA GUI).
+
+\subsection{Building a phylogenetic tree}
+
+Distance-based methods: we calculate the distance matrix and build a tree from it.
+
+Maximum Parsimony tree (MP): computer calculates all possible trees and picks the one with minimum evolutionary changes.
+
+Why biologists prefer MP over distance-based methods?
+
+There is another problem with reverse mutations.
+Distance-based methods look
+How do we model the reverse mutation?
+Biologists borrowed concepts from mathematics.
+C, T (Pyrimidines) interchange more often than A, G (Purines).
+MP considers all mutations to be equally likely.
+Maximum Likelihood (ML) method addresses this problem (estimates the mutation rate).
+
+\emph{Bayesian methods to derive phylogenetic trees are becoming more popular}.
+
+To find confidences for branches, we apply \emph{bootstrap} (resampling $ \rightarrow $ the percentage of trees that support this branch).
+
+In MEGA, we may place a root on a branch (using the GUI).
+
+\subsubsection{Food for thought}
+
+Do we need complicated methods (parsimony, likelihood) for population genomics within a species?
+In traditional phylogenetics, there is only distant relationship (among mammals, all plants, etc); even using only single-copy genes, we cannot use simple distant-based methods because they cannot handle reverse mutations.
+Within one species, the evolutionary time is small and we may do the whole genome comparison.
+
+\subsection{Basics of molecular evolution}
+
+% TODO a bit
+
+The mutation rate is different from substitution (fixation) rate.
+Mutations occur often, but not all are fixed.
+
+Mutations that are good will be fixed; but there are very few mutations that are good.
+Most mutations that are fixed are neutral.
+
+Neutral mutation rate $ \mu_0 $: in one generation, the expected number of neutral mutations is $ 2 N \cdot \mu_0 $.
+
+% TODO a bit
+
+A \emph{saturation} of DNA difference (of molecular clock): at some point, mutations start happening at the same sites and species do not diverge so quickly.
+
+A \emph{shadow gene} is a broken gene that is no longer working (and has a pretty high evolution rate).
+Intron mutations have pretty high rate, too.
+3'-UTR and 5'-cap have low substitution rate.
+
+Evolutionists designed special metrics to estimate the substitution rate: $ K_A / K_S $ % TODO
+We find synonymous sites ( $ K_S $) and scale total mutated sites .
+$ K_A / K_S = 1 \Rightarrow $ a neutral mutation.
+$ K_A / K_S > 1 $: positive selection
+
+Most genes have low $ K_A / K_S $.
+
+\subsection{The McDonald-Kreitman test (coding sequence)}
+
+The length of the branch ~ the evolution time (how many mutation has actually happened).
+% TODO some
+
+Presume that our gene is completely neutral (branch lengths totally reflect the mutation rate).
+
+If our gene is fixing many amino acids differences between species (positive selection), the number of non-synonymous divergent site will be significantly larger than 
+
+\end{document}
