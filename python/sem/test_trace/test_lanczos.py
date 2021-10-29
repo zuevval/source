@@ -13,7 +13,8 @@ def test_lanczos_naive():
         q = np.random.uniform(-1, 1, mtx_size)  # TODO ask: what's the best choice for q1?
         q /= np.linalg.norm(q)
 
-        max_eig_estimate = lanczos_naive(a=rand_mtx_props.mtx, q1=q)  # TODO find out the number of iterations
-        assert 0 <= max_eig_estimate <= eig_max
-        print("test for n={} passed, deviation~={:.3f}"
-              .format(mtx_size, np.abs(np.max(rand_mtx_props.eigvals) - max_eig_estimate)))
+        eig_estimate = lanczos_naive(a=rand_mtx_props.mtx, q1=q.reshape((len(q), 1)), max_iter=mtx_size - 1)
+        assert (0 <= eig_estimate.eigvals).all() and (eig_estimate.eigvals <= eig_max).all()
+        print("test for n={} passed, k={}, deviation of max eig ={}"
+              .format(mtx_size, len(eig_estimate.eigvals),
+                      np.abs(np.max(rand_mtx_props.eigvals) - np.max(eig_estimate.eigvals))))
