@@ -7,6 +7,14 @@ def quad_approx(mtx: np.array, vec: np.array, f: Callable[[np.array], np.array])
 
 
 def tr_approx(mtx: np.array, f: Callable[[np.array], np.array], n_samples: int, seed: int) -> float:
+    """
+    Unbiased stochastic trace estimator using Hutchinson trick
+    @param mtx: TODO
+    @param f: TODO
+    @param n_samples: TODO
+    @param seed: TODO
+    @return: TODO
+    """
     result = 0
     np.random.seed(seed)
     for _ in range(n_samples):

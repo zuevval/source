@@ -1,24 +1,16 @@
-from scipy.stats import ortho_group
-from numpy import random
 import numpy as np
 
 from python.sem.trace.trace_approx import tr_approx
-
-
-def rand_positive_definite_mtx(size: int, seed: int):
-    random.seed(seed)
-    q = ortho_group.rvs(dim=size)
-    eigvals = np.abs(random.randn(size)) + 1e-3  # random positive numbers
-    return q @ np.diag(eigvals) @ q.T
+from sem.test_trace.test_utils import rand_positive_definite_mtx
 
 
 def test_rand_positive_definite():
     for seed in range(10):
-        assert np.all(np.linalg.eigvals(rand_positive_definite_mtx(10, seed)) > 0)
+        assert np.all(np.linalg.eigvals(rand_positive_definite_mtx(10, seed).mtx) > 0)
 
 
 def test_tr_approx():
-    m = rand_positive_definite_mtx(10, 0)
+    m = rand_positive_definite_mtx(10, 0).mtx
 
     def f(x: np.array) -> np.array:
         return np.log(np.abs(x) + .5)
