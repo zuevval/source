@@ -5,18 +5,18 @@ from python.sem.trace.trace_approx import tr_approx, ApproxMethod
 from python.sem.test_trace.test_utils import rand_positive_definite_mtx
 
 
-@np.vectorize
-def average_deviation(n_samples: int, eig_max: float, absolute: bool):
-    def f(x: np.array) -> np.array:
-        return x ** 2
+def matrix_fun(x: np.array) -> np.array:
+    return x ** 3
 
+
+@np.vectorize
+def average_deviation(n_samples: int, eig_max: float, absolute: bool, mtx_size: int):
     n_sample_runs = 15
-    mtx_size = 100
     result = 0
     for seed in range(n_sample_runs):
         mtx = rand_positive_definite_mtx(size=mtx_size, seed=seed, eig_max=eig_max).mtx
-        tr_precise = np.trace(f(mtx))
-        delta_tr = np.abs(tr_precise - tr_approx(mtx=mtx, f=f, n_samples=n_samples, seed=seed,
+        tr_precise = np.trace(matrix_fun(mtx))
+        delta_tr = np.abs(tr_precise - tr_approx(mtx=mtx, f=matrix_fun, n_samples=n_samples, seed=seed,
                                                  approx_method=ApproxMethod.bruteforce))
         if not absolute:
             delta_tr /= np.abs(tr_precise)
@@ -27,10 +27,11 @@ def average_deviation(n_samples: int, eig_max: float, absolute: bool):
 def vis_hutchinson():
     eig_maxes = np.arange(start=2, stop=30, step=2)
     n_samples = np.arange(1, 10)
+    mtx_size = 10
     x, y = np.meshgrid(n_samples, eig_maxes)
 
     for absolute_dev in (True, False):
-        z = average_deviation(x, y, absolute_dev)
+        z = average_deviation(x, y, absolute_dev, mtx_size=mtx_size)
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
         ax.plot_surface(x, y, z, cmap=cm.get_cmap("RdYlGn"),
                         linewidth=0, antialiased=False)
@@ -39,16 +40,14 @@ def vis_hutchinson():
         ax.set_ylabel("max eigenvalue")
         ax.set_yticks(eig_maxes)
         ax.set_zlabel("average deviation")
-        ax.set_title("Method error for 10-by-10 matrix: " + "absolute" if absolute_dev else "relative")
+        ax.set_title("Hutchinson error for {}-by-{} matrix: {}".format(mtx_size, mtx_size,
+                                                                       "absolute" if absolute_dev else "relative"))
         plt.show()
 
 
 def vis_gauss_lanczos():
     n_repetitions = 30
     eig_max = 5
-
-    def f(x: np.ndarray) -> np.ndarray:
-        return x ** 3
 
     mtx_sizes = list(range(2, 15))
     average_errs = []
@@ -57,9 +56,9 @@ def vis_gauss_lanczos():
         average_err = 0
         for seed in range(n_repetitions):
             mtx = rand_positive_definite_mtx(size=mtx_size, seed=seed, eig_max=eig_max).mtx
-            tr_appr = tr_approx(mtx=mtx, f=f, n_samples=mtx_size // 2 + 1, seed=seed,
+            tr_appr = tr_approx(mtx=mtx, f=matrix_fun, n_samples=mtx_size // 2 + 1, seed=seed,
                                 approx_method=ApproxMethod.gauss_lanczos, max_iter=mtx_size // 2 + 1)
-            tr_precise = np.trace(f(mtx))
+            tr_precise = np.trace(matrix_fun(mtx))
             print("trace (approx): {}".format(tr_appr))
             print("trace (precise): {}".format(tr_precise))
             average_err += np.abs((tr_appr - tr_precise) / tr_appr)
