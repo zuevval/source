@@ -1,0 +1,138 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+\section{Lecture 4.  Population genetics 1: Population structure}
+Nov 1, 2021
+
+The next week: Natural Selection
+
+% TODO 
+
+1859: "On the origin of species", Charles Darwin.
+1866: Gregor Mendel published his work.
+1900: re-discovery of Mendel's work.
+
+We only work with \emph{biallelic SNPs}.
+We can simply change SNP genotypes into numbers: 0, 1, 2.
+It is not important which allele we call 0 and which 2; we care only about differences, discan.
+The convention is like this: the \emph{reference} allele is 0, the \emph{alternative} is 2.
+
+We may calculate the pairwise distance matrix and then do UPGMA, neighbor-joining, multidimensional scaling, ...
+
+There are more sophisticated methods, e.g. based on machine learning -- 
+
+PCA: there are \emph{scree plots}.
+PC 1 explains the most of the variation (by definition).
+
+There is nothing fancy about population genetics software: we just use traditional statistical methods.
+
+PCoA (principal coordinates analysis, or \emph{multidimensional scaling}): a bit different.
+
+In genomics, we deal with hundreds of thousands or sometimes with millions of SNPs ($ p \gg n $).
+We can get pairwise distance matrix and build PCoA.
+
+A genetic PCA map of Europeans surprisingly resembles the European geographic map.
+
+\subsubsection{Problems related with PCA: Uneven sampling}
+
+Population
+
+Methods using the K-clustering "idea":
+
+\begin{itemize}[noitemsep]
+	\item STRUCTURE, fineSTRUCTURE, ADMIXTURE
+	\item First set a fixed K value representing K genetic groups
+	\item ... % TODO
+\end{itemize}
+
+\begin{leftbar}
+
+Non-negative matrix factorization:
+
+TODO a very good example!! % TODO
+
+But many people still use STRUCTURE or ADMIXTURE software.
+
+\end{leftbar}
+
+What is the best $ k $ value in biology?
+There is no best $ k $ value!
+
+"why is K-means so common in popgen, rather than hierarchical clustering, even when we don't have a priori expectations for K"?
+- "There is no need to be obsessed with one best K value. It makes more sense to compare different K. That is similar to a hierarchical clustering".
+
+Puerto RIco and other islands to the south of the USA were the first stop on the way of slave transportation from Africa to the USA.
+
+Isolation by distance: two population are closer to each other when they live in the same area.
+
+Northern Americans show weaker patterns of isolation by distance.
+
+\subsubsection{When does isolation by distance NOT work?}
+
+Arabidopsis study: in South Europe there is the native population.
+
+Isolation by distance is the null hypothesis of spatial genetic vatiation! \\
+
+\subsection{Genetic drift}
+
+Why two population become different when they are separated?
+
+There are mutations, but they do not contribute much to the genetic variation.
+What 
+
+Genotype frequencey of the next generation depends only on allele frequency (p,q), \textbf{not} original genotype frequency (X, Y, Z).
+
+HWE tells us that as long as some assumption are met, the next generation's frequncies are (p, q) (no evolution!).
+
+Assumptions: random mating, no natural selection, no mutations between A \& a, very large population = no genetic drift, no dramatic population size changes, etc...
+ 
+Genetic drift is essentially a process of random sampling of genotypes.
+It's like bootstrapping.
+
+If we give the system enough time and the population is small enough, there will be a single allele.
+Mitochondrial Eve.
+
+% TODO mitochondrial Eve
+
+Drift is determined by population size.
+It's a key factor in popgen.
+
+$F_{ST}$: assuming we have a species with 5 populations, each with 100 individuals.
+Expected heterozygosity $ H_T = 2pq $.
+We may compare $H_T$ and observed heterozygosity $H_S = 2pq() $ % TODO foruma
+\[ F_{ST}  = \frac{H_T - H_S}{H_T}\]
+
+Heterozygosity: assume two population with strong gene flow between them.
+
+Population 1: $ A $ allele: $ p = 0.55, q = 0.45 $;
+
+% TODO 
+
+In a model with two populations with weak gene flow: 
+
+Population 1: $ p=0.8, q=0.2 $; population 2: $ p=0.2, q=0.8 $ \\
+
+When there is a species with 2000 individuals, then in three models (1 population of 2000, 10 populations of 200, 100 populations) results will be very different.
+This is the essence of $ F_{ST} $.
+
+\subsubsection{Effective population size}
+
+In previous cases, despite the population size is small, we assume that the population is ideal.
+
+The \emph{census population size} is simply a head count.
+
+Imagine we have a population of 100 individuals.
+Suppose we can estimate the amount of drift after many generation.
+In the real world the amount of genetic drift will be stronger than simulated.
+
+$ N_e $ -- the effective population size.
+E.g. in walrus herds there are only a few males.
+
+Drift and low $ N_e $ is bad.
+"Pure blood" dogs have
+
+What's the human effective population size?
+Census size: $ > 7.8 \times 10^9 $.
+
+Effective population size: about 3000 individual.
+
+\end{document}
