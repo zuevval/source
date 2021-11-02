@@ -125,8 +125,86 @@ A \emph{panmixia} is a situation when any pair of different gender in the popula
 We assume that
 \begin{enumerate}[noitemsep]
     \item The population is infinitely large
-    \item Generations are independent
-    \item Panmixia
+    \item Generations are independent (one generation will give rise to a set of gametes which will give rise to the next generation and so on)
+    \item Panmixia (random sampling / segregation and aggregation of gametes)
 \end{enumerate}
+
+Genotype A \& B $ \rightarrow $ genotypes AA, AB, BB.
+Allele frequencies:
+\begin{gather*}
+	p = p(A) = p(AA) + \frac{1}{2} p(AB), \medskip q = p(B) = 1 - p(A) \medskip \Rightarrow \\ \medskip \boxed{ p(AA) = p^2, p(AB) = 2pq, p(BB) = q^2 } \quad \text{(Hardy-Weinberg equilibrium)}
+\end{gather*}
+
+Despite these formulas are based on very simple assumption, normally loci follow HWE.
+
+\subsubsection{Linkage Disequilibrium}
+
+Covariance and correlation: correlation is scaled by variances of variables and ranges from -1 to 1.
+
+Loci are located on a chromosome and frequently the distribution of the genotypes within two close loci is statistically dependent.
+
+Consider a system which consists of two loci presumably linked together, and in each locus there are two alleles (say, A/a and B/b).
+
+Two loci on the same chromosome: alleles are in \emph{cis}; on two different chromosomes: \emph{trans}.
+
+Consider a locus with two alleles, A and a. If some another loci used to have a single allele B, but at some point a mutation occurred which led to another (lucky) allele "b" (and that individual happened to have A genotype), then in a short period A and b genotypes will be correlated.
+This is \emph{linkage disequilibrium}.
+
+The measure of LD is $ D := P(AB)p(ab) - p(Ab)p(aB) $ (it is covariance).
+Statisticians also often use $ r^2 := \frac{D}{p(A) p(B) p(a) p(b)} $ (this is squared correlation).
+
+\textbf{Lewontin's D'}: $ D' \overset{def}= \frac{D}{D_{\max}} $
+
+What reasons could cause LD?
+
+\begin{enumerate}[noitemsep]
+    \item Loci are close (physical proximity)
+    \item Loci are far away, but there was a mapping error
+    \item Genetic structure (e.g., our study is a mixture of two different population, or there was a recent mutation).
+\end{enumerate}
+
+Genetic maps.
+HapMap project; its successor is the 1000 genomes project.
+HapMap: researchers could genotype about 10 million SNPs in the human genome, but HapMap identifed about 250-500 000 "tag" SNPs that explain most of the variance (they provide always as much information as the whole set of 10 000 000 SNPs).
+
+\subsection{Genetic Drift}
+
+There are stochastic factors affecting allele frequencies -- a \emph{genetic drift}.
+Recall that the model of genetic drift (generation are not overlapping, each generation is a random sampling of $ 2n $ gametes, ...) is a simple but often good model.
+
+Consider a population with 10 diploid individuals and a single copy of a gene with mutation, i.e. $95\%$ usual gametes and $5\%$ mutants.
+What are the chances that
+\begin{enumerate}[noitemsep]
+	\item A mutation will get lost;
+	\item In the next generation, exactly one copy of a mutant allele will be present;
+	\item In the next generation, the number of copies will increase?
+\end{enumerate}
+
+Answers: $ \left( \frac{19}{20} \right)^{20} = 0.95^{20 \approx 0.36}, \quad \left( \frac{19}{20} \right)^{19} \cdot \frac{1}{20} \cdot \binom{20}{1} = \left( \frac{19}{20} \right)^{19} \approx 0.38, \quad 1 - (0.36+0.38) = 0.26 $.
+
+\subsubsection{Bottleneck effect and founder effect}
+
+Bottleneck: a population size reduces dramatically.
+Founder effect: a very small number of founders diverge and form a new population.
+Mathematically these effects are the same.
+
+\subsubsection{Long-term consequencies of drift}
+
+Consider a population of size 1.
+Let the initial individual be heterozygotic.
+The chances that the heterozygocity persists in the next generation is $0.5$.
+Sooner or later, each allele will be either fixed or lost.
+
+Expected times of loss and fixation: let $ p_0 $ denote the original frequency, $ n $ -- the \textbf{effective} population size.
+Then
+
+\begin{gather*}
+	\mathds E [t_{lost}] = -4 n \frac{p_0}{1-p_0} \cdot \ln(p_0) \\
+	\mathds E [t_{fixed}] = -4n \frac{1-p_0}{p_0} \cdot \ln(1-p_0) \\
+	\mathds E[t_{segregate}] = -4n [(1-p_0) \ln (1-p_0) + p_0 \ln (p_0)] \\
+	P(lost | t, p_0) = \exp \left( -4n \frac{p_0}{t} \right) \\
+	Var(p) = p_0 (1-p_0) \left( 1 - \left( 1 - \frac{1}{2n} \right)^t \right)
+\end{gather*}
+
 
 \end{document}
