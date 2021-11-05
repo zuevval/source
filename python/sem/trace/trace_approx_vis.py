@@ -3,37 +3,40 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from python.sem.trace.trace_approx import tr_approx, ApproxMethod
 from python.sem.test_trace.test_utils import rand_positive_definite_mtx
+from itertools import product
 
 
 def matrix_fun(x: np.array) -> np.array:
     if isinstance(x, np.ndarray) and x.ndim == 2:
-        return x @ x @ x
-    return x ** 3  # when the matrix is not rectangular, return element-wise product
+        return x @ x
+    return x ** 2  # when the matrix is not rectangular, return element-wise product
 
 
 @np.vectorize
-def average_deviation(n_samples: int, eig_max: float, absolute: bool, mtx_size: int):
+def average_deviation(n_samples: int, eig_max: float, absolute: bool, mtx_size: int, method: ApproxMethod,
+                      max_iter: int) -> float:
     n_sample_runs = 15
     result = 0
     for seed in range(n_sample_runs):
         mtx = rand_positive_definite_mtx(size=mtx_size, seed=seed, eig_max=eig_max).mtx
         tr_precise = np.trace(matrix_fun(mtx))
         delta_tr = np.abs(tr_precise - tr_approx(mtx=mtx, f=matrix_fun, n_samples=n_samples, seed=seed,
-                                                 approx_method=ApproxMethod.bruteforce))
+                                                 approx_method=method, max_iter=max_iter))
         if not absolute:
             delta_tr /= np.abs(tr_precise)
         result += delta_tr
     return result / n_sample_runs
 
 
-def vis_hutchinson():
+def vis_samples_vs_max_eig():
     eig_maxes = np.arange(start=2, stop=30, step=2)
     n_samples = np.arange(1, 10)
     mtx_size = 10
     x, y = np.meshgrid(n_samples, eig_maxes)
 
-    for absolute_dev in (True, False):
-        z = average_deviation(x, y, absolute_dev, mtx_size=mtx_size)
+    for absolute_dev, method, max_iter in product((True, False), (ApproxMethod.bruteforce, ApproxMethod.gauss_lanczos),
+                                                  (1, 2)):
+        z = average_deviation(x, y, absolute_dev, mtx_size=mtx_size, method=method, max_iter=max_iter)
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
         ax.plot_surface(x, y, z, cmap=cm.get_cmap("RdYlGn"),
                         linewidth=0, antialiased=False)
@@ -42,12 +45,14 @@ def vis_hutchinson():
         ax.set_ylabel("max eigenvalue")
         ax.set_yticks(eig_maxes)
         ax.set_zlabel("average deviation")
-        ax.set_title("Hutchinson error for {}-by-{} matrix: {}".format(mtx_size, mtx_size,
-                                                                       "absolute" if absolute_dev else "relative"))
+        ax.set_title("{} error for {}-by-{} matrix: {}".format(
+            method, mtx_size, mtx_size,
+            "absolute" if absolute_dev else "relative") +
+                     ("" if method == ApproxMethod.bruteforce else "\n Lanczos iterations: " + str(max_iter)))
         plt.show()
 
 
-def vis_gauss_lanczos():
+def vis_gauss_lanczos_mtx_size():
     n_repetitions = 30
     eig_max = 5
 
@@ -76,8 +81,8 @@ def vis_gauss_lanczos():
 
 
 def main():
-    vis_gauss_lanczos()
-    vis_hutchinson()
+    vis_gauss_lanczos_mtx_size()
+    vis_samples_vs_max_eig()
 
 
 if __name__ == "__main__":
