@@ -6,7 +6,9 @@ from python.sem.test_trace.test_utils import rand_positive_definite_mtx
 
 
 def matrix_fun(x: np.array) -> np.array:
-    return x ** 3
+    if isinstance(x, np.ndarray) and x.ndim == 2:
+        return x @ x @ x
+    return x ** 3  # when the matrix is not rectangular, return element-wise product
 
 
 @np.vectorize
@@ -49,7 +51,7 @@ def vis_gauss_lanczos():
     n_repetitions = 30
     eig_max = 5
 
-    mtx_sizes = list(range(2, 15))
+    mtx_sizes = list(range(2, 45))
     average_errs = []
     for mtx_size in mtx_sizes:
         np.random.seed(0)
