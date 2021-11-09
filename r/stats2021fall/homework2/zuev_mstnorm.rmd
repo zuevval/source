@@ -16,9 +16,9 @@ param.c <- -1.4
 param.d <- 1.
 param.h <- .8
 param.alpha0 <- -7.
-param.gamma0 <- 2.
+param.sigma0 <- 2.
 param.alpha1 <- -1.
-param.gamma1 <- 2.
+param.sigma1 <- 2.
 ```
 ## Task 1
 
@@ -89,3 +89,47 @@ data.frame(stat = c("mean", "s^2"),
            hi = c(x.mean.ci["hi"], x.s2.ci["hi"])) %>% print
 
 ```
+
+## Task 5. Kolmogorov test
+
+Using built-in Kolmogorov test:
+
+```{r}
+cdf.expected <- function(x) pnorm(x, param.alpha0, param.sigma0^2)
+ks.test(x = x, y = cdf.expected)
+```
+
+Custom version: Ivchenko, Medvedev p. 107-108 (53/123)
+
+```{r}
+data$cdfEmpirical <- data$rank / nrow(data)
+data$cdfTheor <- cdf.expected(data$x)
+custom.d <- max(abs(data$cdfEmpirical - data$cdfTheor))
+
+kolm.cdf <- function(x) {
+  k <- 1:4 # an approximation; the precise range is 1:Inf
+  1 - 2 * sum((-1)^(k - 1) * exp(-2 * (k^2 * x^2)))
+}
+
+cat(1 - kolm.cdf(custom.d))
+
+```
+
+From table (Ivchenko, Medvedev): since $ \alpha_2 = 0.01, n = 50 $, $ P(D_n= \sup_x |F_n(x)-F(x)|) > \alpha_2 = 0.226 $
+
+## Task 6. Chi squared test (simple hypothesis)
+
+```{r}
+my.chisq.test <- function(x = ? numeric){
+  brk <- c(-Inf, -2, 0, 2, 4, 6, Inf)
+  x.hist <- hist(x, plot = F, breaks = brk)
+  nu <- x.hist$counts
+  pr <- pnorm(tail(brk, -1), param.alpha0, param.sigma0) - pnorm(head(brk, -1), param.alpha0, param.sigma0)
+  expected_counts <- length(x) * pr
+  sum((nu - expected_counts)^2 / expected_counts)
+} -> numeric
+
+my.chisq.test(x) %>% pchisq(df = x.n) %>% cat
+
+```
+We reject the null hypothesis because $ p-value = 1 - F_{\chi^2}(stat\_value) \approx 0 $
