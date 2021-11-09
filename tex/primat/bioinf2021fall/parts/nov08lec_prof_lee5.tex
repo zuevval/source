@@ -1,0 +1,127 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+\section{Population genetics II: Selection and the consequences}
+
+The most important thing about Hardy-Weinberg Equilibrium is that it tells us the condition under which evolution does not happen.
+
+Evolution is the violation of HWE.
+
+HWE assumes no drift (a large population), random mating, no mutations, no gene flow and no linkage disequilibrium.
+
+What is \emph{fitness}?
+This measure describes how well the individual survive, succeeds in finding a mate, and the number of his progeny.
+If an individual does not survive or does not find a mate, his fitness is consider zero.
+
+Absolute fitness: $ W_{A_1 A_1} = 20 $ seeds, $ W_{A_2 A_2} = 16 $ seeds.
+Relative fitness: absolute divided by the largest in the population.
+
+Consider one locus.
+
+% TODO some 10 minutes
+
+\subsubsection{Mutation-selection balance}
+
+Suppose $ A_1 $ is the dominant allele, $ A_2 $ -- recessive.
+
+$ A_1 A_1 $, $ A_1 A_2 $ -- fitness 1.
+
+% TODO a bit
+
+In the first location, the elevation rate is increased by
+
+If the fruit flight comes from higher elevation, it takes higher time to recover...
+
+Gene flow is too frequent...
+
+Migration might wash away the mutation!
+
+In the real world, we may see see local adaptations even in the presence of migration.
+For example, mice in Arizona have different frequencies of genes responsible for skin color.
+
+\subsubsection{Trade-off: selective advantage depends on environments}
+
+A plant may grow quicker OR yield larger crop.
+\emph{Boechera stricta} has more fruits in the West US than in the East.
+
+We can use some phenotype-to-environment association.
+
+\subsection{Detecting natural selection}
+
+How to observe traces of previous selection (and on-going)?
+Two methods: focus on divergence between population or polymorphisms inside a single population.
+
+We cannot use the frequency of a single SNP to decide whether it is under selection because of the drift.
+But loci under selection have extreme allele frequency divergence, so comparing to a neutral expectation we can detect these loci.
+Recall mice: gene defining skin color differs from some random gene.
+
+Look: this is not GWAS!
+Here we see P-values of difference in allele frequencies of genes between Han Chinese and Tibetans.
+Tibetans have an altitude adaptation in their genome.
+
+Where the adaptation may come from?
+A new mutation, or inherited from ancient people.
+They have good genes from denisovans.
+
+Adaptive introgression: during the Ice Age, there were 4 populations of people located in different parts of Southern Europe.
+
+Japonica and Indica rice:
+there is a gene which is very different among them and which has nothing to do with local adaptation. % TODO ask: What this gene is responsible to?
+
+$ F_{ST} - Q_{ST} $ comparison
+
+\subsubsection{Patterns of DNA polymorphism. Tajima's D}
+
+$ \pi $ is a pairwise distance
+
+Tajima's D statistics: tries to compare whether the level of polymorphism meets the neutral expectation.
+
+Recall that branch lengths are bigger when the sequences differ more.
+Singleton (an SNP found in a single individual), doubleton, tripleton, ...
+
+Under the neutrality, we may calculate the number of singletons.
+
+Site frequency spectrum: every bar is proportional to the branch length
+
+The sum of all bars is the total number of SNP sites.
+
+The population genetic parameters $ \Theta = 4 N_e u $, $ N_e $ is the effective population size.
+It may be proven that under neutrality $ \pi = \hat k = 4 N_e u = \Theta $.
+Also, under neutrality, $ \Theta = \frac{S}{a_n} $.
+So we may calculate two different estimates of $ \Theta $.
+
+\[ D \overset{def}= \frac{d}{\sqrt{\hat V (d)}} = \frac{\hat k - \frac{S}{a_1}}{\sqrt{[ e_1 S + e_2 S (S - 1) ]}} \]
+If every is neutral and population size is constant, Tajima's D = 0.
+
+$ S $ is very sensitive to SNPs with very low frequency alleles (particularly singletons).
+If there are many terminal brances (recent rapid population expansion), there will be a lot of singletons, $ S $ will increase and Tajima's D will be negative.
+If the population size decreases and we loose a lot of singletons, we have positive D values.
+
+\subsection{Selection and genetic variation. Positive selection and selective sweep}
+
+Very strong positive selection would decrease the variation in a particular place of a chromosome (\emph{selective sweep}).
+This is the reason why we may, having observed a dip ...
+% TODO a bit
+
+Maize vs teosinte:
+The corn in a totally artificial monster which did not exist in the wild before native Americans domesticated it.
+
+The number of polymorphisms have been calculated in the sliding window along the genome.
+
+Pi ratio:
+
+If you read a lot of modern papers, you will see that they calculate Tajima's D statistics
+
+% TODO a bit
+
+A polygenic trait: example is the human height.
+It is very difficult to find traces of evolution for the polygeinc trait because this evolution may be achieved with only a slight change in many sites at the same time.
+
+\subsubsection{Other types of selection?}
+
+Directional selection reduces genetic variation.
+Balancing selection maintains variation.
+
+Negative frequency-dependent selection:
+the frequency of left-
+
+\end{document}
