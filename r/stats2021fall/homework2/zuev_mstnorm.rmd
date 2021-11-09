@@ -1,0 +1,91 @@
+## Setting up the parameters
+
+```{r message = F, warning = F}
+library(tidyverse) # dplyr, ggplot2, purrr, ...
+
+x <- c(-4.503, -2.342, +0.437, +0.473, +1.531, -1.864, -2.283, -1.011,
+       -2.743, -3.224, -3.284, +0.561, -0.626, -1.950, -0.825, +2.213,
+       -2.503, -2.371, +0.278, +0.361, +0.653, -1.057, -1.404, -1.059,
+       +1.673, -0.429, -2.543, +0.758, -1.195, -3.485, -0.863, -1.398,
+       -4.310, +3.068, -3.704, -2.858, -4.464, -3.021, -1.593, +2.710,
+       -3.191, +2.498, -0.024, +1.903, +1.244, -0.048, +1.354, -3.339,
+       +1.330, -3.136)
+
+param.alpha2 <- .01
+param.c <- -1.4
+param.d <- 1.
+param.h <- .8
+param.alpha0 <- -7.
+param.gamma0 <- 2.
+param.alpha1 <- -1.
+param.gamma1 <- 2.
+```
+## Task 1
+
+### Variational series
+
+```{r}
+data <- as.data.frame(x) %>%
+  mutate(id = row_number()) %>%
+  arrange(x) %>%
+  mutate(rank = row_number())
+
+data %>% ggplot(aes(x = rank, ymin = 0, ymax = x)) +
+  geom_linerange() +
+  ggtitle(label = "Variational series") +
+  theme(plot.title = element_text(hjust = .5))
+
+```
+
+### ECDF
+
+```{r}
+data %>% ggplot(aes(x)) + stat_ecdf()
+```
+
+### Histogram and the "frequency polygon"
+
+```{r}
+data.hist <- data %>% ggplot(aes(x)) + geom_histogram(binwidth = param.h)
+data.hist.values <- ggplot_build(data.hist)$data[[1]] %>% mutate(x = .5 * (xmin + xmax))
+data.hist + geom_line(data = data.hist.values, aes(x, y), colour = "red")
+```
+## Task 2. Sample characteristics
+```{r}
+x.mean <- mean(x)
+x.s2 <- mean(x^2) - x.mean^2
+x.med <- median(x)
+x.asym <- mean((x - x.mean)^3) / (x.s2^(3 / 2))
+x.kurt <- mean((x - x.mean)^4) / (x.s2^2)
+
+x.n <- length(x)
+x.p_cd <- sum(param.c <= x & x <= param.d) / x.n
+
+c("mean" = x.mean, "s2" = x.s2, "median" = x.med, "asymmetry" = x.asym, "kurtosis" = x.kurt, "p(c<=x<=d)" = x.p_cd) %>% print
+```
+## Task 3. MLE and method of moments estimates for the Gauss distribution parameters
+Under assumption of normality MLE for mean is the sample mean and MLE for variance is the sample variance.
+
+The method of moments estimator for mean/variance is also the sample mean / sample variance
+```{r}
+x.mean.mle <- x.mean
+x.s2.mle <- x.s2
+
+x.mean.moments <- x.mean
+x.s2.moments <- x.s2
+```
+
+## Task 4. Confidence intervals for distribution parameters
+
+```{r}
+t.quantile <- qt((1 - param.alpha2) / 2, x.n - 1)
+x.mean.ci <- x.mean + c(lo = -t.quantile, hi = t.quantile) * sqrt(x.s2 / (x.n - 1))
+
+chisq.quantile <- qchisq(p = (1 - param.alpha2) / 2, df = x.n)
+x.s2.ci <- x.s2 * (1 + c(lo = -1 / chisq.quantile, hi = 1 / chisq.quantile)) # Ivchenko, Medvedev p. 85 (42/123)
+
+data.frame(stat = c("mean", "s^2"),
+           lo = c(x.mean.ci["lo"], x.s2.ci["lo"]),
+           hi = c(x.mean.ci["hi"], x.s2.ci["hi"])) %>% print
+
+```
