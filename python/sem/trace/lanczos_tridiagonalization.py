@@ -17,7 +17,7 @@ def lanczos_naive(a: np.ndarray, q1: np.ndarray, max_iter: int) -> LanczosResult
     @param a: Symmetric positive definite square matrix (two-dimensional: NxN)
     @param q1: unit vector (the starting point for Lanczos tridiagonalization) (two-dimensional: Nx1)
     @param max_iter: maximum number of iterations
-    @return: lambda_0 (the estimate of the largest eigenvalue of `a`)
+    @return: lambda_0 (the estimate of the largest eigenvalue of `a`) and the corresponding eigenvector
     """
     n = len(q1)
     alpha, beta = [], [1]
@@ -29,4 +29,26 @@ def lanczos_naive(a: np.ndarray, q1: np.ndarray, max_iter: int) -> LanczosResult
         r.append((a - alpha[-1] * np.eye(N=n)) @ q[-1] - beta[-1] * q[-2])
         beta.append(np.linalg.norm(r[-1]))
     eigval, eigvec = eigh_tridiagonal(d=np.array(alpha), e=np.array(beta[1:-1]))
+    return LanczosResult(eigvecs=eigvec, eigvals=eigval)
+
+
+def lanczos_vectorized(a: np.ndarray, q1: np.ndarray, max_iter: int) -> LanczosResult:
+    """
+    Vectorized form of `lanczos_naive` (Golub, alg-m 10.3.1)
+    """
+    w = q1.copy()
+    v = a @ q1
+    alpha, beta = [(w.T @ v)[0, 0]], []
+    while len(alpha) < max_iter:
+        v -= alpha[-1] * w
+        beta.append(np.linalg.norm(v))
+        if np.isclose(beta[-1], 0):
+            beta.pop()
+            break
+
+        v, w = - beta[-1] * w, v / beta[-1]
+        v += a @ w
+        alpha.append((w.T @ v)[0, 0])
+
+    eigval, eigvec = eigh_tridiagonal(d=np.array(alpha), e=np.array(beta))
     return LanczosResult(eigvecs=eigvec, eigvals=eigval)
