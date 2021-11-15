@@ -95,41 +95,60 @@ data.frame(stat = c("mean", "s^2"),
 Using built-in Kolmogorov test:
 
 ```{r}
-cdf.expected <- function(x) pnorm(x, param.alpha0, param.sigma0^2)
-ks.test(x = x, y = cdf.expected)
+x.cdf.expected <- function(x) pnorm(x, param.alpha0, param.sigma0)
+ks.test(x = x, y = x.cdf.expected)
 ```
 
 Custom version: Ivchenko, Medvedev p. 107-108 (53/123)
 
 ```{r}
 data$cdfEmpirical <- data$rank / nrow(data)
-data$cdfTheor <- cdf.expected(data$x)
+data$cdfTheor <- x.cdf.expected(data$x)
 custom.d <- max(abs(data$cdfEmpirical - data$cdfTheor))
 
+# for alpha2 = 0.01 Kolmogorov distribution quantile q_alpha = 1.6276
+cat(custom.d * sqrt(x.n))
+```
+The maximum alpha with which we cannot reject the null hypothesis is the p-value.
+```{r}
 kolm.cdf <- function(x) {
-  k <- 1:4 # an approximation; the precise range is 1:Inf
-  1 - 2 * sum((-1)^(k - 1) * exp(-2 * (k^2 * x^2)))
+  k_range <- -30:30 # an approximation; the precise range is -Inf:Inf
+  ll <- k_range %>% lapply(function(k = ? numeric){ (-1)^k * exp(-2 * (k^2 * x^2)) } -> numeric)
+  do.call(rbind, ll) %>% colSums
 }
 
-cat(1 - kolm.cdf(custom.d))
+cat("p-value:", 1 - kolm.cdf(custom.d * sqrt(x.n)))
 
 ```
-
-From table (Ivchenko, Medvedev): since $ \alpha_2 = 0.01, n = 50 $, $ P(D_n= \sup_x |F_n(x)-F(x)|) > \alpha_2 = 0.226 $
 
 ## Task 6. Chi squared test (simple hypothesis)
 
 ```{r}
-my.chisq.test <- function(x = ? numeric){
-  brk <- c(-Inf, -2, 0, 2, 4, 6, Inf)
+brk <- c(-Inf, -2, 0, 2, 4, 6, Inf)
+my.chisq.test <- function(x = ? numeric, cdf.expected){
   x.hist <- hist(x, plot = F, breaks = brk)
   nu <- x.hist$counts
-  pr <- pnorm(tail(brk, -1), param.alpha0, param.sigma0) - pnorm(head(brk, -1), param.alpha0, param.sigma0)
+  pr <- cdf.expected(tail(brk, -1)) - cdf.expected(head(brk, -1))
   expected_counts <- length(x) * pr
-  sum((nu - expected_counts)^2 / expected_counts)
+  return(sum((nu - expected_counts)^2 / expected_counts))
 } -> numeric
 
-my.chisq.test(x) %>% pchisq(df = x.n) %>% cat
+x.chi2.simple <- my.chisq.test(x, cdf.expected = x.cdf.expected)
+cat("p-value: ", 1 - pchisq(x.chi2.simple, df = length(brk) - 1))
 
 ```
 We reject the null hypothesis because $ p-value = 1 - F_{\chi^2}(stat\_value) \approx 0 $
+
+# Task 7. Chi-squared test for complex alternative
+```{r}
+my.chisq.test.complex <- function (x = ? numeric){
+  x.mean <- mean(x)
+  x.sd <- mean(x^2) - x.mean^2
+  return(my.chisq.test(x = x, cdf.expected = function(x) pnorm(x, x.mean, x.sd)))
+}
+
+x.chi2.complex <- my.chisq.test.complex(x)
+
+cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 1))
+```
+$ \alpha_2 = 0.01 \Rightarrow $ we do not reject the null hypothesis
