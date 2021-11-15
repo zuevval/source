@@ -1,0 +1,205 @@
+\documentclass{article}
+
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+
+\usepackage[left=20mm, top=20mm, right=20mm, bottom=20mm, footskip=10mm]{geometry}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{graphicx}
+\usepackage{float} % force pictures position with \begin{figure}[H]
+\newcommand{\myPictWidth}{.75\textwidth}
+
+\begin{document}
+
+\title{Statistics in bioinformatics. Lab 2}
+\author{Valerii Zuev}
+\maketitle
+
+\tableofcontents
+
+\setcounter{section}{-1}
+\section{Setup}
+
+<<cache=F>>=
+
+library(tidyverse) # dplyr, ggplot2, purrr, ...
+
+x <- c(-4.503, -2.342, +0.437, +0.473, +1.531, -1.864, -2.283, -1.011,
+       -2.743, -3.224, -3.284, +0.561, -0.626, -1.950, -0.825, +2.213,
+       -2.503, -2.371, +0.278, +0.361, +0.653, -1.057, -1.404, -1.059,
+       +1.673, -0.429, -2.543, +0.758, -1.195, -3.485, -0.863, -1.398,
+       -4.310, +3.068, -3.704, -2.858, -4.464, -3.021, -1.593, +2.710,
+       -3.191, +2.498, -0.024, +1.903, +1.244, -0.048, +1.354, -3.339,
+       +1.330, -3.136)
+
+param.alpha2 <- .01
+param.c <- -1.4
+param.d <- 1.
+param.h <- .8
+param.alpha0 <- -7.
+param.sigma0 <- 2.
+param.alpha1 <- -1.
+param.sigma1 <- 2.
+
+@
+
+\section{Task 1}
+
+\subsection{Variation series}
+
+<<cache=T>>=
+
+data <- as.data.frame(x) %>%
+  mutate(id = row_number()) %>%
+  arrange(x) %>%
+  mutate(rank = row_number())
+
+data %>% ggplot(aes(x = rank, ymin = 0, ymax = x)) +
+  geom_linerange() +
+  ggtitle(label = "Variational series") +
+  theme(plot.title = element_text(hjust = .5))
+
+@
+
+\subsection{ECDF}
+
+<<cache=T>>=
+data %>% ggplot(aes(x)) + stat_ecdf()
+@
+
+\subsection{Histogram and the "frequency polygon"}
+
+<<cache=T>>=
+data.hist <- data %>% ggplot(aes(x)) + geom_histogram(binwidth = param.h)
+data.hist.values <- ggplot_build(data.hist)$data[[1]] %>% 
+  mutate(x = .5 * (xmin + xmax))
+data.hist + geom_line(data = data.hist.values, aes(x, y), colour = "red")
+@
+
+\section{Task 2. Sample characteristics}
+
+<<cache=T>>=
+x.mean <- mean(x)
+x.s2 <- mean(x^2) - x.mean^2
+x.med <- median(x)
+x.asym <- mean((x - x.mean)^3) / (x.s2^(3 / 2))
+x.kurt <- mean((x - x.mean)^4) / (x.s2^2)
+
+x.n <- length(x)
+x.p_cd <- sum(param.c <= x & x <= param.d) / x.n
+
+c("mean" = x.mean, "s2" = x.s2, "median" = x.med, 
+  "asymmetry" = x.asym, "kurtosis" = x.kurt, "p(c<=x<=d)" = x.p_cd) %>% print
+@
+
+\section{Task 3. MLE and method of moments estimates for the Gauss distribution parameters}
+
+Under assumption of normality MLE for mean is the sample mean and MLE for variance is the sample variance.
+
+The method of moments estimator for mean/variance is also the sample mean / sample variance
+
+<<cache=T>>=
+x.mean.mle <- x.mean
+x.s2.mle <- x.s2
+
+x.mean.moments <- x.mean
+x.s2.moments <- x.s2
+@
+
+\section{Task 4. Confidence intervals for distribution parameters}
+
+<<cache=T>>=
+
+t.quantile <- qt((1 - param.alpha2) / 2, x.n - 1)
+x.mean.ci <- x.mean + c(lo = -t.quantile, 
+                        hi = t.quantile) * sqrt(x.s2 / (x.n - 1))
+
+chisq.quantile <- qchisq(p = (1 - param.alpha2) / 2, df = x.n)
+x.s2.ci <- x.s2 * (1 + c(lo = -1 / chisq.quantile,
+                         hi = 1 / chisq.quantile)) # Ivchenko, Medvedev p. 85 (42/123)
+
+data.frame(stat = c("mean", "s^2"),
+           lo = c(x.mean.ci["lo"], x.s2.ci["lo"]),
+           hi = c(x.mean.ci["hi"], x.s2.ci["hi"])) %>% print
+
+@
+
+\section{Task 5. Kolmogorov test}
+
+Custom version (Ivchenko, Medvedev p. 107-108 (53/123))
+<<cache=T>>=
+data$cdfEmpirical <- data$rank / nrow(data)
+
+x.cdf.expected <- function(x) pnorm(x, param.alpha0, param.sigma0)
+data$cdfTheor <- x.cdf.expected(data$x)
+custom.d <- max(abs(data$cdfEmpirical - data$cdfTheor))
+@
+for $ \alpha_2 = 0.01 $ Kolmogorov distribution quantile $ q_{1 - \alpha} = 1.6276 $
+<<cache=F>>=
+cat(custom.d * sqrt(x.n))
+@
+
+The maximum alpha with which we cannot reject the null hypothesis is the p-value.
+
+<<cache=F>>=
+kolm.cdf <- function(x) {
+  k_range <- -30:30 # an approximation; the precise range is -Inf:Inf
+  ll <- k_range %>% 
+    lapply(function(k = ? numeric){ 
+      (-1)^k * exp(-2 * (k^2 * x^2)) 
+      } -> numeric)
+  do.call(rbind, ll) %>% colSums
+}
+
+cat("p-value:", 1 - kolm.cdf(custom.d * sqrt(x.n)))
+@
+
+
+Checking with the built-in Kolmogorov test:
+
+<<cache=T>>=
+ks.test(x = x, y = x.cdf.expected)
+@
+
+\section{Task 6. Chi squared test (simple hypothesis)}
+
+<<cache=T>>=
+brk <- c(-Inf, -2, 0, 2, 4, 6, Inf)
+my.chisq.test <- function(x = ? numeric, cdf.expected){
+  x.hist <- hist(x, plot = F, breaks = brk)
+  nu <- x.hist$counts
+  pr <- cdf.expected(tail(brk, -1)) - cdf.expected(head(brk, -1))
+  expected_counts <- length(x) * pr
+  return(sum((nu - expected_counts)^2 / expected_counts))
+} -> numeric
+
+x.chi2.simple <- my.chisq.test(x, cdf.expected = x.cdf.expected)
+cat("p-value: ", 1 - pchisq(x.chi2.simple, df = length(brk) - 1))
+@
+
+We reject the null hypothesis because $ p-value = 1 - F_{\chi^2}(stat\_value) \approx 0 $
+
+\section{Task 7. Chi-squared test for complex alternative}
+
+<<cache=T>>=
+my.chisq.test.complex <- function (x = ? numeric){
+  x.mean <- mean(x)
+  x.sd <- mean(x^2) - x.mean^2
+  return(my.chisq.test(x = x, cdf.expected = function(x) pnorm(x, x.mean, x.sd)))
+}
+
+x.chi2.complex <- my.chisq.test.complex(x)
+
+cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 1))
+@
+
+$ \alpha_2 = 0.01 \Rightarrow $ we do not reject the null hypothesis
+
+\section{Task 8. The most powerful test}
+
+<<cache=T>>=
+# TODO
+@
+
+\end{document}
