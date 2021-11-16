@@ -152,3 +152,8 @@ x.chi2.complex <- my.chisq.test.complex(x)
 cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 1))
 ```
 $ \alpha_2 = 0.01 \Rightarrow $ we do not reject the null hypothesis
+```{r}
+c_alpha2 <- qnorm(mean=x.n*x.mean,sd=sqrt(x.n*x.s2), p=param.alpha2) %>% abs %>% log
+log_ratio <- (param.alpha1 - param.alpha0) * sum(x) / (2 * param.sigma0)
+print(log_ratio <= c_alpha2)
+```
