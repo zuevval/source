@@ -8,6 +8,12 @@ from itertools import product
 
 def matrix_fun(x: np.array) -> np.array:
     if isinstance(x, np.ndarray) and x.ndim == 2:
+        return np.linalg.inv(x)
+    return x ** -1
+
+
+def matrix_square(x: np.array) -> np.array:  # this has been used previously, but we are more interested in inverse mtx
+    if isinstance(x, np.ndarray) and x.ndim == 2:
         return x @ x
     return x ** 2  # when the matrix is not rectangular, return element-wise product
 
@@ -81,7 +87,7 @@ def vis_gauss_lanczos_mtx_size():
 
 
 def main():
-    vis_gauss_lanczos_mtx_size()
+    # vis_gauss_lanczos_mtx_size()
     vis_samples_vs_max_eig()
 
 
