@@ -49,7 +49,7 @@ def tr_approx(mtx: np.array, f: Callable[[np.array], np.array], n_samples: int, 
         vec = np.random.choice((-1, 1), (len(mtx), 1))
         if approx_method == ApproxMethod.bruteforce:
             result += bruteforce_approx(mtx=mtx, vec=vec, f=f)
-        elif approx_method in (ApproxMethod.gauss_lanczos_naive,):
+        elif approx_method in (ApproxMethod.gauss_lanczos_naive, ApproxMethod.gauss_lanczos_memopt):
             result += gauss_lanczos_approx(mtx=mtx, vec=vec, f=f, max_iter=max_iter if max_iter else len(mtx),
                                            method=approx_method)
     return result / n_samples
