@@ -32,9 +32,9 @@ def lanczos_naive(a: np.ndarray, q1: np.ndarray, max_iter: int) -> LanczosResult
     return LanczosResult(eigvecs=eigvec, eigvals=eigval)
 
 
-def lanczos_vectorized(a: np.ndarray, q1: np.ndarray, max_iter: int) -> LanczosResult:
+def lanczos_memoptimized(a: np.ndarray, q1: np.ndarray, max_iter: int) -> LanczosResult:
     """
-    Vectorized form of `lanczos_naive` (Golub, alg-m 10.3.1)
+    A more memory-efficient form of `lanczos_naive` (Golub, alg-m 10.3.1)
     """
     w = q1.copy()
     v = a @ q1

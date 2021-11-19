@@ -1,7 +1,7 @@
 import numpy as np
 
-from python.sem.trace.lanczos_tridiagonalization import lanczos_naive, lanczos_vectorized
-from sem.test_trace.test_utils import rand_positive_definite_mtx, rand_unit_vector
+from python.sem.trace.lanczos_tridiagonalization import lanczos_naive, lanczos_memoptimized
+from python.sem.test_trace.test_utils import rand_positive_definite_mtx, rand_unit_vector
 
 
 def test_lanczos_naive():
@@ -24,5 +24,5 @@ def test_lanczos_vectorized():
     for mtx_size in range(10, 40, 5):
         rand_mtx_props = rand_positive_definite_mtx(size=mtx_size, seed=seed, eig_max=5)
         q1, max_iter = rand_unit_vector(size=mtx_size, seed=seed).reshape((mtx_size, 1)), mtx_size // 2 + 1
-        res_vec = lanczos_vectorized(a=rand_mtx_props.mtx, q1=q1, max_iter=max_iter)
+        res_vec = lanczos_memoptimized(a=rand_mtx_props.mtx, q1=q1, max_iter=max_iter)
         assert np.abs(np.max(res_vec.eigvals) - np.max(rand_mtx_props.eigvals)) < abs_tol

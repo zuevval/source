@@ -1,7 +1,7 @@
 import numpy as np
 
 from python.sem.trace.trace_approx import tr_approx, ApproxMethod
-from sem.test_trace.test_utils import rand_positive_definite_mtx
+from python.sem.test_trace.test_utils import rand_positive_definite_mtx
 
 
 def test_rand_positive_definite():

@@ -2,7 +2,13 @@ import numpy as np
 from typing import Callable, Optional
 from enum import Enum
 
-from python.sem.trace.lanczos_tridiagonalization import lanczos_naive
+from python.sem.trace.lanczos_tridiagonalization import lanczos_naive, lanczos_memoptimized
+
+
+class ApproxMethod(Enum):
+    bruteforce = "br"
+    gauss_lanczos_naive = "gl"
+    gauss_lanczos_memopt = "gl2"
 
 
 def bruteforce_approx(mtx: np.ndarray, vec: np.ndarray, f: Callable[[np.ndarray], np.ndarray]) -> float:
@@ -10,17 +16,18 @@ def bruteforce_approx(mtx: np.ndarray, vec: np.ndarray, f: Callable[[np.ndarray]
 
 
 def gauss_lanczos_approx(mtx: np.ndarray, vec: np.ndarray, f: Callable[[np.ndarray], np.ndarray],
-                         max_iter: int) -> float:
+                         max_iter: int, method: ApproxMethod) -> float:
     vec_norm = np.linalg.norm(vec)
-    decomposition = lanczos_naive(a=mtx, q1=vec / vec_norm, max_iter=max_iter)
+    q1 = vec / vec_norm
+    if method == ApproxMethod.gauss_lanczos_naive:
+        decomposition = lanczos_naive(a=mtx, q1=q1, max_iter=max_iter)
+    elif method == ApproxMethod.gauss_lanczos_memopt:
+        decomposition = lanczos_memoptimized(a=mtx, q1=q1, max_iter=max_iter)
+    else:
+        raise ValueError("Method " + str(method) + " not supported in `gauss_lanczos_approx`")
     weights = decomposition.eigvecs[0, :] ** 2
     nodes = decomposition.eigvals.flatten()
     return np.sum(weights * f(nodes)) * vec_norm ** 2
-
-
-class ApproxMethod(Enum):
-    bruteforce = "br"
-    gauss_lanczos = "gl"
 
 
 def tr_approx(mtx: np.array, f: Callable[[np.array], np.array], n_samples: int, seed: int,
@@ -33,7 +40,7 @@ def tr_approx(mtx: np.array, f: Callable[[np.array], np.array], n_samples: int, 
     @param n_samples: number of iterations for the Hutchinson trick
     @param seed: integer (a source of randomness)
     @param approx_method: the method for the quadrature estimation
-    @param max_iter: when ApproxMethod is `gauss_lanczos`, limits the number of iterations in tridiagonalization
+    @param max_iter: when ApproxMethod is `gauss_lanczos_*`, limits the number of iterations in tridiagonalization
     @return: estimated trace value
     """
     result = 0
@@ -42,6 +49,7 @@ def tr_approx(mtx: np.array, f: Callable[[np.array], np.array], n_samples: int, 
         vec = np.random.choice((-1, 1), (len(mtx), 1))
         if approx_method == ApproxMethod.bruteforce:
             result += bruteforce_approx(mtx=mtx, vec=vec, f=f)
-        elif approx_method == ApproxMethod.gauss_lanczos:
-            result += gauss_lanczos_approx(mtx=mtx, vec=vec, f=f, max_iter=max_iter if max_iter else len(mtx))
+        elif approx_method in (ApproxMethod.gauss_lanczos_naive,):
+            result += gauss_lanczos_approx(mtx=mtx, vec=vec, f=f, max_iter=max_iter if max_iter else len(mtx),
+                                           method=approx_method)
     return result / n_samples

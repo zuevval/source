@@ -4,6 +4,7 @@ from matplotlib import cm
 from python.sem.trace.trace_approx import tr_approx, ApproxMethod
 from python.sem.test_trace.test_utils import rand_positive_definite_mtx
 from itertools import product
+from pathlib import Path
 
 
 def matrix_fun(x: np.array) -> np.array:
@@ -40,9 +41,12 @@ def vis_samples_vs_max_eig():
     mtx_size = 10
     x, y = np.meshgrid(n_samples, eig_maxes)
 
-    for absolute_dev, method, max_iter in product((True, False), (ApproxMethod.bruteforce, ApproxMethod.gauss_lanczos),
+    for absolute_dev, method, max_iter in product((True, False),
+                                                  (ApproxMethod.bruteforce, ApproxMethod.gauss_lanczos_naive),
                                                   (1, 2)):
         z = average_deviation(x, y, absolute_dev, mtx_size=mtx_size, method=method, max_iter=max_iter)
+
+        plt.figure()
         fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
         ax.plot_surface(x, y, z, cmap=cm.get_cmap("RdYlGn"),
                         linewidth=0, antialiased=False)
@@ -55,7 +59,9 @@ def vis_samples_vs_max_eig():
             method, mtx_size, mtx_size,
             "absolute" if absolute_dev else "relative") +
                      ("" if method == ApproxMethod.bruteforce else "\n Lanczos iterations: " + str(max_iter)))
-        plt.show()
+        out_path = Path("vis_naive_inv/{}_iter{}_abs{}.png".format(method, max_iter, absolute_dev))
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        plt.savefig(out_path)
 
 
 def vis_gauss_lanczos_mtx_size():
@@ -70,7 +76,7 @@ def vis_gauss_lanczos_mtx_size():
         for seed in range(n_repetitions):
             mtx = rand_positive_definite_mtx(size=mtx_size, seed=seed, eig_max=eig_max).mtx
             tr_appr = tr_approx(mtx=mtx, f=matrix_fun, n_samples=mtx_size // 2 + 1, seed=seed,
-                                approx_method=ApproxMethod.gauss_lanczos, max_iter=mtx_size // 2 + 1)
+                                approx_method=ApproxMethod.gauss_lanczos_naive, max_iter=mtx_size // 2 + 1)
             tr_precise = np.trace(matrix_fun(mtx))
             print("trace (approx): {}".format(tr_appr))
             print("trace (precise): {}".format(tr_precise))
