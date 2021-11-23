@@ -141,7 +141,7 @@ We reject the null hypothesis because $ p-value = 1 - F_{\chi^2}(stat\_value) \a
 
 # Task 7. Chi-squared test for complex alternative
 ```{r}
-my.chisq.test.complex <- function (x = ? numeric){
+my.chisq.test.complex <- function(x = ? numeric) {
   x.mean <- mean(x)
   x.sd <- mean(x^2) - x.mean^2
   return(my.chisq.test(x = x, cdf.expected = function(x) pnorm(x, x.mean, x.sd)))
@@ -152,8 +152,51 @@ x.chi2.complex <- my.chisq.test.complex(x)
 cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 1))
 ```
 $ \alpha_2 = 0.01 \Rightarrow $ we do not reject the null hypothesis
+
+## Task 8
+
+We test the hypothesis
+\[ H_0 : x_i \sim \mathcal N (a_0, \sigma^2) \]
+against the alternative
+\[ H_1 : x_i \sim N(a_1, \sigma^2) \]
+
+According to Neyman-Pearson lemma, the most powerful test is the likelihood ratio test with the rejection region of the null hypothesis
+
+\[ \vec x : W = \frac{L(\theta_0 | \vec x)}{L(\theta_1 | \vec x)} \le C_\alpha, \quad C_\alpha : P(W \le C_\alpha) = \alpha \]
+
+The log-likelihood ratio
+
+\[ \ln W = \ln \frac{L_1}{L_0}= \frac{\sum_{i=1}^n (x_i -a_1)^2 }{2 \sigma^2} = \frac{\sum_{i=1}^n (x_i - a_0)^2 }{2 \sigma^2} = \frac{(a_1 - a_0) \sum_i x_i}{2 \sigma^2} \]
+
+Under the null hypothesis, $ \sum_i x_i \sim \mathcal N(na_0, n\sigma^2) \Rightarrow $ we may introduce $ \tilde C_\alpha := q_{1 - \alpha}$ -- a quantile of this distribution, and the test takes the form
+\[ \sum_i x_i \gtrless \tilde C_\alpha \]
+
+First, we will plot the empirical PDF and two theoretical PDFs:
+
 ```{r}
-c_alpha2 <- qnorm(mean=x.n*x.mean,sd=sqrt(x.n*x.s2), p=param.alpha2) %>% abs %>% log
-log_ratio <- (param.alpha1 - param.alpha0) * sum(x) / (2 * param.sigma0)
-print(log_ratio <= c_alpha2)
+data %>% ggplot(aes(x)) +
+  geom_histogram(aes(y = ..density..), bins = 6, colour = "black", fill = "white") +
+  stat_function(fun = dnorm, args = list(mean = param.alpha0, sd = param.sigma0), colour = "red") +
+  stat_function(fun = dnorm, args = list(mean = param.alpha1, sd = param.sigma0), colour = "blue") +
+  theme_minimal()
+```
+
+Even without the test it is evident that we should choose the distribution with the higher mean which is $ H_1 $.
+
+Next, we calculate $\tilde C_\alpha$ and perform the test.
+$\alpha_0 < \alpha_1 \Rightarrow$ when $ \sum_i x_i \le \tilde C_\alpha $, we resort to the null hypothesis, otherwise -- alternative.
+
+```{r}
+c_alpha2 <- qnorm(mean = param.alpha0 * x.n, sd = param.sigma0 * x.n, p = 1 - param.alpha2)
+cat("Accepting H_0: ", mean(x) < c_alpha2, "\n")
+cat("power:", 1 - pnorm(q = c_alpha2, mean = param.alpha1 * x.n, sd = param.sigma0 * x.n))
+```
+As expected, the test suggests that we prefer $ H_1 $ over $ H_0 $. \\
+
+What happens if we swap $ H_0 $ with $ H_1 $?
+Now the rejection region of the null hypothesis is in the lower tail of the distribution $\mathcal N (\alpha_1, \sigma_0)$.
+```{r}
+c_alpha2a <- qnorm(mean = param.alpha1 * x.n, sd = param.sigma0 * x.n, p = param.alpha2)
+cat("Accepting hypothesis with mean=alpha_1: ", mean(x) > c_alpha2a, "\n")
+cat("power:", 1 - pnorm(q = c_alpha2a, mean = param.alpha0 * x.n, sd = param.sigma0 * x.n))
 ```

@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage{amsmath}
+\usepackage{amssymb}
 
 \usepackage{hyperref}
 \hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
@@ -269,20 +270,35 @@ The log-likelihood ratio
 
 \[ \ln W = \ln \frac{L_1}{L_0}= \frac{\sum_{i=1}^n (x_i -a_1)^2 }{2 \sigma^2} = \frac{\sum_{i=1}^n (x_i - a_0)^2 }{2 \sigma^2} = \frac{(a_1 - a_0) \sum_i x_i}{2 \sigma^2} \]
 
-Under the null hypothesis, $ \sum_i x_i \sim \mathcal N(na_0, n\sigma^2) \Rightarrow  C_\alpha$ is the $\alpha$-quantile of this distribution
+Under the null hypothesis, $ \sum_i x_i \sim \mathcal N(na_0, n\sigma^2) \Rightarrow $ we may introduce $ \tilde C_\alpha$ -- $1 - \alpha$-quantile of this distribution, $ \sum x_i \gtrless \tilde C_\alpha $.
+
+First, we should plot the empirical PDF and two theoretical PDFs:
 
 <<cache=F>>=
-c_alpha2 <- qnorm(mean=x.n*x.mean,sd=sqrt(x.n*x.s2), p=param.alpha2) %>% abs %>% log
-log_ratio <- (param.alpha1 - param.alpha0) * sum(x) / (2 * param.sigma0^2) %>% abs
-print(log_ratio <= c_alpha2)
+data %>% ggplot(aes(x)) +
+  geom_histogram(aes(y = ..density..), bins = 6, colour = "black", fill = "white") +
+  stat_function(fun = dnorm, args = list(mean = param.alpha0, sd = param.sigma0), colour = "red") +
+  stat_function(fun = dnorm, args = list(mean = param.alpha1, sd = param.sigma0), colour = "blue") +
+  theme_minimal()
 @
 
-The test suggests that we prefer $ H_0 $ over $ H_1 $.
+Obviously we should choose the distribution with the higher meah which is $ H_1 $.
 
-The power of the test $ W = \exp((\ln W)) $
 
 <<cache=F>>=
-exp(log_ratio)
+c_alpha2 <- qnorm(mean=param.alpha0 * x.n, sd=param.sigma0 * x.n, p = 1 - param.alpha2)
+cat("Accepting H_0: ", mean(x) < c_alpha2, "\n")
+cat("power:", 1 - pnorm(q=c_alpha2, mean = param.alpha1 * x.n, sd = param.sigma0 * x.n))
 @
 
+The test suggests that we prefer $ H_0 $ over $ H_1 $ as expected. \\
+
+What happens if we swap $ H_0 $ with $ H_1 $?
+Now the rejection region of the null hypothesis is in the lower tail of the distribution $\mathcal N (\alpha_1, \sigma_0)$.
+
+<<>>=
+c_alpha2a <- qnorm(mean = param.alpha1 * x.n, sd = param.sigma0 * x.n, p = param.alpha2)
+cat("Accepting hypothesis with mean=alpha_1: ", mean(x) > c_alpha2a, "\n")
+cat("power:", 1 - pnorm(q = c_alpha2a, mean = param.alpha0 * x.n, sd = param.sigma0 * x.n))
+@
 \end{document}
