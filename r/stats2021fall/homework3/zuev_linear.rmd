@@ -1,0 +1,59 @@
+# Task 1
+
+## Setup
+
+```{r}
+library(tidyverse)
+dd <- data.frame(
+  x = c(2, 2, 3, 3, 2, 2, 3, 3, 1, 2, 1, 3, 3, 2, 3, 3, 5,
+        4, 2, 3, 2, 4, 2, 5, 3, 1, 4, 4, 3, 3, 2, 0, 1, 3,
+        2, 4, 1, 2, 4, 4, 3, 1, 3, 3, 3, 3, 3, 3, 3, 3),
+  y = c(7.73, 8.48, 6.32, 7.77, 9.27, 16.50, 0.76, 15.88, 17.74, 3.60, 16.51, 7.36, 5.70, 20.78, 7.93, 9.48, 17.41,
+        15.39, 13.35, 18.13, 6.53, 3.47, 9.34, 5.04, 8.08, 15.46, 4.49, 8.59, 16.29, 14.91, 9.28, 2.52, 14.78, 7.19,
+        1.76, 12.47, 8.11, 24.42, 9.73, 7.09, 0.61, 10.16, 14.71, 9.94, 23.16, 13.07, 9.46, 3.90, 4.79, 14.32))
+```
+
+## (a) Fitting a linear model and plotting the data
+
+```{r}
+
+least_squares <- function(x = ? matrix, dd = ? data.frame){
+  y <- as.matrix(dd$y)
+  b <- solve(x %*% t(x)) %*% (x %*% y) # (xx')^{-1}xy
+  y_hat <- t(x) %*% b
+  print(
+    dd %>%
+      mutate(y_hat = y_hat) %>%
+      ggplot(aes(x, y)) +
+      geom_point() +
+      geom_line(aes(y = y_hat), color = "red") +
+      theme_minimal())
+  list("coef" = b, "y" = y, "y_hat" = y_hat)
+} -> matrix
+
+dd %>%
+  mutate(bias = 1) %>%
+  select(bias, x) %>%
+  as.matrix %>%
+  t %>%
+  least_squares(dd = dd)
+
+```
+
+## (b) The same with the square term
+```{r}
+order2.x <- dd %>%
+  mutate(bias = 1, x_sq = x^2) %>%
+  select(bias, x, x_sq) %>%
+  as.matrix %>%
+  t
+order2.regression <- least_squares(x = order2.x, dd = dd)
+
+```
+## (c) Testing residuals of the polynomial model for normality
+
+```{r}
+order2.residuals <- unlist(order2.regression["y"]) - unlist(order2.regression["y_hat"])
+hist(order2.residuals)
+chisq.test(order2.residuals)
+```
