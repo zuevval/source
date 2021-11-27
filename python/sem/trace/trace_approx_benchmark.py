@@ -6,7 +6,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-from python.sem.test_trace.test_utils import rand_positive_definite_mtx
+from python.sem.test_trace.testing_utils import rand_positive_definite_mtx
 from python.sem.trace.trace_approx import tr_approx, ApproxMethod
 from python.sem.trace.trace_approx_vis import matrix_fun
 
@@ -20,8 +20,8 @@ def trace_approx_benchmark(n_lanczos_iter: int,
         ApproxMethod.gauss_lanczos_memopt,
     )
 
-    n_repeats = 5
-    mtx_sizes = list(range(20, 521, 20))
+    n_repeats = 100
+    mtx_sizes = list(range(20, 121, 20))
     n_observ = len(mtx_sizes)
     times_exact = [0] * n_observ
     times, errs = ({method: [0] * n_observ for method in methods} for _ in range(2))

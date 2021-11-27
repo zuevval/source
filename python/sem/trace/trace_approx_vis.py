@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
 from python.sem.trace.trace_approx import tr_approx, ApproxMethod
-from python.sem.test_trace.test_utils import rand_positive_definite_mtx
+from python.sem.test_trace.testing_utils import rand_positive_definite_mtx
 from itertools import product
 from pathlib import Path
 

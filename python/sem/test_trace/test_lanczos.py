@@ -1,7 +1,7 @@
 import numpy as np
 
 from python.sem.trace.lanczos_tridiagonalization import lanczos_naive, lanczos_memoptimized
-from python.sem.test_trace.test_utils import rand_positive_definite_mtx, rand_unit_vector
+from python.sem.test_trace.testing_utils import rand_positive_definite_mtx, rand_unit_vector
 
 
 def test_lanczos_naive():
