@@ -43,7 +43,13 @@
 \newcommand{\phm}{\phantom{-}}
 
 \begin{document}
-	
+
+\begin{figure}[H]
+    \includegraphics[width=\linewidth]{scheme}
+    \caption{Igolkina et al. Multi-trait multi-locus SEM model
+        discriminates SNPs of different effects // BMC Genomics 2020, 21}
+\end{figure}
+
 \begin{gather*}
 	\eta = B \eta + \Pi g + \varepsilon \\
 	p = \Lambda \eta + K y + \delta
@@ -64,7 +70,7 @@
 	\eta_1 \\
 	\eta_2 \\
 	\eta_3
-\end{pmatrix} + 
+\end{pmatrix} +
 \begin{pmatrix}
 	\pi_{11} & \pi_{12} & \pi_{32} & 0 & 0 & 0 \\
 	0 & 0 & 0 & \pi_{24} & 0 & 0 \\
@@ -89,12 +95,12 @@
 	0 & \lambda_{52} & 0 \\
 	0 & 0 & \lambda_{63} \\
 	0 & 0 & \lambda_{73} \\
-\end{pmatrix} 
+\end{pmatrix}
 \begin{pmatrix}
 	\eta_1 \\
 	\eta_2 \\
 	\eta_3
-\end{pmatrix} + 
+\end{pmatrix} +
 \begin{pmatrix}
 	k_{11} & k_{12} & 0 & 0 & 0 & 0 \\
 	0 & 0 & k_{23} & 0 & 0 & 0 \\
@@ -109,7 +115,7 @@
 \end{pmatrix} + \delta
 \end{gather*}
 
-Не может ли какой-то SNP влиять на $p_i$ как посредством латентных переменных, так и напрямую? \\
+% Не может ли какой-то SNP влиять на $p_i$ как посредством латентных переменных, так и напрямую? \\
 
 LISREL:
 
@@ -118,8 +124,8 @@ LISREL:
 	eta1 ~~ g1 + g2 + g3
 	eta2 ~~ eta1 + g4
 	eta3 ~~ eta1 + eta2 + g5 + g6
-	
-	#  measurement part (not sure about it)
+
+	#  measurement part
 	eta1 =~ p1 + p2 + p3
 	eta2 =~ p3 + p4 + p5
 	eta3 =~ p6 + p7
@@ -131,5 +137,5 @@ LISREL:
 	y6 =~ p7
 \end{verbatim}
 
-	
+
 \end{document}
