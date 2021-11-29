@@ -38,7 +38,7 @@ a.f <- as.factor(a)
 b.f <- as.factor(b)
 mod.s <- formula(y ~ a.f*b.f)
 mod.add <- formula(y~a.f+b.f)
-mod.a <- formula(y~a,f)
+mod.a <- formula(y~a.f)
 mod.b <- formula(y~b.f)
 mod.0 <- formula(y~1)
 
