@@ -4,6 +4,8 @@
 
 ```{r}
 library(tidyverse)
+library(nortest) # for `pearson.test`
+param.alpha <- .01
 dd <- data.frame(
   x = c(2, 2, 3, 3, 2, 2, 3, 3, 1, 2, 1, 3, 3, 2, 3, 3, 5,
         4, 2, 3, 2, 4, 2, 5, 3, 1, 4, 4, 3, 3, 2, 0, 1, 3,
@@ -55,5 +57,30 @@ order2.regression <- least_squares(x = order2.x, dd = dd)
 ```{r}
 order2.residuals <- unlist(order2.regression["y"]) - unlist(order2.regression["y_hat"])
 hist(order2.residuals)
-chisq.test(order2.residuals)
+pearson.test(order2.residuals)
+
+data.frame(x = order2.residuals) %>% ggplot(aes(x)) +
+  geom_histogram(aes(y = ..density..), bins = 5, colour = "black", fill = "white") +
+  stat_function(fun = dnorm, args = list(mean = mean(order2.residuals), sd = sd(order2.residuals)), colour = "red")
+```
+
+## (d) confidence intervals for coefficients
+
+```{r}
+dd$x2 <- dd$x ^2
+order2.linregr <- lm(dd$y ~ dd$x + dd$x2) # marvelous! Built-in method's results match my implementation's results
+confint(order2.linregr, parm=c(2,3), level = 1 - param.alpha)
+```
+## (e) TODO linear dependency / independency hypotheses
+
+## (f) AIC, BIC
+
+```{r}
+order0.linregr <- lm(dd$y ~ 1)
+order1.linreg <- lm(dd$y ~ dd$x)
+
+regrs <- list(order0.linregr, order1.linreg, order2.linregr)
+lapply(regrs, summary)
+lapply(regrs, AIC)
+lapply(regrs, BIC)
 ```
