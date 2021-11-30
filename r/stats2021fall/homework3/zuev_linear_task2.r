@@ -8,8 +8,10 @@ dd <- dd %>% mutate(a = as.factor(a), b = as.factor(b))
 
 # (a) ANOVA model
 
-anova.add <- lm(y~a+b, data=dd)
-summary(anova.add)
+dd %>%
+  group_by(a, b) %>%
+  summarise(mean = mean(y), var = var(y)) %>%
+  write.csv("anova2.csv")
 
 # (b) plot
 
@@ -20,13 +22,16 @@ dd %>% ggplot(aes(x = a, y = y, color = b, shape = b, group = b)) +
 
 # (c) residuals analysis
 
-anova.add$residuals %>% hist(main="ANOVA: residuals distribution")
+# TODO not exactly?
+anova.add <- lm(y ~ a + b, data = dd)
+summary(anova.add)
+anova.add$residuals %>% hist(main = "ANOVA: residuals distribution")
 
 # (d) Step-by-step ANOVA
 
-anova.a <- lm(y~a,data=dd)
-anova.b <- lm(y~b,data=dd)
-anova.0 <- lm(y~1,data=dd)
+anova.a <- lm(y ~ a, data = dd)
+anova.b <- lm(y ~ b, data = dd)
+anova.0 <- lm(y ~ 1, data = dd)
 
 anova.models <- list(anova.add, anova.a, anova.b, anova.0)
 names(anova.models) <- c("mult", "add", "a", "b", "0")

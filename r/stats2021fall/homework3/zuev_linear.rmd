@@ -60,7 +60,7 @@ hist(order2.residuals)
 pearson.test(order2.residuals)
 
 data.frame(x = order2.residuals) %>% ggplot(aes(x)) +
-  geom_histogram(aes(y = ..density..), bins = 5, colour = "black", fill = "white") +
+  geom_histogram(aes(y = ..density..), bins = 6, colour = "black", fill = "white") +
   stat_function(fun = dnorm, args = list(mean = mean(order2.residuals), sd = sd(order2.residuals)), colour = "red")
 ```
 
@@ -71,8 +71,10 @@ dd$x2 <- dd$x ^2
 order2.linregr <- lm(dd$y ~ dd$x + dd$x2) # marvelous! Built-in method's results match my implementation's results
 confint(order2.linregr, parm=c(2,3), level = 1 - param.alpha)
 ```
-## (e) TODO linear dependency / independency hypotheses
-
+## (e) linear dependency / independency hypotheses
+```{r}
+confint(lm(dd$y~dd$x),parm=2,level=1-param.alpha)
+```
 ## (f) AIC, BIC
 
 ```{r}
