@@ -30,17 +30,23 @@ data <- as.data.frame(x) %>%
   arrange(x) %>%
   mutate(rank = row_number())
 
-data %>% ggplot(aes(x = rank, ymin = 0, ymax = x)) +
-  geom_linerange() +
+data %>% ggplot(aes(x = x, y = 0)) +
+  geom_point() +
   ggtitle(label = "Variational series") +
-  theme(plot.title = element_text(hjust = .5))
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = .5),
+        axis.title.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks.y = element_blank())
 
 ```
 
 ### ECDF
 
 ```{r}
-data %>% ggplot(aes(x)) + stat_ecdf()
+data %>% ggplot(aes(x)) +
+  stat_ecdf() +
+  theme_minimal()
 ```
 
 ### Histogram and the "frequency polygon"
@@ -48,7 +54,9 @@ data %>% ggplot(aes(x)) + stat_ecdf()
 ```{r}
 data.hist <- data %>% ggplot(aes(x)) + geom_histogram(binwidth = param.h)
 data.hist.values <- ggplot_build(data.hist)$data[[1]] %>% mutate(x = .5 * (xmin + xmax))
-data.hist + geom_line(data = data.hist.values, aes(x, y), colour = "red")
+data.hist +
+  geom_line(data = data.hist.values, aes(x, y), colour = "red") +
+  theme_minimal()
 ```
 ## Task 2. Sample characteristics
 ```{r}
@@ -56,7 +64,7 @@ x.mean <- mean(x)
 x.s2 <- mean(x^2) - x.mean^2
 x.med <- median(x)
 x.asym <- mean((x - x.mean)^3) / (x.s2^(3 / 2))
-x.kurt <- mean((x - x.mean)^4) / (x.s2^2)
+x.kurt <- mean((x - x.mean)^4) / (x.s2^2) - 3
 
 x.n <- length(x)
 x.p_cd <- sum(param.c <= x & x <= param.d) / x.n
@@ -78,13 +86,18 @@ x.s2.moments <- x.s2
 ## Task 4. Confidence intervals for distribution parameters
 
 ```{r}
-t.quantile <- qt((1 - param.alpha2) / 2, x.n - 1)
+t.quantile <- qt(param.alpha2 / 2, x.n - 1)
 x.mean.ci <- x.mean + c(lo = -t.quantile, hi = t.quantile) * sqrt(x.s2 / (x.n - 1))
 
-chisq.quantile <- qchisq(p = (1 - param.alpha2) / 2, df = x.n)
-x.s2.ci <- x.s2 * (1 + c(lo = -1 / chisq.quantile, hi = 1 / chisq.quantile)) # Ivchenko, Medvedev p. 85 (42/123)
+
+x.s2.ci <- x.s2 *
+  (x.n - 1) *
+  (c( # Ivchenko, Medvedev p. 85 (42/123)
+    lo = 1 / qchisq(p = 1 - param.alpha2 / 2, df = x.n - 1),
+    hi = 1 / qchisq(p = param.alpha2 / 2, df = x.n - 1)))
 
 data.frame(stat = c("mean", "s^2"),
+           value = c(x.mean, x.s2),
            lo = c(x.mean.ci["lo"], x.s2.ci["lo"]),
            hi = c(x.mean.ci["hi"], x.s2.ci["hi"])) %>% print
 
