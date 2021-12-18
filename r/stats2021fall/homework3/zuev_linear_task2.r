@@ -10,8 +10,13 @@ dd <- dd %>% mutate(a = as.factor(a), b = as.factor(b))
 
 dd.summary <- dd %>%
   group_by(a, b) %>%
-  summarise(mean = mean(y), var = var(y))
+  summarise(group_mean = mean(y))
 dd.summary %>% write.csv("anova2.csv")
+
+dd.joint <- left_join(dd, dd.summary) %>%
+  mutate(residual = y - group_mean)
+
+sigma.hat <- mean(dd.joint$residual^2) - mean(dd.joint$residual)^2
 
 # (b) plot
 
@@ -21,10 +26,6 @@ dd %>% ggplot(aes(x = a, y = y, color = b, shape = b, group = b)) +
   theme_minimal()
 
 # (c) residuals analysis
-
-dd.joint <- left_join(dd, dd.summary) %>%
-  rename(group_mean = mean, group_var = var) %>%
-  mutate(residual = y - group_mean)
 
 dd.joint$residual %>% hist(main = "ANOVA: residuals distribution")
 
