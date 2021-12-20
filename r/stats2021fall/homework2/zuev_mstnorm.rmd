@@ -86,7 +86,7 @@ x.s2.moments <- x.s2
 ## Task 4. Confidence intervals for distribution parameters
 
 ```{r}
-t.quantile <- qt(param.alpha2 / 2, x.n - 1)
+t.quantile <- qt(1 - param.alpha2 / 2, x.n - 1)
 x.mean.ci <- x.mean + c(lo = -t.quantile, hi = t.quantile) * sqrt(x.s2 / (x.n - 1))
 
 
@@ -201,7 +201,7 @@ $\alpha_0 < \alpha_1 \Rightarrow$ when $ \sum_i x_i \le \tilde C_\alpha $, we re
 
 ```{r}
 c_alpha2 <- qnorm(mean = param.alpha0 * x.n, sd = param.sigma0 * x.n, p = 1 - param.alpha2)
-cat("Accepting H_0: ", mean(x) < c_alpha2, "\n")
+cat("Accepting H_0: ", sum(x) < c_alpha2, "\n")
 cat("power:", 1 - pnorm(q = c_alpha2, mean = param.alpha1 * x.n, sd = param.sigma0 * x.n))
 ```
 As expected, the test suggests that we prefer $ H_1 $ over $ H_0 $. \\
@@ -211,5 +211,5 @@ Now the rejection region of the null hypothesis is in the lower tail of the dist
 ```{r}
 c_alpha2a <- qnorm(mean = param.alpha1 * x.n, sd = param.sigma0 * x.n, p = param.alpha2)
 cat("Accepting hypothesis with mean=alpha_1: ", mean(x) > c_alpha2a, "\n")
-cat("power:", 1 - pnorm(q = c_alpha2a, mean = param.alpha0 * x.n, sd = param.sigma0 * x.n))
+cat("power:", pnorm(q = c_alpha2a, mean = param.alpha0 * x.n, sd = param.sigma0 * x.n))
 ```
