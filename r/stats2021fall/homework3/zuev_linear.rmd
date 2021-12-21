@@ -67,13 +67,27 @@ data.frame(x = order2.residuals) %>% ggplot(aes(x)) +
 ## (d) confidence intervals for coefficients
 
 ```{r}
-dd$x2 <- dd$x ^2
+order2.x.r <- Matrix::rankMatrix(as.matrix(order2.x))[1]
+order2.x.n <- ncol(order2.x)
+q <- 2 # the length of the parameter vector (we look at two parameters)
+bonferroni.quantile <- qf(p = 1 - param.alpha / dd.n, df1 = q, df2 = dd.n - dd.r)
+
+conf.c <- rbind(c(0, 0), c(1, 0), c(0, 1))
+conf.s2 <- var(dd$y)
+conf.gamma <- conf.s2 * t(conf.c) %*% solve(order2.x %*% t(order2.x)) %*% conf.c
+
+order2.tested_coefs <- t(conf.c) %*% order2.regression$coef
+order2.confdelta <- bonferroni.quantile * sqrt(diag(conf.gamma))
+order2.confint <- data.frame(lo = order2.tested_coefs - order2.confdelta, hi = order2.tested_coefs + order2.confdelta)
+print(order2.confint)
+
+dd$x2 <- dd$x^2
 order2.linregr <- lm(dd$y ~ dd$x + dd$x2) # marvelous! Built-in method's results match my implementation's results
-confint(order2.linregr, parm=c(2,3), level = 1 - param.alpha)
+confint(order2.linregr, parm = c(2, 3), level = 1 - param.alpha)
 ```
 ## (e) linear dependency / independency hypotheses
 ```{r}
-confint(lm(dd$y~dd$x),parm=2,level=1-param.alpha)
+confint(lm(dd$y ~ dd$x), parm = 2, level = 1 - param.alpha)
 ```
 ## (f) AIC, BIC
 
