@@ -1,5 +1,41 @@
-from scipy.stats import kstest, norm
+from typing import List
+
+from scipy.optimize import minimize
+from scipy.stats import kstest, kstwo, norm
 import numpy as np
+import matplotlib.pyplot as plt
+
+
+def kolm_smirn(x: List[float]) -> None:
+    a0 = -7
+    sigma = 2
+    z = [(xi - a0) / sigma for xi in x]
+    print(kstest(z, "norm"))
+
+    plt.figure()
+    plt.hist(z)
+    plt.show()
+
+    a2 = .01
+    print("1-alpha2 Kolmogorov dist-n quantile", kstwo.ppf(n=len(x), q=1 - a2))
+
+
+def chisq_complex(x: List[float]) -> None:
+    mu_start, sigma_start = np.mean(x), np.var(x)
+    breaks = [-float("inf"), -3.5, -2, 0, 1.5, float("inf")]
+    nu, _ = np.histogram(x, bins=breaks)
+
+    def log_likelihood(params: np.array) -> float:
+        mu, sigma = params
+        cdf_values = np.array([norm.cdf(q, loc=mu, scale=sigma) for q in breaks])
+        cdf_deltas = np.array([hi - lo for lo, hi in zip(cdf_values[:-1], cdf_values[1:])])
+        return -float(np.sum(nu * np.log(cdf_deltas)))
+
+    params_start = np.array([mu_start, sigma_start])
+    print("starting point:", params_start)
+    print("starting point log-likelihood:", log_likelihood(params=params_start))
+
+    print("minimization result:", minimize(log_likelihood, params_start))
 
 
 def main():
@@ -14,10 +50,8 @@ def main():
          -3.191, 2.498, -0.024, 1.903, 1.244,
          -0.048, 1.354, -3.339, 1.33, -3.136
          ]
-    a0 = -7
-    sigma = 2
-    z = [(xi - a0) / sigma for xi in x]
-    print(kstest(z, "norm"))
+    kolm_smirn(x=x)
+    chisq_complex(x=x)
 
 
 if __name__ == "__main__":

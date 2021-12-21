@@ -137,12 +137,21 @@ cat("p-value:", 1 - kolm.cdf(custom.d * sqrt(x.n)))
 ## Task 6. Chi squared test (simple hypothesis)
 
 ```{r}
-brk <- c(-Inf, -2, 0, 2, 4, 6, Inf)
-my.chisq.test <- function(x = ? numeric, cdf.expected){
+brk <- c(-Inf, -3.5, -2, 0, 1.5, Inf)
+my.chisq.test <- function(x = ? numeric, cdf.expected, out_name = "chisq_result.csv"){
   x.hist <- hist(x, plot = F, breaks = brk)
   nu <- x.hist$counts
   pr <- cdf.expected(tail(brk, -1)) - cdf.expected(head(brk, -1))
   expected_counts <- length(x) * pr
+
+
+  chisq.stats <- data.frame(bin_left = head(brk, -1), bin_right = tail(brk, -1),
+                            nu_i = nu, p_i = pr, np_i = expected_counts,
+                            nu_i_np_i = nu - expected_counts, delta_squared = (nu - expected_counts)^2)
+  chisq.stats %>%
+    mutate_if(is.numeric, round, digits = 2) %>%
+    write.csv(out_name)
+
   return(sum((nu - expected_counts)^2 / expected_counts))
 } -> numeric
 
@@ -154,13 +163,12 @@ We reject the null hypothesis because $ p-value = 1 - F_{\chi^2}(stat\_value) \a
 
 # Task 7. Chi-squared test for complex alternative
 ```{r}
-my.chisq.test.complex <- function(x = ? numeric) {
-  x.mean <- mean(x)
-  x.sd <- mean(x^2) - x.mean^2
-  return(my.chisq.test(x = x, cdf.expected = function(x) pnorm(x, x.mean, x.sd)))
-}
+# Finding MLE in Python, `zuev_mstnorm_task5.py`
 
-x.chi2.complex <- my.chisq.test.complex(x)
+x.mean.mle <- -0.915
+x.s2.mle <- 2.11
+
+x.chi2.complex <- my.chisq.test(x = x, cdf.expected = function(x) pnorm(x, x.mean.mle, x.s2.mle), out_name = "chisq_result_complex.csv")
 
 cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 1))
 ```
