@@ -67,42 +67,51 @@ data.frame(x = order2.residuals) %>% ggplot(aes(x)) +
 ## (d) confidence intervals for coefficients
 
 ```{r}
+conf.q <- 2 # the length of the parameter vector (we look at two parameters)
+dd$x2 <- dd$x^2
+order2.linregr <- lm(dd$y ~ dd$x + dd$x2) # marvelous! Built-in method's results match my implementation's results
+confint(order2.linregr, parm = c(2, 3), level = 1 - param.alpha / conf.q)
+
 order2.x.r <- Matrix::rankMatrix(as.matrix(order2.x))[1]
 order2.x.n <- ncol(order2.x)
-conf.q <- 2 # the length of the parameter vector (we look at two parameters)
+dd.n <- nrow(dd)
+dd.r <- Matrix::rankMatrix(order2.x)
 bonferroni.quantile <- qf(p = 1 - param.alpha / conf.q, df1 = conf.q, df2 = dd.n - dd.r)
 
 conf.c <- rbind(c(0, 0), c(1, 0), c(0, 1))
-conf.s2 <- var(dd$y)
-conf.xxt_inv <- solve(order2.x %*% t(order2.x))
+conf.s2 <- var(order2.linregr$residuals)
+conf.xxt_inv <- t(solve(order2.x %*% t(order2.x)))
 conf.gamma <- conf.s2 * t(conf.c) %*%
   conf.xxt_inv %*%
   conf.c
 
 order2.tested_coefs <- t(conf.c) %*% order2.regression$coef
-order2.confdelta <- bonferroni.quantile * sqrt(diag(conf.gamma))
+order2.confdelta <- bonferroni.quantile * sqrt(diag(conf.gamma))# TODO
 order2.confint <- data.frame(lo = order2.tested_coefs - order2.confdelta, hi = order2.tested_coefs + order2.confdelta)
 print(order2.confint)
-
-dd$x2 <- dd$x^2
-order2.linregr <- lm(dd$y ~ dd$x + dd$x2) # marvelous! Built-in method's results match my implementation's results
-confint(order2.linregr, parm = c(2, 3), level = 1 - param.alpha)
 ```
 ## (e) linear dependency / independence hypotheses
 ```{r}
-hypot.c1 <- rbind(c(1, 0), c(0, 1))
-hypot.c2 <- matrix(c(1, 0), nrow = 2)
-order1.x <- order2.x %>% head(-1)
-hypot.xxt_inv <- solve(order1.x %*% t(order1.x))
+hypot.c1 <- rbind(c(1, 0), c(0, 1), c(0, 0))
+hypot.c2 <- matrix(c(1, 0, 0), nrow = 3)
 hypot.f_stats <- list("dependent" = hypot.c1, "independent" = hypot.c2) %>%
   lapply(function(c = ? matrix) {
-    hypot.beta <- t(c) %*% hypot.xxt_inv %*% c
-    psi <- t(c) %*% order1.regression$coef
+    hypot.beta <- t(c) %*% conf.xxt_inv %*% c
+    psi <- t(c) %*% order2.regression$coef
     conf.f_stat <- t(psi) %*% hypot.beta %*% psi / (conf.q * conf.s2)
     return(conf.f_stat)
   } -> numeric) %>%
   unlist
 hypot.pvals <- hypot.f_stats %>% lapply(function(q = ? numeric) 1 - pf(q = q, df1 = conf.q, df2 = dd.n - dd.r))
+
+lm.square <- lm(y~x+x2, data=dd)
+lm.first <- lm(y~x, data=dd)
+lm.zero <- lm(y~1, data=dd)
+
+anova(lm.first, lm.square)
+cat("--------\n")
+anova(lm.zero, lm.square)
+
 ```
 ## (f) AIC, BIC
 

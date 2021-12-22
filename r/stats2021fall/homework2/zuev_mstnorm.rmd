@@ -170,7 +170,7 @@ x.s2.mle <- 2.11
 
 x.chi2.complex <- my.chisq.test(x = x, cdf.expected = function(x) pnorm(x, x.mean.mle, x.s2.mle), out_name = "chisq_result_complex.csv")
 
-cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 1))
+cat("p-value:", 1 - pchisq(x.chi2.complex, df = length(brk) - 2 - 1))
 ```
 $ \alpha_2 = 0.01 \Rightarrow $ we do not reject the null hypothesis
 

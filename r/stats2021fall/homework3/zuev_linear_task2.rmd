@@ -1,0 +1,31 @@
+```{r message = F, warning = F}
+library(tidyverse)
+dd <- data.frame(y = c(13.24, 11.55, 12.21, 11.54, 18.77, 16.51, 20.13, 18.22, 17.81, 13.76, 17.79, 16.83, 18.42, 19.86, 19.29, 19.04, 26.38, 26.73, 25.27, 29.77, 25.18, 26.78, 23.91, 25.41, 17.85, 18.14, 18.29, 17.85, 29.18, 27.87, 26.41, 25.86, 26.27, 22.76, 26.30, 24.11, 14.41, 16.61, 16.23, 15.64, 25.49, 23.85, 24.28, 21.53, 23.64, 20.01, 21.34, 21.19),
+                 a = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4),
+                 b = c(1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3))
+dd <- dd %>% mutate(a = as.factor(a), b = as.factor(b))
+```
+```{r}
+model.general <- lm(y ~ a * b, data = dd)
+model.add <- lm(y ~ a + b, data = dd)
+model.a <- lm(y ~ a, data = dd)
+model.b <- lm(y ~ b, data = dd)
+model.1 <- lm(y ~ 1, data = dd)
+models <- list("add" = model.add, "a" = model.a, "b" = model.b, "1" = model.1)
+models.all <- c(list("general" = model.general), models)
+```
+```{r}
+model.general$residuals %>% hist(main = "residuals distribition for the general model")
+```
+```{r}
+anova(model.general)
+```
+```{r}
+models %>% lapply(function(mod) anova(mod, model.general))
+```
+```{r}
+models.all %>% lapply(AIC)
+```
+```{r}
+models.all %>% lapply(BIC)
+```

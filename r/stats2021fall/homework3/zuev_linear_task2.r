@@ -8,9 +8,11 @@ dd <- dd %>% mutate(a = as.factor(a), b = as.factor(b))
 
 # (a) ANOVA model
 
+anova.general <- aov(y ~ a * b, data = dd)
+
 dd.summary <- dd %>%
   group_by(a, b) %>%
-  summarise(group_mean = mean(y))
+  summarise(group_mean = mean(y), count = n())
 dd.summary %>% write.csv("anova2.csv")
 
 dd.joint <- left_join(dd, dd.summary) %>%
