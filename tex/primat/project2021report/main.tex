@@ -34,7 +34,7 @@
 \usepackage{amsthm} % theorems with proofs
 \newtheorem{thrm}{Теорема}
 
-\usepackage[backend=biber, bibstyle=gost-numeric, sorting=none, block=space]{biblatex}
+\usepackage[backend=biber, bibstyle=gost-numeric, sorting=none, block=space]{biblatex} % this does not always work: in TeXStudio you have to choose "default bibliography tool = Biber" manually
 \addbibresource{bibliography.bib}
 \DeclareFieldFormat[inproceedings]{pagetotal}{\mkpagetotal[bookpagination]{#1}}
 \renewbibmacro*{chapter+pages}{%
