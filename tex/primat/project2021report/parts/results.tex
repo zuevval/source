@@ -1,1 +1,17 @@
-% TODO
+\begin{figure}[H]
+    \includegraphics[width=\myPictWidth]{rel_deviation}
+    \label{fig:rel_deviation}
+    \caption{Зависимость относительной ошибки метода при запуске на случайно сгенерированных матрицах от числа элементов в матрице. Ошибка усредняется по 30 запускам}
+\end{figure}
+
+\newcommand{\lanczosBenchmarkFig}[1]{
+    \begin{figure}[H]
+        \includegraphics[width=\myPictWidth]{benchmark/lanczos_iter#1}
+        \label{fig:lanczos_benchmark#1}
+        \caption{ Сравнение алгоритмов по времени и точности (при вычислении трёхдиагональной матрицы #1$\times$#1) }
+    \end{figure}
+}
+
+\lanczosBenchmarkFig{3}
+
+Графики для других значений числа итераций метода Ланшоца приведены в приложении (\ref{appendix:benchmark}).

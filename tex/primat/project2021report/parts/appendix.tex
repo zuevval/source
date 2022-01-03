@@ -1,0 +1,46 @@
+\subsection{Приложение 1. Оценка точности нахождения следа матрицы методом Ланшоца }
+
+Напомним, алгоритм Ланшоца вычисления следа матрицы $ tr(A), A \in \mathds R^{n \times n} $ приближённо находит несколько раз с помощью последовательности частичных тридиагонализаций матрицы $A$ значения выражений вида $ u^T Au, u \in \{0, 1\} ^n $ и затем усредняет полученные значения (подобное усреднение называется \emph{методом Хатчинсона}).
+
+На рис. \ref{fig:trace_deviation} показано усреднённое по 5 запускам отклонение полученного значения следа матрицы от значения, вычисленного напрямую, в зависимости от максимального собственного числа (параметр генератора) и максимального числа итераций метода Хатчинсона (т. е. числа повторений сэмплирования вектора $ u $ и вычисления выражения $ u^T A u $).
+
+\begin{figure}[H]
+    \captionsetup[subfigure]{justification=centering}
+    \centering
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{vis_naive_inv/ApproxMethod.bruteforce_iter2_absTrue}
+        \caption{Вычисление $ u^TAu $ точное; \\ абсолютная ошибка}
+        \label{fig:trdev_brut_abs}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{vis_naive_inv/ApproxMethod.bruteforce_iter2_absFalse}
+        \caption{Вычисление $ u^TAu $ точное; \\ относительная ошибка}
+        \label{fig:trdev_brut_rel}
+    \end{subfigure}
+
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{vis_naive_inv/ApproxMethod.gauss_lanczos_naive_iter2_absTrue}
+        \caption{Метод Ланшоца; \\ абсолютная ошибка}
+        \label{fig:trdev_lanc_abs}
+    \end{subfigure}%
+    \begin{subfigure}{.5\textwidth}
+        \centering
+        \includegraphics[width=\myPictWidth]{vis_naive_inv/ApproxMethod.gauss_lanczos_naive_iter2_absFalse}
+        \caption{Метод Ланшоца; \\ относительная ошибка}
+        \label{fig:trdev_lanc_rel}
+    \end{subfigure}
+    \caption{ Зависимость усреднённого по 5 запускам отклонения следа матрицы от точного значения от числа итераций метода Хатчинсона и максимального собственного числа матрицы }
+    \label{fig:trace_deviation}
+\end{figure}
+
+\newpage
+\subsection{Приложение 2. Сравнение времени и точности работы алгоритмов нахождения следа функции от матрицы }
+\label{appendix:benchmark}
+
+\lanczosBenchmarkFig{1}
+\lanczosBenchmarkFig{2}
+\lanczosBenchmarkFig{4}
+
