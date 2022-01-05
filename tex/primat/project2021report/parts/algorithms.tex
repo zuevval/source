@@ -1,1 +1,118 @@
-% TODO
+\subsection{Процедура Хатчинсона}
+
+Пусть $ B \in \mathds{R}^{n\times n} $ -- симметричная матрица и $ tr(B) \ne 0 $.
+Пусть также $ u \in \{-1, 1\}^n $ -- вектор-столбец единиц со случайным знаком, причём знаки равновероятны. Тогда $ \mathds{E} (u^T B u) = tr(B) $ \cite{golub2010matMomentsQuadr}.
+
+Следовательно, след матрицы можно оценить, сгенерировав случайным образом $ p $ векторов $ u_k, k \in \{1;p\} $ и вычислив затем выражение следующего вида:
+\begin{equation}\label{eq:hutch}
+    \overline{tr(B)} = \frac{1}{p} \sum_{k=1}^p u_k^T B u_k
+\end{equation}
+
+Безусловно, способ \eqref{eq:hutch} имеет смысл только при $ p \ll n $ и только в том случае, если известен некоторый быстрый способ вычисления билинейной формы $ u_k^T B u_k $ (быстрый по сравнению с прямым перемножением), иначе выигрыша в скорости работы не будет.
+Далее обсуждается метод приближённой оценки билинейной формы в случае $ B = f(A) $, иными словами, когда $B$ есть функция от другой квадратной матрицы.
+
+\subsection{Билинейная форма как интеграл Римана-Стилтьеса}\label{section:stieltjes}
+
+Пусть дан промежуток $ [a;b] $, и некоторая \emph{весовая функция} $ w(x) $ монотонна и непрерывна справа на $ [a;b] $, а функция $f(x): \mathds{R}\to \mathds{R}$ интегрируема на $ [w(a);w(b)] $.
+Рассмотрим интеграл Римана-Стильтеса
+
+\begin{gather}
+    \label{eq:stieltjes}
+    I(f) \equiv \int_{a}^{b} f(x) dw(x) \defeq \lim_{\lambda \to 0} S_m \\
+    \label{eq:stieltjesSum}
+    \space S_m = \sum_{k=0}^{m-1} f(c_k) (w(x_{k+1}-w(x_k))), c_k \in [x_k; x_{k+1}]
+\end{gather}
+где $\lambda$ -- ранг дробления, $m$ -- число точек в разбиении.
+
+Зададим $ w(x) $ как ступенчатую функцию с узлами $ \lambda_k \in [a;b], k \in \{1;n\} $.
+Тогда \eqref{eq:stieltjes} принимает следующий вид:
+\begin{equation}\label{eq:stieltjesDiscrete}
+    \int_{a}^{b} f(x) dw(x) = \sum_{k=0}^n f(\lambda_k) \Delta w(\lambda_k)
+\end{equation}
+
+К виду \eqref{eq:stieltjesDiscrete} мы приведём билинейную форму \eqref{eq:hutch}. \\
+
+Пусть матрица $ A \in \mathds{R}^{n \times n} $ симметричная, $ A = X \Lambda X^T $ -- её разложение по собственным значениям и собственным векторам, $ \Lambda = diag(\lambda_1, \dots, \lambda_n) $, $ \lambda_n \le \dots \le \lambda_1 $.
+Тогда в силу того, что
+$ f(A) \defeq X \cdot diag(f(\lambda_1), \dots, f(\lambda_n)) \cdot X^T $,
+\begin{equation} \label{eq:quadToSum}
+    u^T f(A) u = (X^T u)^T \cdot diag(f(\lambda_1), \dots, f(\lambda_n)) \cdot (X^Tu) = \sum_{k=0}^n (X^Tu)_k^2 f(\lambda_k)
+\end{equation}
+
+Положив в формуле \eqref{eq:stieltjesDiscrete} $ a \le \lambda_n, b \ge \lambda_1 $ и узлы $ w_k := \sum_{j=k}^n (X^T u)_j^2 $, получим в точности \eqref{eq:quadToSum}.
+Окончательно имеем:
+
+\begin{equation} \label{eq:quadToIntegral}
+    \boxed{ u^T f(A) u = \int_a^b f(x) d w(x) }
+\end{equation}
+
+где
+
+\begin{gather*}
+    w(x) = \begin{cases}
+        w_{n+1}, x < \lambda_n \\
+        w_j, \lambda_j \le x \le \lambda_{j-1} \\
+        w_1, \lambda_1 < x
+    \end{cases} \\
+    \lambda_j : A = X^T \Lambda X, \Lambda = \begin{pmatrix}
+        \lambda_1 & 0 & 0 & \dots & 0 \\
+         0 & \lambda_2 & 0 & \dots & 0 \\
+         & & \ddots \\
+         0 & \dots & 0 & \lambda_{n-1} & 0 \\
+         0 & 0 & \dots & 0 & \lambda_n
+    \end{pmatrix} \\
+    w_j := \sum_{j=k}^n (X^T u)^2_j \\
+    a \le \lambda_n, \space b \ge \lambda_1 \\
+\end{gather*}
+
+\subsection{Квадратуры Гаусса. Связь с тридиагонализацией}
+
+\emph{Квадратурами Гаусса} для интеграла Римана-Стилтьеса называют приближение \eqref{eq:stieltjes} суммой следующего вида:
+
+\begin{equation}\label{eq:gaussQuad}
+    I(f) \approx I_G(f) := \sum_{i=1}^k w_i f(t_i)
+\end{equation}
+
+где $ \{w_i\}_{i=1}^k, \{t_i\}_{i=1}^k $ выражаются из условия $ I(P_{2k-1}) \equiv I_G(P_{2k-1}) $ $ \forall P_{2k-1} $; $ P_{s} $ обозначает вещественный полином степени $ s $.
+
+Показано \cite{golub2013matcomput}, что для неизвестных коэффициентов в \eqref{eq:gaussQuad} справедливы следующие утверждения:
+
+\begin{enumerate}
+    \item Для интервала $ [a;b] $ и весовой функции $ w(x) $, заданных в разделе \ref{section:stieltjes}, всегда найдётся набор полиномов $ \{ p_0(\lambda), p_1(\lambda), ... \}: deg(p_k)=k $, и притом
+    \[ \int_a^b p_i(\lambda)p_j(\lambda) dw(\lambda) = \begin{cases}
+        0, i \ne j \\
+        1, i = j
+    \end{cases} \]
+Эти полиномы определены с точностью до знака и могут быть выражены через рекуррентное соотношение:
+\begin{equation}\label{eq:gaussRecur}
+    \gamma_k p_k(\lambda) = (\lambda-\omega_k) p_{k-1}(\lambda) - \gamma_{k-1}p_{k-2}(\lambda)
+\end{equation}
+
+где $ \{\omega_k\}, \{\gamma_k\} $ -- некоторые последовательности вещественных чисел; $ p_{-1}(\lambda) \equiv 0, p_0(\lambda) \equiv 1 $.
+
+\item Нули $ \{ \theta_j \}_{j=1}^k $ полиномов $ p_k(\lambda) $ есть собственные числа трёхдиагональной матрицы $ T_k $, определяемой следующим образом:
+\[ T_k := \begin{pmatrix}
+    \omega_1 & \gamma_1 & 0 & 0 & 0 & 0 & \dots & 0 \\
+    \gamma_1 & \omega_2 & \gamma_2 & 0 & 0 & 0 & \dots & 0 \\
+    0 & \gamma_2 & \omega_3 & \gamma_3 & 0 & 0 & \dots & 0 \\
+    0 & 0 & \ddots & \ddots & \ddots & 0 & \dots & 0 \\
+    \vdots \\
+\end{pmatrix} \]
+
+\item Узлы $\{t_k\} $ и веса $ \{w_k\}$ в квадратурной формуле \eqref{eq:gaussQuad} выражаются через спектр матрицы $ T_k $:
+\begin{equation}
+    S^T T_k S = diag(\theta_1, \dots, \theta_k) \Rightarrow t_i = \theta_i, \omega_i = s_{1i}^2, i \in \{ 1;k \}
+\end{equation}
+Отсюда немедленно следует
+\begin{equation}\label{eq:gaussSpector}
+    \boxed{ I_G(f) = \sum_{i=1}^k s_{1i}^2 f(\theta_i) }
+\end{equation}
+\end{enumerate}
+
+Задавшись неким значением $k$ и используя \eqref{eq:hutch}, \eqref{eq:quadToIntegral} и \eqref{eq:gaussSpector}, несложно оценить значение $ tr(f(A)) $.
+Необходимо, однако, вычислить неизвестные элементы трёхдиагональной матрицы $ T_k $, а также её собственные числа и векторы.
+Это можно эффективно сделать, применяя \emph{алгоритм Ланшоца}.
+
+\subsection{Алгоритм Ланшоца}
+
+\subsection{Псевдокод}
