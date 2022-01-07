@@ -115,4 +115,64 @@ $ f(A) \defeq X \cdot diag(f(\lambda_1), \dots, f(\lambda_n)) \cdot X^T $,
 
 \subsection{Алгоритм Ланшоца}
 
+Пусть $ A \in \mathds{R}^{n \times n} $ и мы хотим решить задачу о собственных значениях $ A $.
+
+Как показано в \cite{golub2013matcomput}, в случае, когда $ A $ -- симметричная положительно определённая матрица, % TODO что, если матрица не положительно определённая?
+первое собственное число $ \lambda_1(A) $ и соответствующий собственный вектор можно получить максимизацией \emph{отношения Рэлея}:
+
+\begin{equation}\label{eq:rayleigh}
+    r(x) \defeq \frac{x^T A x}{x^T x}, x \in \mathds{R}^n, x \ne 0 \Rightarrow \max r(x) = \lambda_1(A)
+\end{equation}
+
+Задавшись неким начальным вектором, будем по шагам искать в его окрестности максимум $ r(x) $.
+Выражение для градиента
+
+\begin{equation}\label{eq:rayleighGrad}
+    \nabla r(x) = \left( \frac{\partial}{\partial x_i} r(x) \right) \overset{\eqref{eq:rayleigh}}= \frac{2Ax}{x^Tx} - \frac{2x \cdot x^T Ax}{(x^Tx)^2} = \frac{2(Ax-r(x)x)}{x^Tx}
+\end{equation}
+
+Рассмотрим некоторую систему ортогональных векторов $ \{ q_1, \dots, q_n \} \subset \mathds R ^n, q_i \underset{i \ne j}\bot q_j $; введём $ Q_k := (q_1, \dots, q_k), k \le n $.
+Введём обозначения: $ M_k $ -- максимальное собственное число $ A $ в пространстве, натянутом на столбцы $ Q_k $, $ m_k $ -- минимальное.
+Иначе,
+
+\begin{gather}
+    \label{eq:Mk}
+    M_k := \lambda_1(Q_k^T A Q_k) = \max_{ y \ne 0 } \frac{ y^T Q_k^T y}{y^T} = \max_{ y \ne 0 } (r(Q_k y)) \le \lambda_1(A) \\
+    \label{eq:mk}
+    m_k := \lambda_n (Q_k^T A Q_k) = \min_{ y \ne 0 }(r(Q_k y)) \ge \lambda_n(A)
+\end{gather}
+
+$ ran(Q_1) \subset ran(Q_2) \subset \dots \subset ran(Q_n) \overset{\eqref{eq:Mk}, \eqref{eq:mk}}\Longrightarrow $
+$ \begin{cases}
+    M_1 \le M_2 \le \dots \le M_n = \lambda_n(A) \\
+    m_1 \ge m_2 \ge \dots \ge m_n = \lambda_1(A)
+\end{cases} $
+
+Будем действовать по следующей схеме: введя некий вектор $ q_0 $, будем последовательно достраивать $ \{ q_k \} $.
+Рассмотрим векторы $ u_k \in span \{q_1, \dots, q_k\}: M_k=r(u_k) $ (т. е. начинаем с $ u_0 \in  span\{ q_0 \} $ и на каждом шаге расширяем пространство поиска).
+Если $ \nabla r(u_k)=0 $, то $ (r(u_k), u_k) $ -- собственное значение и собственный вектор $ A $, соответственно, можно выйти из процесса итерирования.
+В противном случае выбираем $ q_{k+1} : \nabla r(u_k) \in span \{ q_1, \dots, q_k \} $.
+
+Заметим:
+
+\[ \begin{cases}
+    \forall x \quad \nabla r(x) \in span\{ Ax, x \} \text{ в силу \eqref{eq:rayleighGrad} } \\
+    u_k \in span \{ q_1, \dots, q_k \}
+\end{cases} \]
+Значит, можно выбрать $ u_k \in span \{ q_1, Aq_1, \dots, A^{k-1} q_1 \} $. Многообразия этого вида называются \emph{подпространствами Крылова} \cite{golub2013matcomput}:
+
+\begin{equation}\label{eq:krylov}
+    \mathcal{K}(A, q_1, k) \defeq span \{ q_1, \dots, A^{k-1}q_1 \}
+\end{equation}
+
+Требуется построить ортонормированный базис $ Q_k $.
+
+В \cite{golub2013matcomput} показано, что для матрицы $ Q := [ q_1 | \dots | q_n ] $ верно следующее: если
+\[ \begin{cases}
+    QQ^T = I_n \\
+    Q^T AQ = T \text{ (трёхдиагональная симметричная матрица)}
+\end{cases} \]
+
+то $ Q[e_1 | Te_1 | T^2 e_1 | \dots | T^{n-1} e_1] $
+
 \subsection{Псевдокод}
