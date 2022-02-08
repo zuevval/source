@@ -59,6 +59,8 @@ When we do a next-gen sequencing (Illumina), we "map" short reads to the referen
 Software: MEGA (everybody use it, you just click buttons!)
 We can translate genes to proteins, align sequences.
 
+Frame shift mutations: indels of length $ l : l\%3 \ne 0 $ (very bad).
+
 CLSUSTAL-W / MUSCLE: different algorithms for alignment.
 Nevertheless, manual adjustment is better (and it is easy to manually adjust alignments using MEGA GUI).
 
@@ -72,23 +74,30 @@ Why biologists prefer MP over distance-based methods?
 
 There is another problem with reverse mutations.
 Distance-based methods look
-How do we model the reverse mutation?
-Biologists borrowed concepts from mathematics.
-C, T (Pyrimidines) interchange more often than A, G (Purines).
-MP considers all mutations to be equally likely.
-Maximum Likelihood (ML) method addresses this problem (estimates the mutation rate).
 
+How do we model the reverse mutation?
+Biologists borrowed concepts from mathematics. % YouTube 48:34
+C, T (Pyrimidines) interchange more often than A, G (Purines); C interchanges much more often with T (transition) than with G (transversion).
+MP considers all mutations to be equally likely; Maximum Likelihood (ML) method addresses this problem (estimates the mutation rate).
+
+When someone is talking about likelihood, there is a Bayes theorem somewhere near.
 \emph{Bayesian methods to derive phylogenetic trees are becoming more popular}.
 
+% YouTube 52:41 Bootstrap
 To find confidences for branches, we apply \emph{bootstrap} (resampling $ \rightarrow $ the percentage of trees that support this branch).
+Then we may "collapse" a low-support branch.
 
+% YouTube 55:07 Back to MEGA: phylogeny
 In MEGA, we may place a root on a branch (using the GUI).
 
+% YouTube 58:46
 \subsubsection{Food for thought}
 
 Do we need complicated methods (parsimony, likelihood) for population genomics within a species?
 In traditional phylogenetics, there is only distant relationship (among mammals, all plants, etc); even using only single-copy genes, we cannot use simple distant-based methods because they cannot handle reverse mutations.
 Within one species, the evolutionary time is small and we may do the whole genome comparison.
+
+The big misconception in the field is that it 
 
 \subsection{Basics of molecular evolution}
 
