@@ -1,0 +1,83 @@
+% !TeX spellcheck = en_US
+% !TeX program = pdflatex
+
+\documentclass{beamer}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+%\usepackage{fontspec} % different fonts
+%\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{chngcntr} % change counters
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+
+
+% styling
+\usetheme{default}
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\title{Кинетическая коррекция: Новый механизм уменьшения числа ошибок в биосинтетических процессах, требующих высокой специфичности}
+\subtitle{(Kinetic Proofreading <...> [Hopfield, 1974])}
+\author{Валерий Зуев}
+\begin{document}
+\begin{frame}[plain]
+    \maketitle
+\end{frame}
+\begin{frame}{Интуитивные соображения}
+
+\end{frame}
+\begin{frame}{Big Picture}
+Специфичность при чтении ДНК (и других реакциях биосинтеза) может быть увеличена по сравнению со специфичностью, обусловленной разницей средних кинетических барьеров, с помощью процесса \emph{кинетической коррекции}.
+
+В статье описан простой кинетический путь, приводящий к такой коррекции, когда реакция сильно, но неспецифично катализируется, например, гидролизом фосфата.
+
+Известные реакции, кажущиеся излишними, оказываются важными для осуществления коррекции.
+
+\end{frame}
+
+\begin{frame}{Малое число ошибок при синтезе}
+
+Доля ошибок в простой модели синтеза:
+\[ p_{err}^{(1)} = \exp \left( - \frac{\Delta G_{CD}}{RT} \right) \]
+
+Модель с коррекцией (точность коррекции та же, что и специфичность при синтезе):
+
+\[ p_{err}^{(2)} = \left(p_{err}^{(1)}\right)^2 \]
+
+
+\end{frame}
+
+\begin{frame}{Модель кинетической коррекции}
+Классическая схема реакции: кинетика Михаэлиса
+
+\[ C + c \overunderset{k'_C}{k_C}{\rightleftharpoons} Cc \overset{W}\to \text{correct product} \quad K_C = \frac{k'_C}{k_C} \]
+
+\end{frame}
+
+\end{document}
