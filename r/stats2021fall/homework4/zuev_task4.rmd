@@ -1,0 +1,23 @@
+---
+title: "R Notebook"
+author: Valerii Zuev
+date: 2/15/2022
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+```{r}
+df <- here::here("r/stats2021fall/homework4", "IDZ4_Data_504020121.csv") %>%
+  read.csv %>%
+  filter(Variant == 4) %>%
+  select(!Variant)
+head(df)
+```
+
+```{r}
+list("general" = Y ~ A * B, "additive" = Y ~ A + B, "a_only" = Y ~ A, "b_only" = Y ~ B) %>% lapply(function(formula) { aov(formula, data = df) })
+#print(aov(Y ~ A * B, data = df))
+```
+
