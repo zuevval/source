@@ -49,9 +49,8 @@
 \begin{frame}[plain]
     \maketitle
 \end{frame}
-\begin{frame}{Интуитивные соображения}
-
-\end{frame}
+% \begin{frame}{Интуитивные соображения}
+% \end{frame}
 \begin{frame}{Big Picture}
 Специфичность при чтении ДНК (и других реакциях биосинтеза) может быть увеличена по сравнению со специфичностью, обусловленной разницей средних кинетических барьеров, с помощью процесса \emph{кинетической коррекции}.
 
@@ -77,6 +76,57 @@
 Классическая схема реакции: кинетика Михаэлиса
 
 \[ C + c \overunderset{k'_C}{k_C}{\rightleftharpoons} Cc \overset{W}\to \text{correct product} \quad K_C = \frac{k'_C}{k_C} \]
+\[ D + c \overunderset{k'_D}{k_D}{\rightleftharpoons} Dc \overset{W}\to \text{incorrect product} \quad K_D = \frac{k'_D}{k_D} \]
+
+\end{frame}
+
+\begin{frame}{Двухэтапная модель}
+
+\begin{align*}
+C + c \overunderset{k'_C}{k_C}{\rightleftharpoons} Cc \overunderset{m'}{m}{\rightleftharpoons} \quad & Cc^* & \overset{W}\to \text{product} \\
+& l'_C \updownarrow l_C & \\
+& C+c &
+\end{align*}
+
+\[ \left( \frac{m'}{m} \right)_{equilib} =  \frac{l_C' k_C}{ l_C k_C' }  = \frac{l_D' k_D}{l_D k_D'} \]
+
+
+\end{frame}
+
+\begin{frame}{Двухэтапная модель энергозависимой реакции}
+    \centering \includegraphics[width=\textwidth]{reaction8}
+\end{frame}
+
+\begin{frame}{Двухэтапная модель энергозависимой реакции} % TODO \only<...> or somethning
+
+Если $ m $ и $ l'_C $ малы:
+
+\begin{align*}
+    C + c \overunderset{k'_C}{k_C}{\rightleftharpoons} Cc \overset{m'}{\rightarrow} \quad & Cc^* & \overset{W}\to \text{product} \\
+    & \downarrow l_C & \\
+    & C+c &
+\end{align*}
+
+\[ \frac{m'}{m} \gtrsim \left( \frac{1}{f_0} \right) \left( \frac{m'}{m} \right) \]
+
+\end{frame}
+
+\begin{frame}{Пример: синтез белка }
+\centering \includegraphics[width=\textwidth]{reaction_rna2protein}
+
+\[ p_{incorporation} \approx \int_{0}^{\infty} e^{-k_C t} W(t) dt \]
+
+\end{frame}
+
+\begin{frame}{Пример: заряжаем тРНК}
+Первый этап:
+
+\centering \includegraphics[width=.7\textwidth]{reaction_trna}
+
+\end{frame}
+
+\begin{frame}{Пример: репликация ДНК}
+    \centering \includegraphics[width=.7\textwidth]{reaction_dna}
 
 \end{frame}
 
