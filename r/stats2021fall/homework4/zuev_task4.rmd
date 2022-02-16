@@ -18,6 +18,49 @@ head(df)
 
 ```{r}
 list("general" = Y ~ A * B, "additive" = Y ~ A + B, "a_only" = Y ~ A, "b_only" = Y ~ B) %>% lapply(function(formula) { aov(formula, data = df) })
-#print(aov(Y ~ A * B, data = df))
 ```
+```{r}
+df <- df %>%
+  group_by(Visit) %>%
+  summarize(MeanY = mean(Y)) %>%
+  inner_join(df)
+df <- df %>%
+  group_by(Visit, A) %>%
+  summarize(AMeanY = mean(Y)) %>%
+  inner_join(df)
+df <- df %>%
+  group_by(Visit, B) %>%
+  summarize(BMeanY = mean(Y)) %>%
+  inner_join(df)
+df %>% ggplot(aes(Visit, Y)) +
+  geom_point(aes(color = B, size = A)) +
+  theme_minimal() +
+  geom_line(aes(Visit, MeanY))
+df %>% ggplot(aes(Visit, AMeanY, group=A, color=A)) + geom_line() + theme_minimal()
+df %>% ggplot(aes(Visit, BMeanY, group=B, color=B)) + geom_line() + theme_minimal()
+pairs(df)
+pairs(df %>% select(Y, ID, A, B))
+```
+```{r}
+# Kolmogorov test
+df.t1 <- df[(df$Visit == 2 & df$A == 1),]
+df.t2 <- df[(df$Visit == 2 & df$A == 0),]
+ks.test(df.t1$Y, df.t2$Y)
+```
+## ANOVA
+```{r, name="ANOVA"}
+q <- lm(Y~A*B, data=df) # TODO probably not df; what is d16T?
+qc<-q$coefficients
+x<-c(0,1) # levels(df$A)
+y<-qc[1]+qc[3]*x
+# TODO plot
+# TODO with
+```
+Вопрос 3 недоформулирован.
+При каждом значении А - тут понятно: по Пирсону (корреляционная матрица, её оцениваем).
+По B: предполагаем, что есть некая стационарность. Делаем стратификацию по B и строим вариограмму.
+Для вариограммы есть функция, её использовать.
 
+См. методичку в разделе сайта [пособия](https://www.sites.google.com/site/malovsergvas/%D0%BC%D0%B5%D1%82%D0%BE%D0%B4%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B5-%D0%BC%D0%B0%D1%82%D0%B5%D1%80%D0%B8%D0%B0%D0%BB%D1%8B/%D0%B8%D0%B7%D0%B1%D1%80%D0%B0%D0%BD%D0%BD%D1%8B%D0%B5-%D0%BB%D0%B5%D0%BA%D1%86%D0%B8%D0%B8)
+
+Можете попробовать уже модели
