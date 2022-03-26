@@ -40,6 +40,7 @@ df %>% ggplot(aes(Visit, AMeanY, group=A, color=A)) + geom_line() + theme_minima
 df %>% ggplot(aes(Visit, BMeanY, group=B, color=B)) + geom_line() + theme_minimal()
 pairs(df)
 pairs(df %>% select(Y, ID, A, B))
+# TODO try https://www.r-graph-gallery.com/correlogram.html
 ```
 ```{r}
 # Kolmogorov test
