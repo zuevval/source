@@ -90,10 +90,60 @@ $R$-свёрточное ядро:
 Haussler D (1999) Convolution kernels on discrete structures. Tech. Rep. UCS-CRL-99-10
 \end{frame}
 
-\begin{frame}{Пример свёрточного ядра}
-    Vertex Label Kernel
-    \[ K_{VL}(G,H) \defeq \sum_{u \in V(G)} \sum_{v \in V(H)} K(l(u, l(v))) \]
+\begin{frame}{Пример свёрточного графового ядра}
+	\begin{enumerate}[label=$\triangleright$]
+		  \item Vertex Label Kernel
+		\[ K_{VL}(G,H) \defeq \sum_{u \in V(G)} \sum_{v \in V(H)} K(l(u, l(v))) \]
+		  \item Edge Label Kernel -- то же самое, но для рёбер
+	\end{enumerate}
 \end{frame}
 
+\begin{frame}{Графовые ядра}
+	\begin{enumerate}[label=$\triangleright$]
+		\item Подходы на основе агрегации соседей
+		\[ ] l^{i}: V(G) \cup V(H) \to \Sigma, i = 0, 1, \dots \]
+		\[ l^i(\nu) = relabel\left( l^{i-1}(\nu), \text{sort}(\{ l^{i-1}(u) | u \in N(\nu) \}) \right), \nu \in V_G \cup V_H \]
+		% TODO написать в подсказку
+		\pause
+		\item Подходы на основе поиска совпадений
+		
+		Optimal assignment kernel: $ ] G, H $ -- графы с представлениями вершин $ \{g_i\}, \{h_j\} $.
+		\[ K_A(G,H) = \max_{\pi \in permutations(\{1,\dots,n\})} \sum_{i=1}^{n} K(g_i, h_{\pi(i)}) \]
+		\pause
+		\item Паттерны подграфов
+		\item Обходы и пути
+	\end{enumerate}
+\end{frame}
 
+\begin{frame}{Пример подхода на основе агрегации соседей: WL}
+\begin{center}
+ \includegraphics[width=\textwidth]{wl}
+\end{center}
+
+Shervashidze N et al (2011) Weisfeiler-Lehman graph kernels.
+J Mach Learn Res 12:2539–2561
+
+\end{frame}
+
+\begin{frame}{Пример подхода на основе поиска совпадений: OA}
+	\begin{center}
+		\includegraphics[width=\textwidth]{oa}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}{Пример подхода на основе сравнения подграфов: графлеты}
+	\begin{center}
+		\includegraphics[width=\textwidth]{graphlet}
+	\end{center}
+	
+\end{frame}
+
+\begin{frame}{Пример подхода на основе путей: прямое произведение}
+	\begin{center}
+		\includegraphics[width=\textwidth]{direct_prod}
+	\end{center}
+	
+\end{frame}
+ 
 \end{document}
