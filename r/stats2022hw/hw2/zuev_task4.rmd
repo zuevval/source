@@ -7,15 +7,20 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(GGally)
 ```
 ```{r}
 df <- here::here("r/stats2021fall/homework4", "IDZ4_Data_504020121.csv") %>%
   read.csv %>%
   filter(Variant == 4) %>%
-  select(!Variant)
+  select(!Variant) %>%
+  mutate(A=as.factor(A), B=as.factor(B))
 head(df)
 ```
 
+```{r}
+ggpairs(df, columns = 1:3, ggplot2::aes(colour=B))
+```
 ```{r}
 list("general" = Y ~ A * B, "additive" = Y ~ A + B, "a_only" = Y ~ A, "b_only" = Y ~ B) %>% lapply(function(formula) { aov(formula, data = df) })
 ```
@@ -40,7 +45,6 @@ df %>% ggplot(aes(Visit, AMeanY, group=A, color=A)) + geom_line() + theme_minima
 df %>% ggplot(aes(Visit, BMeanY, group=B, color=B)) + geom_line() + theme_minimal()
 pairs(df)
 pairs(df %>% select(Y, ID, A, B))
-# TODO try https://www.r-graph-gallery.com/correlogram.html
 ```
 ```{r}
 # Kolmogorov test
