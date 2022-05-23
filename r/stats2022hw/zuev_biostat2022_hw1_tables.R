@@ -28,9 +28,6 @@ ggsave(data_path("admitted_stats.png"), scale = .3)
 # ------
 # Task 2: Chi squared, CMH-test
 # -----
-df.admitted <- data.frame("males" = df.male$yes, "females" = df.female$yes)
-chisq.test(df.admitted)
-
 df.comb.counts <- bind_rows(
   data.frame("gender" = "male", "admitted" = "yes", "count" = df.male$yes, "department" = row.names(df.male)),
   data.frame("gender" = "male", "admitted" = "no", "count" = df.male$no, "department" = row.names(df.male)),
@@ -91,6 +88,7 @@ poiss.llr.pvalue
 poiss.independent <- glm(count ~ gender * department + admitted * department, data = df.comb.counts, family = "poisson")
 poiss.independent.llr <- poiss.independent$deviance - poiss.general$deviance
 poiss.independent.llr.pvalue <- pchisq(poiss.independent.llr, df = poiss.independent$df.residual, lower.tail = F)
+poiss.independent.llr.pvalue
 
 df.comb.counts %>%
   group_by(gender, admitted) %>%
