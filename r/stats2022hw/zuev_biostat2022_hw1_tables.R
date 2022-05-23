@@ -29,7 +29,6 @@ ggsave(data_path("admitted_stats.png"), scale = .3)
 # -----
 df.admitted <- data.frame("males" = df.male$yes, "females" = df.female$yes)
 chisq.test(df.admitted)
-cmh_test(df.admitted)
 
 df.comb.counts <- bind_rows(
   data.frame("gender" = "male", "admitted" = "yes", "count" = df.male$yes),
@@ -63,4 +62,20 @@ models
 # Task 4. Poisson
 # ----
 
+poiss.res <- glm(count ~ gender * admitted, data = df.comb.counts, family = "poisson")
+poiss.null <- glm(count ~ gender + admitted, data = df.comb.counts, family = "poisson")
+poiss.llr <- poiss.null$deviance - poiss.res$deviance
+poiss.llr.pvalue <- pchisq(poiss.llr, df = 3, lower.tail = F)
+poiss.llr.pvalue
 
+poiss.dependent <- glm(count ~ gender + admitted, data = df.comb.counts, family = "poisson")
+poiss.independent <- glm(count ~ admitted, data = df.comb.counts, family = "poisson")
+poiss.dependent.llr <- poiss.independent$deviance - poiss.dependent$deviance
+poiss.dependent.llr.pvalue <- pchisq(poiss.dependent.llr, df = 3, lower.tail = F)
+poiss.dependent.llr.pvalue
+
+df.comb.counts %>%
+  group_by(gender, admitted) %>%
+  summarise(count = sum(count)) %>%
+  ggplot(aes(x = gender, y = count, fill = admitted)) +
+  geom_bar(stat = "identity", position = position_dodge())
