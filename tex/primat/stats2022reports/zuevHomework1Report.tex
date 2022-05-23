@@ -1,0 +1,309 @@
+% !TeX spellcheck = en_US
+% !TeX program = xelatex
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{chngcntr} % change counters
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+\usepackage[left=30mm, top=20mm, right=30mm, bottom=20mm, nohead, footskip=10mm]{geometry}
+
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.9\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\title{Лабораторная работа 1. \\
+     Анализ категориальных данных}
+\author{Валерий Зуев}
+\maketitle
+
+\setcounter{section}{-1}
+
+\section{Постановка задачи}
+
+Исходные данные задачи представлены в таблице ниже.
+Необходимо провести манипуляции, описанные в разделах \ref{section:barplot}-\ref{section:poisson}.
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Mon May 23 10:22:25 2022
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{r|rr|rr}
+        \hline
+        & \multicolumn{2}{c}{Admitted, male} & \multicolumn{2}{c}{Admitted, female} \\
+        \hline
+        Department & yes & no & yes & no \\
+        \hline
+        1 & 512 & 313 &  89 &  19 \\
+        2 & 353 & 207 &  17 &   8 \\
+        3 & 120 & 205 & 202 & 391 \\
+        4 & 138 & 279 & 131 & 244 \\
+        5 &  53 & 138 &  94 & 299 \\
+        6 &  22 & 351 &  24 & 317 \\
+        \hline
+    \end{tabular}
+    \label{tbl:task}
+    \caption{Статистика поступления в UCB (1973 год)}
+\end{table}
+
+\section{Графическое изображение (barplot)}
+\label{section:barplot}
+
+\begin{leftbar}
+    Изобразить графически частоты для двух групп абитуриентов, принятых и не принятых в высшие школы с классификацией по полу (barplot).
+    Сравнить полученные результаты.
+\end{leftbar}
+
+Частота положительного результата в группе $ g \in \{ \text{male}, \text{female} \} $ в высшей школе $ d \in \{1;6 \} $
+\[ p_{dg} = \frac{n_{d,g,yes}}{n_{d,g,yes} + n_{d,g,no}} \]
+
+Эти частоты, а также суммарное число принятых/не принятых кандидатов изображены на столбчатых диаграммах ниже.
+
+\begin{figure}[H]
+    \center{\includegraphics[width=\myPictWidth]{admitted_stats}}
+    \label{fig:frequencies}
+    \caption{Доля принятых мужчин и женщин в каждой высшей школе}
+\end{figure}
+
+\begin{figure}[H]
+    \center{\includegraphics[width=\myPictWidth]{total_counts}}
+    \caption{Общее число принятых и не принятых мужчин и женщин}
+\end{figure}
+
+Шансы на поступление в каждом департаменте примерно одинаковые у мужчин и женщин, но мужчин поступает больше, а также доля неудачно поступивших в целом среди женщин выше (стоит отметить, что в первом департаменте число абитуриентов больше всех остальных, и в нём же доля поступивших мужчин среди поступавших наиболее значительно превышает долю поступивших женщин).
+
+\section{Хи-квадрат, CMH-тест}
+
+\begin{leftbar}
+    Проверить наличие статистической зависимости между поступлением в школу и полом (Хи-квадрат) и гипотезу условной независимости (CMH-test)
+\end{leftbar}
+
+Тест хи-квадрат проводится с таблицей сопряжённости $ 2 \times 2 $ и проверяет гипотезу о наличии зависимости между значениями двух случайных величин (нулевая гипотеза -- шансы попадания в каждую клетку таблицы получены просто произведением шансов попадания в данную строку и шансов попадания в данный столбец).
+Статистика теста при выполнении нулевой гипотезы имеет асимптотическое распределение хи-квадрат с одной степенью свободы. \\
+
+Асимптотический обобщённый критерий Кочрана-Мантела-Хензела (CMH-тест) проводится с таблицей сопряжённости $ 2 \times 2 \times d $ и проверяет наличие зависимости при условии фиксированного департамента $d$. \\
+
+Таблица, по которой проведены оба теста:
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Mon May 23 13:02:12 2022
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{llrl}
+        \hline
+        gender & admitted & count & department \\
+        \hline
+        male & yes & 512 & 1 \\
+        male & yes & 353 & 2 \\
+        male & yes & 120 & 3 \\
+        male & yes & 138 & 4 \\
+        male & yes &  53 & 5 \\
+        male & yes &  22 & 6 \\
+        male & no & 313 & 1 \\
+        male & no & 207 & 2 \\
+        male & no & 205 & 3 \\
+        male & no & 279 & 4 \\
+        male & no & 138 & 5 \\
+        male & no & 351 & 6 \\
+        female & yes &  89 & 1 \\
+        female & yes &  17 & 2 \\
+        female & yes & 202 & 3 \\
+        female & yes & 131 & 4 \\
+        female & yes &  94 & 5 \\
+        female & yes &  24 & 6 \\
+        female & no &  19 & 1 \\
+        female & no &   8 & 2 \\
+        female & no & 391 & 3 \\
+        female & no & 244 & 4 \\
+        female & no & 299 & 5 \\
+        female & no & 317 & 6 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Таблица сопряжённости:
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Mon May 23 16:21:11 2022
+\begin{table}[H]
+    \centering
+    \begin{tabular}{rrr}
+        \hline
+        & no & yes \\
+        \hline
+        female & 1278 & 557 \\
+        male & 1493 & 1198 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Результаты тестов:
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{rll}
+        \hline
+        тест & статистика & p-value \\
+        \hline
+        хи-квадрат & 96.61 & 2.2e-16 \\
+        CMH & 1.52 & 0.22 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Согласно результатам тестов, в общем случае шансы поступления зависят от пола, но условные шансы не зависят.
+
+\section{Подготовка к применению модели регрессии}
+
+Воспользуемся функцией \texttt{uncount} из пакета \texttt{tidyr}.
+
+Результат (приведены несколько избранных строк):
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Mon May 23 14:28:26 2022
+\begin{table}[H]
+    \centering
+    \begin{tabular}{rlll}
+        \hline
+        & gender & admitted & department \\
+        \hline
+        1 & male & yes & 1 \\
+        513 & male & yes & 2 \\
+        866 & male & yes & 3 \\
+        986 & male & yes & 4 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\section{Модель логистический регрессии}
+
+\begin{leftbar}
+    С использованием модели логистической регрессии описать зависимость шансов поступления в школу от пола и факультета.
+    С использованием AIC выбрать оптимальную модель логистической регрессии для описания этих данных.
+\end{leftbar}
+
+Обобщённая линейная модель:
+
+\[ g(E(y_a|\vec x)) = \beta_0 + \vec \beta \cdot \vec x \]
+
+где $ y_a $ -- индикатор зачисления/незачисления, $ \vec x $ -- бинарный вектор, содержащий информацию о гендере и факультете в форме one-hot encoding (вклад гендера, вклад факультета, совместный вклад гендера и факультета).
+
+В случае логистической регрессии $ g(y) = logit(y) $.
+
+Сравниваемые модели отличаются компонентами вектора $ \beta $, которые приравниваются к нулю: в общем случае все могут быть ненулевые, в модели с независимым влиянием факторов нулевые коэффициенты при совместном вкладе и так далее.
+Всего проверены пять моделей.
+
+Соответствующие значения AIC:
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Mon May 23 15:26:54 2022
+\begin{table}[ht]
+    \centering
+    \begin{tabular}{lr}
+        \hline
+        model & AIC \\
+        \hline
+        admitted \~{} 1 & 6046.34 \\
+        admitted \~{} gender & 5954.89 \\
+        admitted \~{} department & 5201.02 \\
+        admitted \~{} gender + department & 5201.49 \\
+        admitted \~{} gender * department & 5191.28 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Следовательно, наилучшая из всех -- модель среднего.
+
+\section{Логарифмическая модель (Пуассона)}
+\label{section:poisson}
+
+\begin{leftbar}
+    С использованием логарифмической модели (Пуассона) проверить гипотезы однородности зависимости шансов поступления в школу от пола и условной независимости шансов поступления от пола.
+\end{leftbar}
+
+В модели регрессии Пуассона $ g(y) = \ln(y) $.
+Модель строится по исходной таблице с числом студентов (counts).
+В качестве зависимой переменной $y$ выступает уже не бинарная величина, а число студентов; факторы -- пол, высшая школа (5 факторов) и приняты/не приняты.
+
+Базовая, наиболее общая модель предполагает наличие совместных взаимодействий вплоть до третьего порядка (пол $ \times $ высшая школа $ \times $ приняты/не приняты):
+
+\begin{verbatim}
+count ~ gender * admitted * department
+\end{verbatim}
+
+В модели с однородной зависимостью перекрёстные члены только до второго порядка:
+
+\begin{verbatim}
+count ~ gender * admitted + gender * department + admitted * department
+\end{verbatim}
+
+В модели условной независимости шансов поступления от пола отсутствует перекрёстный член, связывающий фактор поступления/непоступления и фактор пола:
+
+
+\begin{verbatim}
+count ~ gender * department + admitted * department
+\end{verbatim}
+
+Для сравнения обеих моделей с базовой используется тест отношения правдоподобия.
+Разность функций правдоподобия общей модели и тестируемой в условиях справедливости тестируемой гипотезы имеет распределение хи-квадрат с числом степеней свободы, равному числу переменных базовой модели, <<обнулённых>> в тестируемой.
+
+Результаты приведены в таблице.
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{rll}
+        \hline
+        модель & LLR & p-value \\
+        \hline
+        однородность & 20.205 & 0.0011 \\
+        условная независимость & 21.736 & 0.0013 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Соответственно, на уровне значимости $ \alpha = 0.01 $ мы отвергаем модель однородности.
+Как и следует ожидать с учётом этого факта, модель условной независимости также отвергается.
+
+
+\section{Интерпретация результатов}
+
+Результаты хи-квадрат и CMH-теста любопытные: вообще говоря, у юношей шансы поступления отличаются от шансов поступления у девушек; но стоит выбрать конкретную высшую школу, и шансы становятся примерно одинаковыми.
+
+Модель логистической регрессии подсказывает, что для конкретного абитуриента лучше всего предсказать вероятность поступления как некую фиксированную величину, не зависящую ни от пола, ни от факультета.
+Модель Пуассона, однако, показывает, что число студентов, попавших в конкретную клетку таблицы, должна быть описана сложной моделью, включающей все взаимодействия вплоть до третьего порядка, а однородной быть описана не может.
+
+\end{document}
