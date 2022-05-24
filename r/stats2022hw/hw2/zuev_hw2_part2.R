@@ -1,4 +1,7 @@
 library(tidyverse)
+library(data.table)
+library(lme4)
+library(cAIC4) # cAIC - conditional Akaike information criterion
 
 df <- here::here("r/stats2021fall/homework4", "IDZ4_Data_504020121.csv") %>%
   read.csv %>%
@@ -46,11 +49,15 @@ to_one_row <- function(dfi = ? data.frame) {
   res
 }
 
-df.id_grouped <- df %>%
-  group_by(ID) %>%
-  group_split %>%
-  lapply(to_one_row) %>%
-  rbindlist
+expand_tbl <- function(tbl = ? data.frame) {
+  tbl %>%
+    group_by(ID) %>%
+    group_split %>%
+    lapply(to_one_row) %>%
+    rbindlist(fill = T)
+}
+
+df.id_grouped <- expand_tbl(df)
 
 # calculating correlations
 df.ids <- unique(df$ID)
@@ -60,11 +67,77 @@ lv.visit <- levels(as.factor(df$Visit))
 
 yv_names <- paste0("Y_V", lv.visit)
 corr.all <- var(df.id_grouped[, names(df.id_grouped) %in% yv_names]) # YouT 2:21:15
+# Correlations in groups: A effect only
+for (ii in lv.a) {
+  vnm <- paste0("var.a", ii)
+  vnm_corr <- paste0("corr", ii)
+  df.ii <- df[df$A == ii,]
+  df.ii.tab <- expand_tbl(df.ii)
+  df.ii.yv <- df.ii.tab %>% select(starts_with("Y_V"))
+  assign(vnm, var(df.ii.yv))
+  assign(vnm_corr, cor(df.ii.yv))
+}
+var.a0
+var.a1
+corr0 # корреляции внутри групп по значениям фактора A (без учёта фактора B)
+corr1 # видим, что корреляции довольно слабые, но при A=1 чуть выше и везде положительные
+
+for (ia in lv.a)
+  for (ib in lv.b) {
+    vnm <- paste0("cor_a", ia, "_b", ib)
+    assign(vnm,
+           df %>%
+             filter(A == ia, B == ib) %>%
+             expand_tbl %>%
+             select(starts_with("Y_V")) %>%
+             var(use = "pairwise.complete.obs")
+    )
+  }
+
+cor_a0_b1 # ковариационные характеристики при усилении группировки обычно не возрастают (в вероятностном смысле)
+cor_a0_b2 # Если зависимость однородная, они и не падают
+cor_a0_b3 # конечно, основное, что хотим посмотреть - насколько расходится с моделью независимости
+cor_a1_b1
+
+# variogram
+library(nlme) # YouT 2:37:10
+lme_model <- lme(Y ~ Visit, random = ~1 | ID, data = df)
+lme.variogram <- Variogram(lme_model, form = ~Visit | ID) # на базе нормированных остатков (eps=1)
+plot(lme.variogram) # 2:45:16
+lme.variogram.resp <- Variogram(lme_model, form = ~Visit | ID, resType = "response") # остатки не нормированные
+plot(lme.variogram.resp) # end ~ 2:51:16
+
+# estimating covariance matrices using variograms. !! only for the group A == 0
+stddevs.by.visit <- lv.visit %>%
+  lapply(function(iv) {
+    df.filtered <- filter(df, A == 0)
+    var(df.filtered$Y[df.filtered$Visit == iv])
+  }) %>%
+  unlist %>%
+  sqrt
+
+var.residuals <- matrix(nrow = length(lv.visit), ncol = length(lv.visit))
+for (i in seq_along(lv.visit))
+  for (j in seq_along(lv.visit)) {
+    if (i == j) var.residuals[i, j] <- stddevs.by.visit[i]
+    else var.residuals[i, j] <- stddevs.by.visit[i] *
+      stddevs.by.visit[j] *
+      (1 - lme.variogram$variog[abs(i - j)])
+  }
+var.residuals # end ~ 2:57:22
 
 # ----
-# task 4. Mixed linear model
+# task 4. Mixed linear model with ID effect
 # ----
 
-# plot no B effect
+df.lme <- function(rand_part = ? formula) lme(fixed = Y ~ Visit, random = rand_part, data = df, method = "ML")
+lme.simple <- df.lme(rand_part = ~1 | ID)
+lme.linear <- df.lme(rand_part = ~Visit | ID)
 
+cAIC(lme.simple)
+cAIC(lme.linear)
+
+# ----
+# task 5. Mixed linear model with Visit (time) effect
+# ----
 
