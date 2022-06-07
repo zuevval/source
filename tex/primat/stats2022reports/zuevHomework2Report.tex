@@ -1,0 +1,326 @@
+% !TeX spellcheck = en_US
+% !TeX program = xelatex
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{setspace,amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{chngcntr} % change counters
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+% \usepackage{theorem}
+\usepackage{amsthm} % theorems with proofs
+\newtheorem{thrm}{Теорема}
+
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+
+\begin{document}
+
+\title{ Статистический анализ динамики измерений наблюдаемой характеристики с течением времени }
+\author{Валерий Зуев (вариант IV)}
+\maketitle
+
+\setcounter{section}{1}
+\section{ Графическое изображение наблюдений }
+
+\begin{leftbar}
+Изобразить графически результаты наблюдений без учёта времени измерений исследуемой характеристики.
+В предположении нормальности значений наблюдаемого признака провести двухфакторный дисперсионный анализ зависимости наблюдаемого признака от значений факторов А и В.
+\end{leftbar}
+
+Посмотрим на данные (верхние строки таблицы):
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 12:29:47 2022
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{rrrllr}
+		\hline
+		& ID & Y & A & B & Visit \\ 
+		\hline
+		1 &   1 & 8.91 & 1 & 1 &   0 \\ 
+		2 &   1 & 1.60 & 1 & 3 &   1 \\ 
+		3 &   1 & 10.63 & 1 & 1 &   2 \\ 
+		4 &   2 & 4.21 & 0 & 1 &   0 \\ 
+		5 &   2 & 5.30 & 0 & 3 &   1 \\ 
+		6 &   2 & 8.34 & 0 & 3 &   2 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\label{img:data_no_time}
+	\includegraphics[width=\textwidth]{data_no_time}
+	\caption{ 
+		Данные без учёта времени посещения врача.
+		Сгруппированы по значению фактора $ B $ (красный -- $ B = 1 $, зелёный -- $ B = 2 $, синий -- $ B = 3 $ ).
+		Слева направо: \textbf{верхний ряд:} сглаженное распределение ID; корреляции между Y и ID; boxplot ID при каждом значении A.
+		\textbf{Средний ряд:} данные в координатах \{ID, Y\}; сглаженное распределение Y; boxplot Y при каждом значении A.
+		\textbf{Нижний ряд:} гистограммы распределения  ID  и Y при каждом значении А; гистограмма распределения A.
+	}
+\end{figure}
+
+Двухфакторный дисперсионный анализ: проверим модель среднего, модели с эффектами факторов А и В, модель с аддитивным влиянием факторов и с перекрёстными членами.
+
+\[ 
+\begin{array}{c|c}
+	\text{ Формула } & \text{ Стандартное отклонение остатков } \\
+	\hline
+	Y \sim 1 & 3.302 \\
+	Y \sim A & 3.262 \\
+	Y \sim B & 3.304 \\
+	Y \sim A + B & 3.264 \\
+	Y \sim A \cdot B & 3.264 \\
+\end{array}
+\]
+
+
+\section{ Траектории; корреляции значений наблюдаемого признака в разные моменты времени }
+\label{section:trajectories}
+
+\begin{leftbar}
+Представить визуально динамику изменений наблюдаемого признака в виде траекторий и оценить наличие влияния постоянного фактора А на значения измеряемого признака.
+Оценить корреляции значений наблюдаемого признака в различные моменты времени при каждом значении признака А без учёта и с учётом влияния признака В.
+\end{leftbar}
+
+\begin{figure}[H]
+\label{img:traj_with_time}
+\centering\includegraphics[width=.8\textwidth]{traj_with_time}
+\caption{ Случайно выбранные 30 траекторий в осях (Visit, Y). Цвет -- значение фактора А (зелёный -- 1, синий -- 2).
+Жирные зелёные и синие точки -- средние значения Y в каждой точке Visit (стратифицированы по значению фактора А).
+Красная линия -- средние значения по всем значениям Y в каждой точке Visit, соединённые ломаной.
+}
+\end{figure}
+
+Оценка корреляций: приведём данные к виду, при котором все измерения для данного ID собраны в одну строку таблицы.
+Несколько строк такой таблицы:
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 23:34:22 2022
+\begin{table}[H]
+	\centering
+	\begin{tabular}{rlrlrlrl}
+		\hline
+		ID & A & Y\_V0 & Y\_B0 & Y\_V1 & Y\_B1 & Y\_V2 & Y\_B2 \\ 
+		\hline
+		1 & 1 & 8.91 & 1 & 1.60 & 3 & 10.63 & 1 \\ 
+		2 & 0 & 4.21 & 1 & 5.30 & 3 & 8.34 & 3 \\ 
+		3 & 0 & 5.63 & 1 & 4.34 & 3 & 7.77 & 1 \\ 
+		4 & 0 & 6.22 & 2 & 3.50 & 1 & 7.25 & 1 \\ 
+		5 & 1 & 5.95 & 3 & 0.45 & 1 & 10.50 & 1 \\ 
+		6 & 0 & 5.98 & 2 & 4.26 & 1 & 7.69 & 2 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+Матрица ковариаций между  измерениями со значением $ A = 0 $: 
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 23:40:34 2022
+\begin{table}[H]
+	\centering
+	\begin{tabular}{rrrr}
+		\hline
+		& Y\_V0 & Y\_V1 & Y\_V2 \\ 
+		\hline
+		Y\_V0 & 2.03 & -0.00 & -0.27 \\ 
+		Y\_V1 & -0.00 & 1.58 & -0.12 \\ 
+		Y\_V2 & -0.27 & -0.12 & 1.84 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+Матрица ковариаций между измерениями со значением $ A = 1 $:
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 23:42:10 2022
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{rrrr}
+		\hline
+		& Y\_V0 & Y\_V1 & Y\_V2 \\ 
+		\hline
+		Y\_V0 & 1.85 & 0.22 & 0.06 \\ 
+		Y\_V1 & 0.22 & 1.89 & 0.05 \\ 
+		Y\_V2 & 0.06 & 0.05 & 1.72 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+При $ A = 0, B = 1 $:
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 23:47:00 2022
+\begin{table}[H]
+	\centering
+	\begin{tabular}{rrrr}
+		\hline
+		& Y\_V0 & Y\_V2 & Y\_V1 \\ 
+		\hline
+		Y\_V0 & 1.72 & 0.06 & -0.06 \\ 
+		Y\_V2 & 0.06 & 1.72 & -0.25 \\ 
+		Y\_V1 & -0.06 & -0.25 & 1.57 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+При $ A = 0, B = 2 $:
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 23:48:07 2022
+\begin{table}[H]
+	\centering
+	\begin{tabular}{rrrr}
+		\hline
+		& Y\_V0 & Y\_V2 & Y\_V1 \\ 
+		\hline
+		Y\_V0 & 2.03 & -0.15 & -0.44 \\ 
+		Y\_V2 & -0.15 & 1.62 & -0.34 \\ 
+		Y\_V1 & -0.44 & -0.34 & 1.54 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+При $ A = 1, B = 1 $:
+
+% latex table generated in R 4.1.1 by xtable 1.8-4 package
+% Thu Jun  2 23:48:58 2022
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{rrrr}
+		\hline
+		& Y\_V0 & Y\_V2 & Y\_V1 \\ 
+		\hline
+		Y\_V0 & 2.30 & -0.39 & -0.19 \\ 
+		Y\_V2 & -0.39 & 1.62 & 0.69 \\ 
+		Y\_V1 & -0.19 & 0.69 & 1.96 \\ 
+		\hline
+	\end{tabular}
+\end{table}
+
+Вариограмма:
+
+\begin{figure}[H]
+	\centering \includegraphics[width=\myPictWidth]{variogram}
+\end{figure}
+
+
+\section{ Смешанные линейные модели c эффектом индивида }
+
+\begin{leftbar}
+Построить смешанную линейную модель с простым эффектом индивида, а также смешанную линейную модель, допускающую линейную зависимость эффекта индивида от времени.
+Определить целесообразность введения коэффициента наклона случайного эффекта, используя критерий cAIC
+\end{leftbar}
+
+Общая формула смешанной линейной модели:
+
+\[ E(Y) = X \beta + Z b + \varepsilon  \]
+
+$ b \sim \mathcal N(0,  \Upsilon) $
+
+Результаты применения моделей: \\
+
+\begin{tabular}{rc}
+	формула & cAIC \\
+	$ Y \sim Visit :  \sim 1 | ID $ & 10717 \\
+	$ Y \sim Visit : \sim Visit | ID $ & 10715 \\
+\end{tabular}
+
+\section{ Смешанные линейные модели с учётом факторов А и В }
+
+\begin{leftbar}
+С учётом результатов п. \ref{section:trajectories} построить смешанную модель зависимости наблюдаемого признака от значений признаков А и В с учётом времени наблюдения.
+При каждом значении фактора А проверить гипотезы аддитивности влияния фактора В и времени наблюдения, а также гипотезы отсутствия влияния каждого из факторов (В и времени наблюдения).
+Включить в модель фактор А и оценить влияние фактора А на значение наблюдаемой характеристики.
+\end{leftbar}
+
+Исследованные модели:
+
+\begin{tabular}{ccc}
+	Формула & Значение A & AIC \\
+	$ Y \sim B + Visit : B | Visit $  & 0 & 3453 \\
+	$ Y \sim B + Visit : B | Visit $  & 1 & 3547 \\
+	$ Y \sim B \cdot Visit : B | Visit $ & 0 & 3760 \\
+	$ Y \sim B \cdot Visit : B | Visit $ & 1 & 3763 \\
+\end{tabular}
+
+Значения AIC примерно одинаковые.
+
+Включим фактор $ A $ в модель:
+
+\begin{enumerate}[noitemsep]
+	\item $ Y \sim  A + B + Visit: A + B | Visit $: $ AIC = 7282 $
+	\item $ Y ~ A * Visit + A * B : A + B | Visit $: $ AIC = 7279 $
+\end{enumerate}
+
+\section{ Дисперсионный анализ }
+\label{section:anova}
+
+\begin{leftbar}
+Провести дисперсионный анализ зависимости распределения наблюдаемого признака, используя GEE-модель с неструктурированной корреляционной структурой наблюдений каждого индивида
+\end{leftbar}
+
+Проведём анализ с моделью $ Y ~ A + B $ с независимой корреляционной структурой по ID.
+
+% TODO what?
+
+\section{ Смешанная модель ковариационного анализа }
+
+\begin{leftbar}
+Построить смешанную модель ковариационного анализа в предположении полиномиальной зависимости второго порядка наблюдаемого признака от времени.
+Проверить гипотезу линейной зависмости среднего значения наблюдаемого признака от времени в присутствии факторов А и В.
+\end{leftbar}
+
+\begin{tabular}{cc}
+	Модель & AIC \\
+	$ Y \sim Visit + Visit2: A + B | Visit $ & 7275.6 \\
+	$ Y \sim Visit: A + B | Visit) $ & 7284 \\
+\end{tabular}
+
+\section{ Выбор наилучшей модели для неслучайного эффекта }
+
+\begin{leftbar}
+С использованием критериев AIC, BIC выбрать наилучшую модель для неслучайного эффекта в рамках смешанной модели, выбранной в  \ref{section:trajectories}.
+Провести исследование влияния факторов A, B и времени обследования на значение исследуемой характеристики в рамках данной модели.
+\end{leftbar}
+
+Наилучшая модель -- $ Y \sim B + Visit : B | Visit $  (аддитивное неслучайное влияние факторов А и В вместе со случайным эффектом, который даёт фактор В при условии заданного значения Visit).
+
+\section{ Количественный анализ динамики изменений наблюдаемого признака }
+
+\begin{leftbar}
+В условиях наилучшей модели, выбранной в п. \ref{section:anova}, провести количественный анализ динамики изменений наблюдаемого признака с течением времени.
+Построить частные и совместные доверительные интервалы для значений параметров модели, принимая во внимание влияние сопутствующих факторов, присутствующих в наилучшей модели.
+\end{leftbar}
+	
+\end{document}

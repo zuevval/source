@@ -237,6 +237,7 @@ q2a.cAIC<-cAIC(q2a)
 # Alternative form
 q1x<-lmer(Y~Visit+(1|ID),data=d16T,REML=FALSE) 
 q2x<-lmer(Y~Visit+(1|ID)+(0+Visit|ID),data=d16T,REML=FALSE) 
+q2x<-lmer(Y~Visit+(1|ID)+(0+Visit|ID),data=d16T,REML=FALSE)
 #
 anova.lme(q1a)
 ranova(q2x,reduce.terms = FALSE)

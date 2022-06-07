@@ -33,6 +33,7 @@ points(0:2, traj.med, "l", col = "red", lwd = 3)
 traj.med.ai <- function(i_a) { 0:2 %>%
   lapply(function(i) filter(df, A == i_a, Visit == i)$Y %>% mean) %>%
   unlist }
+
 points(0:2, traj.med.ai(0), col = "green", lwd = 5)
 points(0:2, traj.med.ai(1), col = "blue", lwd = 5)
 dev.off()
@@ -58,6 +59,9 @@ expand_tbl <- function(tbl = ? data.frame) {
 }
 
 df.id_grouped <- expand_tbl(df)
+head(df.id_grouped) %>%
+  xtable::xtable() %>%
+  print(include.rownames = F)
 
 # calculating correlations
 df.ids <- unique(df$ID)
@@ -77,8 +81,8 @@ for (ii in lv.a) {
   assign(vnm, var(df.ii.yv))
   assign(vnm_corr, cor(df.ii.yv))
 }
-var.a0
-var.a1
+var.a0 %>% xtable::xtable()
+var.a1 %>% xtable::xtable()
 corr0 # корреляции внутри групп по значениям фактора A (без учёта фактора B)
 corr1 # видим, что корреляции довольно слабые, но при A=1 чуть выше и везде положительные
 
@@ -94,10 +98,10 @@ for (ia in lv.a)
     )
   }
 
-cor_a0_b1 # ковариационные характеристики при усилении группировки обычно не возрастают (в вероятностном смысле)
-cor_a0_b2 # Если зависимость однородная, они и не падают
+cor_a0_b1 %>% xtable::xtable() # ковариационные характеристики при усилении группировки обычно не возрастают (в вероятностном смысле)
+cor_a0_b2 %>% xtable::xtable() # Если зависимость однородная, они и не падают
 cor_a0_b3 # конечно, основное, что хотим посмотреть - насколько расходится с моделью независимости
-cor_a1_b1
+cor_a1_b1 %>% xtable::xtable()
 
 # variogram
 library(nlme) # YouT 2:37:10
@@ -136,8 +140,52 @@ lme.linear <- df.lme(rand_part = ~Visit | ID)
 
 cAIC(lme.simple)
 cAIC(lme.linear)
+lm(Y ~ Visit, data = df) %>% AIC # 7284.355
 
 # ----
 # task 5. Mixed linear model with Visit (time) effect
 # ----
 
+lme.ab <- lmer(Y ~ A + B + (A | Visit), data = df, REML = F)
+lmerTest::ranova(lme.ab)
+
+lme.b.additive <- function(data) lmer(Y ~ B + Visit + (B | Visit), data = data, REML = F)
+lme.b.general <- function(data) lmer(Y ~ B * Visit + (B | Visit), data = data, REML = F)
+dev.null <- levels(df$A) %>% lapply(function(a.lvl = ? factor) {
+  print(paste("A =", a.lvl))
+  data <- df %>% filter(A == a.lvl)
+  data %>% lme.b.additive %>% AIC %>% print # TODO check the hypothesis
+  data %>% lme.b.general %>% AIC %>% print
+})
+
+lmer(Y ~ A + B + Visit + (A + B | Visit), data = df, REML = F) %>% AIC
+lmer(Y ~ A * Visit + A * B + (A + B | Visit), data = df, REML = F) %>% AIC
+
+# ----
+# Task 6
+# ----
+
+gee::gee(Y ~ A + B, data = df, id = ID)
+
+# ----
+# Task 7
+# ----
+
+df.Visit2 <- df %>% mutate(Visit2 = Visit^2)
+lm.polynom <- lmer(Y ~ Visit + Visit2 + (A + B | Visit), data = df.Visit2, REML = F)
+lm.linear <- lmer(Y ~ Visit + (A + B | Visit), data = df)
+lmerTest::ranova(lm.polynom)
+lmerTest::ranova(lm.linear)
+
+# ----
+# Task 8
+# ----
+
+# AIC, BIC: already done in (5)
+
+# ----
+# Task 9
+# ----
+
+lmer(Y ~ Visit + (B | Visit), data = df, REML = F)
+# TODO confints

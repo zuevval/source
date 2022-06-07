@@ -14,15 +14,16 @@ df <- here::here("r/stats2021fall/homework4", "IDZ4_Data_504020121.csv") %>%
   read.csv %>%
   filter(Variant == 4) %>%
   select(!Variant) %>%
-  mutate(A=as.factor(A), B=as.factor(B))
-head(df)
+  mutate(A = as.factor(A), B = as.factor(B))
+head(df) %>% xtable::xtable()
 ```
 
 ```{r}
-ggpairs(df, columns = 1:3, ggplot2::aes(colour=B))
+ggpairs(df, columns = 1:3, ggplot2::aes(colour = B))
 ```
 ```{r}
-list("general" = Y ~ A * B, "additive" = Y ~ A + B, "a_only" = Y ~ A, "b_only" = Y ~ B) %>% lapply(function(formula) { aov(formula, data = df) })
+list("general" = Y ~ A * B, "additive" = Y ~ A + B,
+     "a_only" = Y ~ A, "b_only" = Y ~ B, "mean" = Y ~ 1) %>% lapply(function(formula) { aov(formula, data = df) })
 ```
 ```{r}
 df <- df %>%
@@ -41,8 +42,12 @@ df %>% ggplot(aes(Visit, Y)) +
   geom_point(aes(color = B, size = A)) +
   theme_minimal() +
   geom_line(aes(Visit, MeanY))
-df %>% ggplot(aes(Visit, AMeanY, group=A, color=A)) + geom_line() + theme_minimal()
-df %>% ggplot(aes(Visit, BMeanY, group=B, color=B)) + geom_line() + theme_minimal()
+df %>% ggplot(aes(Visit, AMeanY, group = A, color = A)) +
+  geom_line() +
+  theme_minimal()
+df %>% ggplot(aes(Visit, BMeanY, group = B, color = B)) +
+  geom_line() +
+  theme_minimal()
 pairs(df)
 pairs(df %>% select(Y, ID, A, B))
 ```
@@ -54,10 +59,10 @@ ks.test(df.t1$Y, df.t2$Y)
 ```
 ## ANOVA
 ```{r, name="ANOVA"}
-q <- lm(Y~A*B, data=df) # TODO probably not df; what is d16T?
-qc<-q$coefficients
-x<-c(0,1) # levels(df$A)
-y<-qc[1]+qc[3]*x
+q <- lm(Y ~ A * B, data = df) # TODO probably not df; what is d16T?
+qc <- q$coefficients
+x <- c(0, 1) # levels(df$A)
+y <- qc[1] + qc[3] * x
 # TODO plot
 # TODO with
 ```
