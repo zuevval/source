@@ -66,41 +66,45 @@
 	\centering
 	\begin{tabular}{rrrllr}
 		\hline
-		& ID & Y & A & B & Visit \\ 
+		& ID & Y & A & B & Visit \\
 		\hline
-		1 &   1 & 8.91 & 1 & 1 &   0 \\ 
-		2 &   1 & 1.60 & 1 & 3 &   1 \\ 
-		3 &   1 & 10.63 & 1 & 1 &   2 \\ 
-		4 &   2 & 4.21 & 0 & 1 &   0 \\ 
-		5 &   2 & 5.30 & 0 & 3 &   1 \\ 
-		6 &   2 & 8.34 & 0 & 3 &   2 \\ 
+		1 &   1 & 8.91 & 1 & 1 &   0 \\
+		2 &   1 & 1.60 & 1 & 3 &   1 \\
+		3 &   1 & 10.63 & 1 & 1 &   2 \\
+		4 &   2 & 4.21 & 0 & 1 &   0 \\
+		5 &   2 & 5.30 & 0 & 3 &   1 \\
+		6 &   2 & 8.34 & 0 & 3 &   2 \\
 		\hline
 	\end{tabular}
 \end{table}
 
+Построим распределение $ Y $.
+
 \begin{figure}[H]
 	\label{img:data_no_time}
-	\includegraphics[width=\textwidth]{data_no_time}
-	\caption{ 
-		Данные без учёта времени посещения врача.
-		Сгруппированы по значению фактора $ B $ (красный -- $ B = 1 $, зелёный -- $ B = 2 $, синий -- $ B = 3 $ ).
-		Слева направо: \textbf{верхний ряд:} сглаженное распределение ID; корреляции между Y и ID; boxplot ID при каждом значении A.
-		\textbf{Средний ряд:} данные в координатах \{ID, Y\}; сглаженное распределение Y; boxplot Y при каждом значении A.
-		\textbf{Нижний ряд:} гистограммы распределения  ID  и Y при каждом значении А; гистограмма распределения A.
-	}
+	\includegraphics[width=\textwidth]{y_only}
+	\caption{Распределение Y}
 \end{figure}
 
-Двухфакторный дисперсионный анализ: проверим модель среднего, модели с эффектами факторов А и В, модель с аддитивным влиянием факторов и с перекрёстными членами.
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{y_and_a}
+    \caption{Распределение Y (стратификация по A)}
+\end{figure}
+\begin{figure}[H]
+    \includegraphics[width=\textwidth]{y_and_b}
+    \caption{Распределение Y (стратификация по B)}
+\end{figure}
 
-\[ 
+Двухфакторный дисперсионный анализ: проверим с помощью критерия хи-квадрат, можно ли без серьёзного увеличения дисперсии редуцировать общую модель.
+
+\[
 \begin{array}{c|c}
-	\text{ Формула } & \text{ Стандартное отклонение остатков } \\
+	\text{ Сравниваемые модели } & \text{ p-value } \\
 	\hline
-	Y \sim 1 & 3.302 \\
-	Y \sim A & 3.262 \\
-	Y \sim B & 3.304 \\
-	Y \sim A + B & 3.264 \\
-	Y \sim A \cdot B & 3.264 \\
+    Y \sim A \cdot B  \text{ VS } Y \sim A + B & 0.4394 \\
+    Y \sim A + B \text{ VS } Y \sim A & 0.9141 \\
+	Y \sim A + B \text{ VS } Y \sim B & 5.174e-13 \\
+	Y \sim A \text{ VS } Y \sim 1 & 4.261e-13 \\
 \end{array}
 \]
 
@@ -129,52 +133,49 @@
 % Thu Jun  2 23:34:22 2022
 \begin{table}[H]
 	\centering
-	\begin{tabular}{rlrlrlrl}
-		\hline
-		ID & A & Y\_V0 & Y\_B0 & Y\_V1 & Y\_B1 & Y\_V2 & Y\_B2 \\ 
-		\hline
-		1 & 1 & 8.91 & 1 & 1.60 & 3 & 10.63 & 1 \\ 
-		2 & 0 & 4.21 & 1 & 5.30 & 3 & 8.34 & 3 \\ 
-		3 & 0 & 5.63 & 1 & 4.34 & 3 & 7.77 & 1 \\ 
-		4 & 0 & 6.22 & 2 & 3.50 & 1 & 7.25 & 1 \\ 
-		5 & 1 & 5.95 & 3 & 0.45 & 1 & 10.50 & 1 \\ 
-		6 & 0 & 5.98 & 2 & 4.26 & 1 & 7.69 & 2 \\ 
-		\hline
-	\end{tabular}
+	\begin{tabular}{rrrr}
+        \hline
+        & Y\_V0 & Y\_V1 & Y\_V2 \\
+        \hline
+        Y\_V0 & 1.00 & -0.00 & -0.14 \\
+        Y\_V1 & -0.00 & 1.00 & -0.07 \\
+        Y\_V2 & -0.14 & -0.07 & 1.00 \\
+        \hline
+    \end{tabular}
 \end{table}
 
-Матрица ковариаций между  измерениями со значением $ A = 0 $: 
+Матрица корреляций между  измерениями со значением $ A = 0 $:
 
 % latex table generated in R 4.1.1 by xtable 1.8-4 package
 % Thu Jun  2 23:40:34 2022
 \begin{table}[H]
 	\centering
 	\begin{tabular}{rrrr}
-		\hline
-		& Y\_V0 & Y\_V1 & Y\_V2 \\ 
-		\hline
-		Y\_V0 & 2.03 & -0.00 & -0.27 \\ 
-		Y\_V1 & -0.00 & 1.58 & -0.12 \\ 
-		Y\_V2 & -0.27 & -0.12 & 1.84 \\ 
-		\hline
-	\end{tabular}
+        \hline
+        & Y\_V0 & Y\_V1 & Y\_V2 \\
+        \hline
+        Y\_V0 & 1.00 & -0.00 & -0.14 \\
+        Y\_V1 & -0.00 & 1.00 & -0.07 \\
+        Y\_V2 & -0.14 & -0.07 & 1.00 \\
+        \hline
+    \end{tabular}
 \end{table}
 
-Матрица ковариаций между измерениями со значением $ A = 1 $:
+Матрица корреляций между измерениями со значением $ A = 1 $:
 
 % latex table generated in R 4.1.1 by xtable 1.8-4 package
 % Thu Jun  2 23:42:10 2022
-\begin{table}[ht]
+\begin{table}[H]
 	\centering
 	\begin{tabular}{rrrr}
-		\hline
-		& Y\_V0 & Y\_V1 & Y\_V2 \\ 
-		\hline
-		Y\_V0 & 1.85 & 0.22 & 0.06 \\ 
-		Y\_V1 & 0.22 & 1.89 & 0.05 \\ 
-		Y\_V2 & 0.06 & 0.05 & 1.72 \\ 
-		\hline
-	\end{tabular}
+        \hline
+        & Y\_V0 & Y\_V1 & Y\_V2 \\
+        \hline
+        Y\_V0 & 1.00 & 0.12 & 0.03 \\
+        Y\_V1 & 0.12 & 1.00 & 0.03 \\
+        Y\_V2 & 0.03 & 0.03 & 1.00 \\
+        \hline
+    \end{tabular}
 \end{table}
 
 При $ A = 0, B = 1 $:
@@ -184,14 +185,14 @@
 \begin{table}[H]
 	\centering
 	\begin{tabular}{rrrr}
-		\hline
-		& Y\_V0 & Y\_V2 & Y\_V1 \\ 
-		\hline
-		Y\_V0 & 1.72 & 0.06 & -0.06 \\ 
-		Y\_V2 & 0.06 & 1.72 & -0.25 \\ 
-		Y\_V1 & -0.06 & -0.25 & 1.57 \\ 
-		\hline
-	\end{tabular}
+        \hline
+        & Y\_V0 & Y\_V2 & Y\_V1 \\
+        \hline
+        Y\_V0 & 1.00 & 0.03 & -0.04 \\
+        Y\_V2 & 0.03 & 1.00 & -0.14 \\
+        Y\_V1 & -0.04 & -0.14 & 1.00 \\
+        \hline
+    \end{tabular}
 \end{table}
 
 При $ A = 0, B = 2 $:
@@ -201,38 +202,53 @@
 \begin{table}[H]
 	\centering
 	\begin{tabular}{rrrr}
-		\hline
-		& Y\_V0 & Y\_V2 & Y\_V1 \\ 
-		\hline
-		Y\_V0 & 2.03 & -0.15 & -0.44 \\ 
-		Y\_V2 & -0.15 & 1.62 & -0.34 \\ 
-		Y\_V1 & -0.44 & -0.34 & 1.54 \\ 
-		\hline
-	\end{tabular}
+        \hline
+        & Y\_V0 & Y\_V2 & Y\_V1 \\
+        \hline
+        Y\_V0 & 1.00 & -0.10 & -0.28 \\
+        Y\_V2 & -0.10 & 1.00 & -0.17 \\
+        Y\_V1 & -0.28 & -0.17 & 1.00 \\
+        \hline
+    \end{tabular}
 \end{table}
 
 При $ A = 1, B = 1 $:
 
 % latex table generated in R 4.1.1 by xtable 1.8-4 package
 % Thu Jun  2 23:48:58 2022
-\begin{table}[ht]
+\begin{table}[H]
 	\centering
 	\begin{tabular}{rrrr}
-		\hline
-		& Y\_V0 & Y\_V2 & Y\_V1 \\ 
-		\hline
-		Y\_V0 & 2.30 & -0.39 & -0.19 \\ 
-		Y\_V2 & -0.39 & 1.62 & 0.69 \\ 
-		Y\_V1 & -0.19 & 0.69 & 1.96 \\ 
-		\hline
-	\end{tabular}
+        \hline
+        & Y\_V0 & Y\_V2 & Y\_V1 \\
+        \hline
+        Y\_V0 & 1.00 & -0.19 & -0.08 \\
+        Y\_V2 & -0.19 & 1.00 & 0.32 \\
+        Y\_V1 & -0.08 & 0.32 & 1.00 \\
+        \hline
+    \end{tabular}
 \end{table}
 
-Вариограмма:
+Ковариации по вариограмме:
 
 \begin{figure}[H]
 	\centering \includegraphics[width=\myPictWidth]{variogram}
 \end{figure}
+
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Wed Jun 08 11:27:57 2022
+\begin{table}[H]
+    \centering
+    \begin{tabular}{rrrr}
+        \hline
+        & Y\_V0 & Y\_V2 & Y\_V1 \\
+        \hline
+        Y\_V0 & 1.43 & -1.68 & 1.53 \\
+         Y\_V1 & -1.68 & 1.26 & -1.59 \\
+        Y\_V2 & 1.53 & -1.59 & 1.36 \\
+        \hline
+    \end{tabular}
+\end{table}
 
 
 \section{ Смешанные линейные модели c эффектом индивида }
@@ -250,11 +266,31 @@ $ b \sim \mathcal N(0,  \Upsilon) $
 
 Результаты применения моделей: \\
 
-\begin{tabular}{rc}
-	формула & cAIC \\
-	$ Y \sim Visit :  \sim 1 | ID $ & 10717 \\
-	$ Y \sim Visit : \sim Visit | ID $ & 10715 \\
-\end{tabular}
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Wed Jun 08 08:32:31 2022
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrrrrr}
+        \hline
+        fixed.part & AIC & cAIC (1|ID) & cAIC (Visit|ID) & pv1 & pv2 \\
+        \hline
+        Y \~{} A * B * Visit & 10670.98 & 10669.77 & 10668.47 & 1.00 & 1.00 \\
+        Y \~{} A * Visit + B * Visit + A * B & 10668.39 & 10667.18 & 10665.87 & 1.00 & 1.00 \\
+        Y \~{} A * Visit + B * Visit & 10666.80 & 10665.58 & 10664.27 & 1.00 & 1.00 \\
+        Y \~{} A * Visit + A * B & 10664.71 & 10663.50 & 10662.20 & 1.00 & 1.00 \\
+        Y \~{} B * Visit + A * B & 10669.80 & 10668.59 & 10667.28 & 1.00 & 1.00 \\
+        Y \~{} A + B + Visit & 10664.48 & 10663.27 & 10661.95 & 1.00 & 1.00 \\
+        Y \~{} A + B & 10964.69 & 10963.71 & 10961.53 & 1.00 & 1.00 \\
+        Y \~{} A + Visit & 10661.19 & 10659.97 & \textbf{10658.66} & 1.00 & 1.00 \\
+        Y \~{} B + Visit & 10722.62 & 10720.44 & 10718.63 & 1.00 & 1.00 \\
+        Y \~{} Visit & 10719.76 & 10717.55 & 10715.75 & 1.00 & 1.00 \\
+        Y \~{} A & 10960.87 & 10959.88 & 10957.71 & 1.00 & 1.00 \\
+        Y \~{} B & 11014.94 & 11013.26 & 11010.46 & 1.00 & 1.00 \\
+        Y \~{} 1 & 11011.45 & 11009.75 & 11006.95 & 1.00 & 1.00 \\
+        \hline
+    \end{tabular}
+\end{table}
+
 
 \section{ Смешанные линейные модели с учётом факторов А и В }
 
@@ -265,23 +301,24 @@ $ b \sim \mathcal N(0,  \Upsilon) $
 \end{leftbar}
 
 Исследованные модели:
+\begin{align*}
+    & Y \sim B + Visit : Visit | ID \\
+    & Y \sim B \cdot Visit : Visit | ID
+\end{align*}
 
-\begin{tabular}{ccc}
-	Формула & Значение A & AIC \\
-	$ Y \sim B + Visit : B | Visit $  & 0 & 3453 \\
-	$ Y \sim B + Visit : B | Visit $  & 1 & 3547 \\
-	$ Y \sim B \cdot Visit : B | Visit $ & 0 & 3760 \\
-	$ Y \sim B \cdot Visit : B | Visit $ & 1 & 3763 \\
-\end{tabular}
+Значения $ p-value $ в тесте хи-квадрат при дисперсионном анализе остатков:
+$ 0.82 $ при $ A = 0 $, $ 0.59 $ при $ A = 1 $.
 
-Значения AIC примерно одинаковые.
+Т. о. в каждом случае модель можно редуцировать.
 
-Включим фактор $ A $ в модель:
+Если же сравнить модели
 
-\begin{enumerate}[noitemsep]
-	\item $ Y \sim  A + B + Visit: A + B | Visit $: $ AIC = 7282 $
-	\item $ Y ~ A * Visit + A * B : A + B | Visit $: $ AIC = 7279 $
-\end{enumerate}
+\begin{align*}
+    & Y \sim A + B + Visit : Visit | ID \\
+    & Y \sim B  + Visit : Visit | ID
+\end{align*}
+
+то $ p-value < 10^{-14} $ (редуцировать модель нельзя).
 
 \section{ Дисперсионный анализ }
 \label{section:anova}
@@ -290,9 +327,32 @@ $ b \sim \mathcal N(0,  \Upsilon) $
 Провести дисперсионный анализ зависимости распределения наблюдаемого признака, используя GEE-модель с неструктурированной корреляционной структурой наблюдений каждого индивида
 \end{leftbar}
 
-Проведём анализ с моделью $ Y ~ A + B $ с независимой корреляционной структурой по ID.
+Протестируем модель общего вида против всех остальных.
 
-% TODO what?
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Wed Jun 08 09:23:36 2022
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lr}
+        \hline
+        model & p.value \\
+        \hline
+        Y \~{} A * Visit + B * Visit + A * B & 0.37 \\
+        Y \~{} A * Visit + B * Visit & 0.14 \\
+        Y \~{} A * Visit + A * B & 0.65 \\
+        Y \~{} B * Visit + A * B & 0.00 \\
+        Y \~{} A + B + Visit & 0.01 \\
+        Y \~{} A + B & 0.00 \\
+        Y \~{} A + Visit & 0.01 \\
+        Y \~{} B + Visit & 0.00 \\
+        Y \~{} Visit & 0.00 \\
+        Y \~{} A & 0.00 \\
+        Y \~{} B & 0.00 \\
+        Y \~{} 1 & 0.00 \\
+        \hline
+    \end{tabular}
+\end{table}
+
 
 \section{ Смешанная модель ковариационного анализа }
 
@@ -301,11 +361,8 @@ $ b \sim \mathcal N(0,  \Upsilon) $
 Проверить гипотезу линейной зависмости среднего значения наблюдаемого признака от времени в присутствии факторов А и В.
 \end{leftbar}
 
-\begin{tabular}{cc}
-	Модель & AIC \\
-	$ Y \sim Visit + Visit2: A + B | Visit $ & 7275.6 \\
-	$ Y \sim Visit: A + B | Visit) $ & 7284 \\
-\end{tabular}
+При сравнении дисперсий остатков в моделях $ Y \sim Visit + Visit2 + ( Visit | ID ) $ и $ Y \sim Visit + ( Visit | ID ) $ получено $ P $-значение $ < 10^{-15} $, то есть квадратичная модель намного лучше объясняет дисперсию.
+
 
 \section{ Выбор наилучшей модели для неслучайного эффекта }
 
@@ -314,7 +371,52 @@ $ b \sim \mathcal N(0,  \Upsilon) $
 Провести исследование влияния факторов A, B и времени обследования на значение исследуемой характеристики в рамках данной модели.
 \end{leftbar}
 
-Наилучшая модель -- $ Y \sim B + Visit : B | Visit $  (аддитивное неслучайное влияние факторов А и В вместе со случайным эффектом, который даёт фактор В при условии заданного значения Visit).
+% latex table generated in R 4.0.5 by xtable 1.8-4 package
+% Wed Jun 08 10:18:37 2022
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lrr}
+        \hline
+        model & cAIC & BIC \\
+        \hline
+        Y \~{} A * B * Visit & 10669.77 & 10752.11 \\
+        Y \~{} A * Visit + B * Visit + A * B & 10667.18 & 10738.22 \\
+        Y \~{} A * Visit + B * Visit & 10665.58 & 10725.32 \\
+        Y \~{} A * Visit + A * B & 10663.50 & 10723.24 \\
+        Y \~{} B * Visit + A * B & 10668.59 & 10733.98 \\
+        Y \~{} A + B + Visit & 10663.27 & 10706.05 \\
+        Y \~{} A + B & 10963.71 & 11000.60 \\
+        Y \~{} A + Visit & \textbf{10659.97} & \textbf{10691.46} \\
+        Y \~{} B + Visit & 10720.44 & 10758.54 \\
+        Y \~{} Visit & 10717.55 & 10744.37 \\
+        Y \~{} A & 10959.88 & 10985.48 \\
+        Y \~{} B & 11013.26 & 11045.20 \\
+        Y \~{} 1 & 11009.75 & 11030.41 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Наилучшая модель -- $ Y \sim A + Visit +(Visit | ID) $  (аддитивное влияние факторов А и Visit).
+Её характеристики:
+
+\begin{verbatim}
+>> df.lme.1_id[[8]]
+
+Linear mixed-effects model fit by maximum likelihood
+Data: df
+Log-likelihood: -5326.597
+Fixed: Y ~ A + Visit
+(Intercept)          A1       Visit
+3.946173    1.037328    1.458898
+
+Random effects:
+Formula: ~1 | ID
+(Intercept) Residual
+StdDev: 9.915825e-05 3.035298
+
+Number of Observations: 2106
+Number of Groups: 702
+\end{verbatim}
 
 \section{ Количественный анализ динамики изменений наблюдаемого признака }
 
@@ -322,5 +424,19 @@ $ b \sim \mathcal N(0,  \Upsilon) $
 В условиях наилучшей модели, выбранной в п. \ref{section:anova}, провести количественный анализ динамики изменений наблюдаемого признака с течением времени.
 Построить частные и совместные доверительные интервалы для значений параметров модели, принимая во внимание влияние сопутствующих факторов, присутствующих в наилучшей модели.
 \end{leftbar}
-	
+
+\begin{verbatim}
+
+> intervals(lm.Visit2, which = "fixed")
+Approximate 95% confidence intervals
+
+Fixed effects:
+            lower      est.     upper
+(Intercept)  6.201718  6.323118  6.444519
+Visit       -9.911643 -9.602131 -9.292619
+Visit2       5.381830  5.530515  5.679199
+attr(,"label")
+
+\end{verbatim}
+
 \end{document}

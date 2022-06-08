@@ -19,11 +19,37 @@ head(df) %>% xtable::xtable()
 ```
 
 ```{r}
-ggpairs(df, columns = 1:3, ggplot2::aes(colour = B))
+# ggpairs(df, columns = 1:3, ggplot2::aes(colour = B))
+
+ggplot(data = df, aes(x = Y)) +
+  geom_histogram() +
+  theme_minimal()
+ggplot(data = df, aes(x = Y, fill = B)) +
+  geom_histogram() +
+  theme_minimal()
+ggplot(data = df %>% filter(A == 0), aes(x = Y, fill = A)) +
+  geom_histogram() +
+  theme_minimal()
+
 ```
 ```{r}
-list("general" = Y ~ A * B, "additive" = Y ~ A + B,
-     "a_only" = Y ~ A, "b_only" = Y ~ B, "mean" = Y ~ 1) %>% lapply(function(formula) { aov(formula, data = df) })
+ggplot(data = df %>% filter(A == 1, Visit == 1), aes(x = Y, fill = A)) +
+  geom_histogram() +
+  theme_minimal()
+```
+```{r}
+lin.models <- list("general" = Y ~ A * B,
+                   "additive" = Y ~ A + B,
+                   "a_only" = Y ~ A,
+                   "b_only" = Y ~ B,
+                   "mean" = Y ~ 1) %>% lapply(function(formula) { lm(formula, data = df) })
+anova(lin.models$general)
+anova(lin.models$additive, lin.models$general) # high p-value (we can reduce the model)
+anova(lin.models$additive, lin.models$a_only) # high p-value (we can reduce the model)
+anova(lin.models$additive, lin.models$b_only) # small p-value
+anova(lin.models$a_only, lin.models$mean) # small p-value
+
+anova(lin.models$general, lin.models$a_only)
 ```
 ```{r}
 df <- df %>%
