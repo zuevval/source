@@ -1,0 +1,95 @@
+% !TeX spellcheck = en_US
+% !TeX program = xelatex
+
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc} % russian, do not change
+\usepackage[T2A, T1]{fontenc} % russian, do not change
+\usepackage[english, russian]{babel} % russian, do not change
+
+\usepackage{setspace} % `setspace` moved from `styling`: https://tex.stackexchange.com/a/577582
+
+% fonts
+\usepackage{fontspec} % different fonts
+\setmainfont{Times New Roman}
+\usepackage{amsmath}
+\usepackage{amssymb} %common math symbols
+\usepackage{dsfont}
+
+% utilities
+\usepackage{systeme} % systems of equations
+\usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
+\usepackage{array} % utils for tables
+\usepackage{makecell} % multirow for tables
+\usepackage{subfiles}
+\usepackage{hyperref}
+\hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
+\usepackage{framed} % advanced frames, boxes
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{subcaption} % captions for subfigures
+\usepackage{color}
+\usepackage{chngcntr} % change counters
+%\counterwithout*{section}{chapter} % continue sections enumeration with chngcntr
+% \usepackage{theorem}
+\usepackage{amsthm} % theorems with proofs
+\newtheorem{thrm}{Теорема}
+
+\usepackage[backend=biber, bibstyle=gost-numeric, sorting=none, block=space]{biblatex} % this does not always work: in TeXStudio you have to choose "default bibliography tool = Biber" manually
+\addbibresource{bibliography.bib}
+\DeclareFieldFormat[inproceedings]{pagetotal}{\mkpagetotal[bookpagination]{#1}}
+\renewbibmacro*{chapter+pages}{%
+    \printfield{note}%
+    \setunit{\bibpagespunct -}%
+    \printfield{pagetotal}%
+    \setunit{\bibpagespunct}%
+    \printfield{pages}%
+    \newunit}
+
+
+% styling
+\usepackage{float} % force pictures position
+\floatstyle{plaintop} % force caption on top
+\usepackage{enumitem} % itemize and enumerate with [noitemsep]
+\setlength{\parindent}{0pt} % no indents!
+
+% misc
+\graphicspath{{./img/}}
+\newcommand{\myPictWidth}{.95\textwidth}
+\newcommand{\phm}{\phantom{-}}
+\newcommand{\defeq}{\overset{def}=}
+
+\begin{document}
+
+% STU 2022 SPRING PROJECT REPORT
+
+\subfile{titlepage}
+\tableofcontents
+\newpage
+
+\section{ Введение }
+\input{parts/intro}
+\newpage
+\section{ Постановка задачи }
+\input{parts/problem}
+\newpage
+\section{ Описание данных }
+% \input{parts/data}
+\section{ Проведённые эксперименты }
+\label{section:experiments}
+\input{parts/experiments}
+\section{ Результаты }
+%\input{parts/results}
+\section{ Выводы }
+%\input{parts/discussion}
+\section{ Заключение }
+\input{parts/conclusion}
+
+\newpage
+\addcontentsline{toc}{section}{\protect\numberline{}Список использованных источников}
+\printbibliography[title={Список использованных источников}]
+
+\newpage
+\section{ Приложения }
+%\subfile{parts/appendix}
+
+\end{document}

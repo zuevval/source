@@ -1,0 +1,34 @@
+\begin{verbatim}
+./kallisto index -i flax_ref.index SRR11830041.1_1.fasta
+
+[build] loading fasta file SRR11830041.1_1.fasta
+[build] k-mer length: 31
+[build] warning: clipped off poly-A tail (longer than 10)
+from 997 target sequences
+[build] warning: replaced 81307 non-ACGUT characters in the input sequence
+with pseudorandom nucleotides
+[build] counting k-mers ... done.
+[build] building target de Bruijn graph ...  done
+[build] creating equivalence classes ...  done
+[build] target de Bruijn graph has 12250208 contigs and contains 106849682 k-mers
+
+\end{verbatim}
+
+\begin{verbatim}
+./kallisto quant -i flax_ref.index -o paired_reads/out/SRR8177761 paired_reads/SRR8177761_1_paired.fastq.gz  paired_reads/SRR8177761_2_paired.fastq.gz
+
+
+[quant] fragment length distribution will be estimated from the data
+[index] k-mer length: 31
+[index] number of targets: 8,078,958
+[index] number of k-mers: 106,849,682
+[index] number of equivalence classes: 16,334,370
+[quant] running in paired-end mode
+[quant] will process pair 1: paired_reads/SRR8177761_1_paired.fastq.gz
+paired_reads/SRR8177761_2_paired.fastq.gz
+[quant] finding pseudoalignments for the reads ... done
+[quant] processed 8,427,058 reads, 338,347 reads pseudoaligned
+[quant] estimated average fragment length: 125.696
+[   em] quantifying the abundances ... done
+[   em] the Expectation-Maximization algorithm ran for 652 rounds
+\end{verbatim}
