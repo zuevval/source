@@ -32,3 +32,37 @@ paired_reads/SRR8177761_2_paired.fastq.gz
 [   em] quantifying the abundances ... done
 [   em] the Expectation-Maximization algorithm ran for 652 rounds
 \end{verbatim}
+
+\subsection{STAR}
+
+\begin{verbatim}
+/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static # ./STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles ../../../../../y/vzuev/datasets/bioMG2022/lus.final.fasta --sjdbGTFfile ../../../../../y/vzuev/ # regularly tap ENTER
+
+./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
+> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq
+
+./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
+> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq \
+> --sjdbInsertSave All  --quantMode GeneCounts --outReadsUnmapped Fastq --outSAMstrandField intronMotif
+
+tail -n +5 ReadsPerGene.out.tab > gene_counts.count
+
+# mass production: # https://github.com/najasplus/STAR-deseq2
+
+for i in 44 55 56 57 58; do
+    ./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+        "SRR81777${i}_1_paired.fastq" \
+        "SRR81777${i}_2_paired.fastq" \
+        --sjdbInsertSave All  --quantMode GeneCounts --outReadsUnmapped Fastq --outSAMstrandField intronMotif \
+        --outFileNamePrefix "./SRR81777${i}/"
+done
+
+for i in 55 56 57 58 59 60 61 62; do
+    cd "./SRR81777${i}/"
+    tail -n +5 ReadsPerGene.out.tab > gene_counts.count
+    cd ..
+done
+
+\end{verbatim}
