@@ -1,0 +1,93 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+
+GitLab:
+\begin{enumerate}[noitemsep]
+	\item Написать свой user ID GitLab
+	\item repo, reporter
+	
+	Issue: open - doing - submit - closed
+\end{enumerate}
+
+Slurm -- несколько режимов:
+
+locate -- просто выделить ресурсы на некоторое количество времени;
+
+задание -- \\
+
+MPI команды: mpirun (работает поверх Slurm)
+
+\section{Параллельные программы}
+
+Выделяют
+\begin{enumerate}[noitemsep]
+	\item Архитектура с общей памятью
+	\item Архитектуры с распределённой памятью (кластеры): машины соединены быстрыми шинами и вместе что-то считают
+	\item Гибридные архитектуры -- всё, что угодно
+\end{enumerate}
+
+Мы занимаемся вторым, притом 
+
+FLOPS -- Floating Point Operations per Second
+
+\subsection{Uniform Memory Access}
+
+UMA (Uniform Memory Access):
+Symmetrical Multiprocessing -- одинаковые процессоры подключены к одной памяти.
+Архитектура MIPS сейчас используется в роутерах.
+
+Non Uniform Memory Access (NUMA) -- архитектура легче расширяема 
+
+\subsection{Устройства с реконфигурируемой архитектурой}
+
+FPGA -- Field Programmable Gate Array (хороши для одновременного вычисления одной операции; дорогие)
+
+\subsection{Grid}
+Grid -- объединяет много кластеров.
+
+\subsection{Закон Амдала}
+
+Amdalh's Las, 1967: с увеличением числа вычислительных узлов рост производительности ограничен
+
+Есть и другой, более оптимистичный закон (Густавсона-Барсиса)
+
+\subsection{Топология и коммуникация}
+
+МВС -- многопроцессорная вычислительная система.
+Когда мы пересылаем данные между узлами, наиболее распространены топологии
+
+\begin{enumerate}[noitemsep]
+	\item Полный граф
+	\item Линейка
+	\item Решётка
+	\item Кольцо -- пересылаем двум соседям (а также бывает тор).
+	Кольцо часто используется для методов оптимизации.
+	\item Звезда (есть master-процесс) и worker'ы
+\end{enumerate}
+
+Система управления памяти
+
+Латентность -- задержка при передаче сообщения нулевой длины
+
+Пропускная способность
+
+\subsection{ Модели параллельного программирования }
+
+\begin{enumerate}
+	\item threads
+	\item Процессы: fork (создать копию процесса с определённого места)  / execv (заместить процесс)
+	\item Передача сообщений (message passing)
+	\item Параллелизм по данным
+\end{enumerate}
+
+POSIX -- стандарт работы операционной системы.
+Но его сложно целиком реализовать, и нет ни одной ОС, реализующих его целиком.
+
+\begin{verbatim}
+	// unistd.h
+
+pid_t my_id = <...>
+
+\end{verbatim}
+
+\end{document}
