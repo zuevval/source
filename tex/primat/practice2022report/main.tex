@@ -20,6 +20,7 @@
 \usepackage{mathtools} % xRightarrow, xrightleftharpoons, etc
 \usepackage{array} % utils for tables
 \usepackage{makecell} % multirow for tables
+\usepackage{booktabs} % toprule, etc for tables
 \usepackage{subfiles}
 \usepackage{hyperref}
 \hypersetup{pdfstartview=FitH,  linkcolor=blue, urlcolor=blue, colorlinks=true}
@@ -72,15 +73,13 @@
 \section{ Постановка задачи }
 \input{parts/problem}
 \newpage
-\section{ Описание алгоритмов }
-% \input{parts/data}
+\section{ Описание программ }
+\input{parts/algo}
 \section{ Проведённые эксперименты }
 \label{section:experiments}
 \input{parts/experiments}
-\section{ Результаты }
-%\input{parts/results}
-\section{ Выводы }
-%\input{parts/discussion}
+\section{ Результаты и выводы }
+\input{parts/results}
 \section{ Заключение }
 \input{parts/conclusion}
 
@@ -90,6 +89,6 @@
 
 \newpage
 \section{ Приложения }
-%\subfile{parts/appendix}
+\subfile{parts/appendix}
 
 \end{document}
