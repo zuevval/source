@@ -66,3 +66,28 @@ for i in 55 56 57 58 59 60 61 62; do
 done
 
 \end{verbatim}
+
+\begin{verbatim}
+# https://data.jgi.doe.gov/refine-download/phytozome?genome_id=200&expanded=Phytozome-200
+
+root@powerhouse:/mnt/y/vzuev/datasets/bioMG2022/phytozome# /mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static/STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles Lusitatissimum_200_BGIv1.0.fa --sjdbGTFfile Lusitatissimum_200_v1.0.gene_exons.gtf --limitGenomeGenerateRAM=100000000000
+
+/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static/STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles Lusitatissimum_200_BGIv1.0.fa --sjdbGTFfile Lusitatissimum_200_v1.0.gene_exons.gtf --limitGenomeGenerateRAM=100000000000
+STAR version: 2.7.10a   compiled: 2022-01-14T18:50:00-05:00 :/home/dobin/data/STAR/STARcode/STAR.master/source
+Jul 04 23:41:07 ..... started STAR run
+Jul 04 23:41:07 ... starting to generate Genome files
+Jul 04 23:41:53 ..... processing annotations GTF
+!!!!! WARNING: --genomeSAindexNbases 14 is too large for the genome size=318250901, which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases 13
+Jul 04 23:42:40 ... starting to sort Suffix Array. This may take a long time...
+Jul 04 23:43:26 ... sorting Suffix Array chunks and saving them to disk...
+Jul 04 23:46:41 ... loading chunks from disk, packing SA...
+Jul 04 23:47:09 ... finished generating suffix array
+Jul 04 23:47:09 ... generating Suffix Array index
+Jul 04 23:48:21 ... completed Suffix Array index
+Jul 04 23:48:21 ... writing Genome to disk ...
+Jul 05 00:02:58 ... writing Suffix Array to disk ...
+Jul 05 00:04:40 ... writing SAindex to disk
+Jul 05 00:05:44 ..... finished successfully
+
+
+\end{verbatim}
