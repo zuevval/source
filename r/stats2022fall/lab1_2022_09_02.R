@@ -7,12 +7,12 @@
 # install.packages("BiocManager")
 library(tidyverse)
 
-# list(
-#   "gdsfmt",
-#   "SNPRelate",
-#   "vcfR",
-#   "HardyWeinberg"
-# ) %>% lapply(function(pkg.name) BiocManager::install(pkg.name))
+ list(
+   "gdsfmt",
+   "SNPRelate",
+   "vcfR",
+   "HardyWeinberg"
+ ) %>% lapply(function(pkg.name) BiocManager::install(pkg.name))
 
 library(gdsfmt) # internal R format for genetic data
 library(SNPRelate)

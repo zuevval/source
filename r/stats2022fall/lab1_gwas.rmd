@@ -1,0 +1,75 @@
+---
+title: "GWAS var1"
+author: Valerii Zuev
+date: 12/23/2022
+output: html_notebook
+---
+## 2. Загрузить генетические и клинические данные
+
+Necessary libraries:
+```{r message = F, warning = F}
+library(gdsfmt) # internal R format for genetic data
+library(SNPRelate)
+library(vcfR)
+library(HardyWeinberg)
+```
+
+Converting VCF to GDS:
+```{r}
+setwd(here::here("r/stats2022fall/VAR_1")) # TODO not when HTML generated
+
+vcf.fn <- "genotype1.vcf.gz"
+pht.fn <- "phenotype_1.txt"
+gds.fn <- "DATA.gds"
+
+# snpgdsVCF2GDS(vcf.fn, gds.fn) # call this once to create a GDS file
+```
+
+Reading elements:
+```{r}
+dat.f <- snpgdsOpen(gds.fn)
+sample.id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
+snp.id <- read.gdsn(index.gdsn(dat.f, "snp.id"))
+snp.rs.id <- read.gdsn(index.gdsn(dat.f, "snp.rs.id"))
+chr <- read.gdsn(index.gdsn(dat.f, "snp.chromosome"))
+pos <- read.gdsn(index.gdsn(dat.f, "snp.position"))
+allele <- read.gdsn(index.gdsn(dat.f, "snp.allele"))
+genotype <- read.gdsn(index.gdsn(dat.f, "genotype"))
+snpgdsClose(dat.f)
+```
+
+Adding annotation:
+```{r}
+pht <- read.table(pht.fn, head = T)
+dat.f.writeable <- snpgdsOpen(gds.fn, readonly = F)
+add.gdsn(dat.f.writeable, "sample.annot", val = pht, compress = "ZIP", closezip = TRUE) # TODO not after the first read
+snpgdsClose(dat.f.writeable)
+```
+
+Opening GDS file again and reading annotation (clinical data):
+```{r}
+dat.f <- snpgdsOpen(gds.fn)
+sample.annot <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
+snpgdsClose(dat.f)
+```
+
+## 3. Охарактеризовать имеющиеся клинические данные. Определить частоты экспериментальной и контрольной групп в мужской и женской популяциях. При наличии пропущенных значений наблюдаемой переменной удалить из исследования соответствующих индивидов.
+
+```{r}
+cat("Gender levels: ")
+levels(as.factor(sample.annot$sex)) %>% cat("\n")
+
+cat("Phenotype levels (2 - HIV-infected, 1 - control): ")
+levels(as.factor(sample.annot$phenotype)) %>% cat("\n")
+
+cat("\nTotal number of observations: ", nrow(sample.annot), "\n\n")
+
+cat("Observations of case/control by gender\n")
+table(sample.annot$sex, sample.annot$phenotype)
+
+cat("\nMissing phenotype values:\n")
+is.na(sample.annot$sex) %>% sum
+is.na(sample.annot$phenotype) %>% sum
+```
+## 4. Охарактеризовать имеющиеся генетические данные. Вычислить для каждого генотипа: частоту минороной аллели (MAF); коэффициент гетерозиготности; процент генотипированных образцов (call rate).
+
