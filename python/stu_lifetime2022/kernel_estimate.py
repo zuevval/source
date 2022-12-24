@@ -1,3 +1,9 @@
+from dataclasses import dataclass
+from typing import Callable
+
+import numpy as np
+
+
 def kb_plus(mu: int, q: float, x: float) -> float:
     assert -1 <= q <= 1, f"`q` should be in [-1; 1], but {q} is passed"
 
@@ -13,6 +19,54 @@ def kb_plus(mu: int, q: float, x: float) -> float:
                 2 * x * (7 * (1 - q) / (1 + q) - 1) + 3 * q - 1 + 7 * (1 - q) ** 2 / (1 + q))
 
     raise ValueError(f"Wrong Mu value: {mu}")
+
+
+def kb_minus(mu: int, q: float, x: float) -> float:
+    return kb_plus(mu, q, -x)
+
+
+def kx_factory(mu: int, x: float,
+               bandwidth: Callable[[float], float], r: float) -> Callable[[float], float]:
+    """
+    Enhanced kernel K_x(z) (equation 2.3 in the article)
+    """
+    if bandwidth(x) <= x <= r - bandwidth(x):
+        return lambda z: kb_plus(mu=mu, q=x / bandwidth(x), x=z)
+    if x < bandwidth(x):
+        return lambda z: kb_minus(mu=mu, q=x / bandwidth(x), x=z)
+    return lambda z: kb_minus(mu=mu, q=(r - x) / bandwidth(x), x=z)
+
+
+@dataclass
+class AlgParams:
+    mu: int  # kernel parameter (possible values: 0, 1, 2, 3)
+
+
+@dataclass
+class InputData:
+    x: np.array  # one-dimensional time data
+    ind: np.array  # 1 = not censored, 0 = censored
+
+
+def estimate_h(params: AlgParams, data: InputData,
+               bandwidth: Callable[[float], float], r: float) -> Callable[[float], float]:
+    """
+    An iteration of hazard rate estimation. Given previous bandwidth estimation and right boundary, provides a new h(t)
+    """
+    pass # TODO
+
+
+def h_estimate(params: AlgParams, data: InputData) -> Callable[[float], float]:
+    """
+    hazard rate estimate with varying kernel and bandwidth
+    """
+    r = np.max(data.x)  # right bound
+    n_uncensored = np.sum(data.ind)
+    b0 = lambda x: r / (8 * n_uncensored ** (1 / 5))  # recommended initial bandwidth
+    h0 = estimate_h(params, data, b0, r)
+    return h0  # TODO return better estimate
+    # b1 = 2 * b0(0) / 3  # b1, b2 - boundaries for optimal bandwidth search
+    # b2 = 4 * b0(0)
 
 
 def main():
