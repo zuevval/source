@@ -1,11 +1,12 @@
 from dataclasses import dataclass
 from typing import Callable
+from scipy.optimize import minimize
 
 import numpy as np
 
 
 def kb_plus(mu: int, q: float, x: float) -> float:
-    # assert -1 <= q <= 1, f"`q` should be in [-1; 1], but {q} is passed" # TODO return assert?
+    assert 0 <= q <= 1, f"`q` should be in [0; 1], but {q} is passed" # TODO return assert?
 
     if mu == 0:
         return (2 / (1 + q) ** 3) * (3 * (1 - q) * x + 2 * (1 - q + q ** 2))
@@ -31,9 +32,9 @@ def kx_factory(mu: int, x: float,
     Enhanced kernel K_x(z) (equation 2.3 in the article)
     """
     if bandwidth(x) <= x <= r - bandwidth(x):
-        return lambda z: kb_plus(mu=mu, q=x / bandwidth(x), x=z)
+        return lambda z: kb_plus(mu=mu, q=1, x=z)
     if x < bandwidth(x):
-        return lambda z: kb_minus(mu=mu, q=x / bandwidth(x), x=z)
+        return lambda z: kb_plus(mu=mu, q=x / bandwidth(x), x=z)
     return lambda z: kb_minus(mu=mu, q=(r - x) / bandwidth(x), x=z)
 
 

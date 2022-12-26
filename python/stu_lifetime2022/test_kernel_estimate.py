@@ -23,7 +23,7 @@ def test_h_estimate():
     plt.figure()
     plt.hist(data.x, density=True)
 
-    sample_x = np.arange(2, 3.5, .1)
+    sample_x = np.arange(1, 4, .1)
     sample_y = [h(xi) for xi in sample_x]
 
     plt.plot(sample_x, sample_y)  # we expect h(t) ~ 1 for standard exponential distribution
