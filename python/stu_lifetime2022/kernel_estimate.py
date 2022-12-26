@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from typing import Callable
-from scipy.optimize import minimize
+from scipy.integrate import quad
 
 import numpy as np
 
 
 def kb_plus(mu: int, q: float, x: float) -> float:
-    assert 0 <= q <= 1, f"`q` should be in [0; 1], but {q} is passed" # TODO return assert?
+    assert 0 <= q <= 1, f"`q` should be in [0; 1], but {q} is passed"  # TODO return assert?
     if x < -1 or x > q:
         return 0
 
@@ -43,7 +43,8 @@ def kx_factory(mu: int, x: float,
 @dataclass
 class AlgParams:
     mu: int  # kernel parameter (possible values: 0, 1, 2, 3)
-    m1: int  # number of points in bandwidth minimization grid
+    m1: int  # number of points between 0 and R in bandwidth minimization grid
+    l: int  # number of points between b1 and b2 in bandwidth minimization grid
     m2: int  # number of points in final hazard rate estimation grid
 
 
@@ -73,6 +74,19 @@ def estimate_h(params: AlgParams, data: InputData,
     return h
 
 
+def ln_factory(data: InputData) -> Callable[[float], float]:
+    """
+    empirical survival function of uncensored observations L_n(x)
+    """
+    x_not_censored = data.x[np.where(data.ind == 1)]
+
+    def ln(x: float) -> float:
+        count = sum(x_not_censored <= x)
+        return 1 - count / (data.n + 1)
+
+    return ln
+
+
 def h_estimate(params: AlgParams, data: InputData) -> Callable[[float], float]:
     """
     hazard rate estimate with varying kernel and bandwidth
@@ -81,7 +95,7 @@ def h_estimate(params: AlgParams, data: InputData) -> Callable[[float], float]:
     n_uncensored = np.sum(data.ind)
     b0 = lambda x: r / (8 * n_uncensored ** (1 / 5))  # recommended initial bandwidth
     h0 = estimate_h(params, data, b0, r)
-    return h0  # TODO return better estimate
+    return h0  # TODO return better estimate; ? flag to return h0, too
     # b1 = 2 * b0(0) / 3  # b1, b2 - boundaries for optimal bandwidth search
     # b2 = 4 * b0(0)
 
