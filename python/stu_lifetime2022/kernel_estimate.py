@@ -7,6 +7,8 @@ import numpy as np
 
 def kb_plus(mu: int, q: float, x: float) -> float:
     assert 0 <= q <= 1, f"`q` should be in [0; 1], but {q} is passed" # TODO return assert?
+    if x < -1 or x > q:
+        return 0
 
     if mu == 0:
         return (2 / (1 + q) ** 3) * (3 * (1 - q) * x + 2 * (1 - q + q ** 2))
