@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Callable
-from scipy.integrate import quad
+from scipy.integrate import quad, trapezoid
 
 import numpy as np
 
@@ -87,7 +87,43 @@ def ln_factory(data: InputData) -> Callable[[float], float]:
     return ln
 
 
-def h_estimate(params: AlgParams, data: InputData) -> Callable[[float], float]:
+def mse_estimate(x: float, bx: float, params: AlgParams, data: InputData,
+                 h0: Callable[[float], float], r: float) -> float:
+    b = lambda _: bx  # bandwidth
+    kx = kx_factory(mu=params.mu, x=x, bandwidth=b, r=r)
+    ln = ln_factory(data)
+    integr_x = np.arange(0, 1, .2)
+    integr_vx = [(kx(y) ** 2 * h0(abs(x - bx * y)) / (1 - ln(x - bx * y))) for y in integr_x]  # TODO remove abs, [-1;1]
+    vx = 1 / (data.n * bx) * trapezoid(integr_vx, integr_x)
+
+    beta_x = trapezoid([h0(abs(x - bx * y)) * kx(y) for y in integr_x], integr_x) - h0(x)  # TODO remove abs
+
+    return vx + beta_x ** 2
+
+
+def update_b(params: AlgParams, data: InputData, h0: Callable[[float], float],
+             b1: float, b2: float, r: float) -> Callable[[float], float]:
+    mse_mtx = np.zeros((params.m1, params.l))
+    grid_x = np.linspace(0, r, params.m1)
+    grid_b = np.linspace(b1, b2, params.l)
+
+    for i_x in range(params.m1):
+        for i_b in range(params.l):
+            mse_mtx[i_x, i_b] = mse_estimate(x=grid_x[i_x], bx=grid_b[i_b], params=params, data=data, h0=h0, r=r)
+
+    opt_b_indices = np.argmin(mse_mtx, axis=1)
+    opt_b = [grid_b[i_b] for i_b in opt_b_indices]
+    delta_x = grid_x[1]
+
+    def b(x: float) -> float:
+        assert 0 <= x <= r, f"x should be in [0;r], r={r}; but given x={x}"
+        idx_x = int(x / delta_x)
+        return opt_b[idx_x]
+
+    return b
+
+
+def h_estimate(params: AlgParams, data: InputData, coarse_est: bool = False) -> Callable[[float], float]:
     """
     hazard rate estimate with varying kernel and bandwidth
     """
@@ -95,9 +131,13 @@ def h_estimate(params: AlgParams, data: InputData) -> Callable[[float], float]:
     n_uncensored = np.sum(data.ind)
     b0 = lambda x: r / (8 * n_uncensored ** (1 / 5))  # recommended initial bandwidth
     h0 = estimate_h(params, data, b0, r)
-    return h0  # TODO return better estimate; ? flag to return h0, too
-    # b1 = 2 * b0(0) / 3  # b1, b2 - boundaries for optimal bandwidth search
-    # b2 = 4 * b0(0)
+    if coarse_est:
+        return h0
+    b1 = 2 * b0(0) / 3  # b1, b2 - boundaries for optimal bandwidth search
+    b2 = 4 * b0(0)
+    b = update_b(params, data, h0=h0, b1=b1, b2=b2, r=r)
+    # TODO calculate even finer b
+    return estimate_h(params, data, b, r)
 
 
 def main():

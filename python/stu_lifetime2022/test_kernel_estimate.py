@@ -13,7 +13,7 @@ def generate_input() -> Tuple[InputData, AlgParams]:
         x=np.random.standard_exponential(data_len),
         ind=np.ones(data_len)  # all not censored
     )
-    params = AlgParams(mu=1, m1=20, l=10, m2=30)
+    params = AlgParams(mu=1, m1=5, l=4, m2=3)
     return data, params
 
 
