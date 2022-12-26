@@ -5,7 +5,7 @@ import numpy as np
 
 
 def kb_plus(mu: int, q: float, x: float) -> float:
-    assert -1 <= q <= 1, f"`q` should be in [-1; 1], but {q} is passed"
+    # assert -1 <= q <= 1, f"`q` should be in [-1; 1], but {q} is passed" # TODO return assert?
 
     if mu == 0:
         return (2 / (1 + q) ** 3) * (3 * (1 - q) * x + 2 * (1 - q + q ** 2))
@@ -40,20 +40,34 @@ def kx_factory(mu: int, x: float,
 @dataclass
 class AlgParams:
     mu: int  # kernel parameter (possible values: 0, 1, 2, 3)
+    m1: int  # number of points in bandwidth minimization grid
+    m2: int  # number of points in final hazard rate estimation grid
 
 
 @dataclass
 class InputData:
     x: np.array  # one-dimensional time data
-    ind: np.array  # 1 = not censored, 0 = censored
+    ind: np.array  # 1 = not censored, 0 = censored (delta_i in equation 2.1)
+
+    @property
+    def n(self):
+        return len(self.x)
 
 
 def estimate_h(params: AlgParams, data: InputData,
                bandwidth: Callable[[float], float], r: float) -> Callable[[float], float]:
     """
-    An iteration of hazard rate estimation. Given previous bandwidth estimation and right boundary, provides a new h(t)
+    Given bandwidth estimation, right boundary and data, constructs kernels and provides h(t) (equation 2.2)
     """
-    pass # TODO
+
+    def h(x: float) -> float:
+        sum_kx: float = 0
+        kx = kx_factory(params.mu, x=x, bandwidth=bandwidth, r=r)
+        for i, (xi, ind_i) in enumerate(zip(data.x, data.ind)):
+            sum_kx += kx((x - xi) / bandwidth(x)) * ind_i / (data.n - i + 1)
+        return sum_kx / bandwidth(x)
+
+    return h
 
 
 def h_estimate(params: AlgParams, data: InputData) -> Callable[[float], float]:
