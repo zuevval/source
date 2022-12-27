@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Union
 from scipy.integrate import quad, trapezoid
 
 import numpy as np
@@ -88,7 +88,7 @@ def ln_factory(data: InputData) -> Callable[[float], float]:
 
 
 def mse_estimate(x: float, bx: float, params: AlgParams, data: InputData,
-                 h0: Callable[[float], float], r: float) -> float:
+                 h0: Callable[[float], float], r: float, ret_dict: False) -> Union[float, dict]:
     b = lambda _: bx  # bandwidth
     kx = kx_factory(mu=params.mu, x=x, bandwidth=b, r=r)
     ln = ln_factory(data)
@@ -97,19 +97,27 @@ def mse_estimate(x: float, bx: float, params: AlgParams, data: InputData,
     vx = 1 / (data.n * bx) * trapezoid(integr_vx, integr_x)
 
     beta_x = trapezoid([h0(abs(x - bx * y)) * kx(y) for y in integr_x], integr_x) - h0(x)  # TODO remove abs
-
-    return vx + beta_x ** 2
+    mse_est = vx + beta_x ** 2
+    if ret_dict:
+        return {"mse_est": mse_est, "vx": vx, "beta_x": beta_x}
+    return mse_est
 
 
 def update_b(params: AlgParams, data: InputData, h0: Callable[[float], float],
-             b1: float, b2: float, r: float) -> Callable[[float], float]:
+             b1: float, b2: float, r: float, ret_dict: bool = False) -> Union[Callable[[float], float], dict]:
     mse_mtx = np.zeros((params.m1, params.l))
+    vx_mtx, betax_mtx = mse_mtx.copy(), mse_mtx.copy()
     grid_x = np.linspace(0, r, params.m1)
     grid_b = np.linspace(b1, b2, params.l)
 
     for i_x in range(params.m1):
         for i_b in range(params.l):
-            mse_mtx[i_x, i_b] = mse_estimate(x=grid_x[i_x], bx=grid_b[i_b], params=params, data=data, h0=h0, r=r)
+            mse_res = mse_estimate(x=grid_x[i_x], bx=grid_b[i_b], params=params,
+                                   data=data, h0=h0, r=r, ret_dict=ret_dict)
+            mse_mtx[i_x, i_b] = mse_res["mse_est"] if ret_dict else mse_res
+            if ret_dict:
+                vx_mtx[i_x, i_b] = mse_res["vx"]
+                betax_mtx[i_x, i_b] = mse_res["beta_x"]
 
     opt_b_indices = np.argmin(mse_mtx, axis=1)
     opt_b = [grid_b[i_b] for i_b in opt_b_indices]
@@ -120,10 +128,16 @@ def update_b(params: AlgParams, data: InputData, h0: Callable[[float], float],
         idx_x = int(x / delta_x)
         return opt_b[idx_x]
 
+    if ret_dict:
+        opt_vx = [vxi[i_b] for vxi, i_b in zip(vx_mtx, opt_b_indices)]
+        opt_beta = [beta_i[i_b] for beta_i, i_b in zip(betax_mtx, opt_b_indices)]
+        return {"b": b, "x": grid_x, "vx": opt_vx, "beta": opt_beta}
+
     return b
 
 
-def h_estimate(params: AlgParams, data: InputData, coarse_est: bool = False) -> Callable[[float], float]:
+def h_estimate(params: AlgParams, data: InputData, coarse_est: bool = False,
+               ret_dict: bool = False) -> Union[Callable[[float], float], dict]:
     """
     hazard rate estimate with varying kernel and bandwidth
     """
@@ -135,9 +149,17 @@ def h_estimate(params: AlgParams, data: InputData, coarse_est: bool = False) -> 
         return h0
     b1 = 2 * b0(0) / 3  # b1, b2 - boundaries for optimal bandwidth search
     b2 = 4 * b0(0)
-    b = update_b(params, data, h0=h0, b1=b1, b2=b2, r=r)
+    b_result = update_b(params, data, h0=h0, b1=b1, b2=b2, r=r, ret_dict=ret_dict)
+    b = b_result if not ret_dict else b_result["b"]
     # TODO calculate even finer b
-    return estimate_h(params, data, b, r)
+    h_est = estimate_h(params, data, b, r)
+    if ret_dict:
+        return {
+            "h_est": h_est,
+            "h_coarse": h0,
+            **b_result
+        }
+    return h_est
 
 
 def main():
