@@ -12,12 +12,11 @@ library(gdsfmt) # internal R format for genetic data
 library(SNPRelate)
 library(vcfR)
 library(HardyWeinberg)
+setwd(here::here("r/stats2022fall/VAR_1")) # TODO not when HTML generated
 ```
 
 Converting VCF to GDS:
 ```{r}
-setwd(here::here("r/stats2022fall/VAR_1")) # TODO not when HTML generated
-
 vcf.fn <- "genotype1.vcf.gz"
 pht.fn <- "phenotype_1.txt"
 gds.fn <- "DATA.gds"
@@ -73,3 +72,137 @@ is.na(sample.annot$phenotype) %>% sum
 ```
 ## 4. Охарактеризовать имеющиеся генетические данные. Вычислить для каждого генотипа: частоту минороной аллели (MAF); коэффициент гетерозиготности; процент генотипированных образцов (call rate).
 
+```{r}
+# what's inside `genotype`?
+cat("number of samples:", nrow(genotype))
+cat("number of SNPs:", ncol(genotype))
+genotype[1:3, 1:10]
+sum(genotype == 3) # >40 000
+# 0 <=> no SNP,  1 <=> SNP in one allele, 2 <=> SNP in both alleles, 3 <=> missing value
+
+genotype_with_na <- genotype
+genotype_with_na[genotype == 3] <- NA
+genotype_observations <- colSums(!is.na(genotype_with_na))
+maf <- 1 - (colSums(genotype_with_na, na.rm = T) / 2) / genotype_observations
+# maf <- lapply(maf, function (x) if(x <= .5) x else 1 - x) %>% unlist
+head(maf)
+```
+
+Heterozygosity
+
+```{r}
+heterozygocity <- colSums(genotype == 1) / colSums(genotype, na.rm = T) # this is probably correct
+expected.heterozygocity <- 2 * maf * (1 - maf)
+
+head(heterozygocity)
+head(expected.heterozygocity)
+hist(heterozygocity)
+hist(expected.heterozygocity)
+hist(expected.heterozygocity - heterozygocity)
+
+```
+
+Call rate
+
+```{r}
+cr <- genotype_observations / nrow(genotype)
+min(cr)
+```
+
+## 5. Провести исследование качества данных для поиска генетических ассоциаций. Отфильтровать данные, не удовлетворяющие стандартам качества.
+
+Использовать фильтры:
+- число пропущенных значений наблюдаемой переменной > 2%
+- число негенотипированных индивидов > 5%
+- MAF < 0.05
+- p-значение теста на проверку равновесия Харди–Вайнберга (pv < 10^{−5} в контрольной группе
+- pv < 10^{−10} в группе заражённых
+
+```{r}
+min.callrate <- .95 # minimum fraction of observations per SNP
+min.genotypedSNP <- .98 # minimum fraction of genotyped SNPs per observation
+min.maf <- .05 # minimum MAF per SNP
+
+rowFilter <- (cr < min.callrate) & (maf > min.maf)
+genotype.colCounts <- colSums(!is.na(genotype_with_na))
+colFilter <- genotype.colCounts < min.genotypedSNP
+
+sum(rowFilter) # 658
+sum(colFilter) # 0
+```
+HWE test
+```{r}
+
+create_freq_mtx <- function(phenotype_value = ? float) {
+  gen.subset <- genotype[sample.annot$phenotype == phenotype_value, ]
+  ant.subset.df <- data.frame(AA = colSums(gen.subset == 0), AB = colSums(gen.subset == 1), BB = colSums(gen.subset == 2))
+  return(as.matrix(ant.subset.df))
+} -> matrix
+
+hwe.subset.f <- function (i = ? integer, subset.mtx = ? matrix){
+  HWExact(subset.mtx[i,], verbose=F)$pval
+}
+
+control.freq <- create_freq_mtx(1)
+case.freq <- create_freq_mtx(2)
+
+case.hwe <- NULL
+control.hwe <- NULL
+
+for (i in seq_along(chr)){
+  case.hwe <- c(case.hwe, hwe.subset.f(i, case.freq))
+  control.hwe <- c(control.hwe, hwe.subset.f(i, control.freq))
+}
+# save.image(file="5a.RData") # saving checkpoint
+```
+
+Putting together all filters:
+```{r}
+# don't forget to load libraries and change path!
+load(file="5a.RData") # restoring from checkpoint
+
+hweFilter <- case.hwe < 10^(-10) & control.hwe < 10^(-5)
+allFilter <- !(rowFilter & hweFilter)
+
+snp.id <- snp.id[allFilter]
+chr <- chr[allFilter]
+pos <- pos[allFilter]
+allele <- allele[allFilter]
+genotype <- genotype[, allFilter]
+
+```
+
+## 6. Провести анализ главных компонент. При наличии в популяции нетипичных образцов отфильтровать их. Интерпретировать результат
+
+```{r}
+```
+
+## 7. Провести проверку родственных связей. Отфильтровать (при наличии) родственные образцы
+
+```{r}
+```
+
+## 8. Составить отчет о проверке качества данных с указанием составов удаленных образцов или генетических маркеров на каждом из этапов, а также характеристик полученного набора данных для статистического анализа
+
+```{r}
+```
+
+## 9. Провести поиск генетических ассоциаций классическими методами (критерий χ^2/Фишера) при кодоминантной, доминантной и рецессивной альтернативах, а также с использованием аллельного подхода для всех индивидов и только для женской популяции. Построить диаграммы Манхэттена
+
+```{r}
+```
+
+## 10. Провести поиск генетических ассоциаций с использованием обобщенной линейной модели логистической регрессии при кодоминантной, доминантной и рецессивной альтернативах, а также с использованием аллельного подхода. Использовать в качестве ковариаты главную компоненту (при необходимости две главных компоненты). Построить диаграммы Манхэттена
+
+```{r}
+```
+
+## 11. Сравнить результаты, полученные классическими методами и с помощью обобщенной линейной модели в присутствии ковариаты
+
+```{r}
+```
+
+## 12. Интерпретировать полученные результаты. На уровне значимости 0.1 найти значимые ассоциации по методу Хольма для каждого множественного теста. Помимо значимых проанализировать топ-10 наиболее значимых ассоциаций.
+
+```{r}
+```
