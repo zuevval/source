@@ -1,0 +1,82 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+
+Oct 20, 2022 \\
+
+Директива \texttt{ordered}
+
+Директива \texttt{critical}: 
+
+\begin{verbatim}
+#pragma omp critical [name]
+\end{verbatim}
+
+Эта область кода выполняется всегда одним потоком.
+Несколько одинаковых [name] схлопываются в одну область.
+
+\begin{verbatim}
+#pragma omp atomic
+\end{verbatim}
+
+\begin{verbatim}
+#pragma omp parallel
+{
+	#pragma omp atomic
+	count++;
+}
+printf(counter);
+\end{verbatim}
+
+Это атомарная операция, то есть в каждый момент управление только у одной нити.
+
+\subsection{Замки}
+
+\begin{enumerate}[noitemsep]
+	\item Простой
+	
+	\begin{verbatim}
+		void omp_init_lock(omp_lock_t * l);
+		void omp_destroy_lock(omp_lock_t * l);
+		int omp_test_lock // 1 if we can take the lock, 0 if we cannot
+	\end{verbatim}
+	
+	\item Nested -- вложенный: у него не один оборот, а несколько оборотов
+	
+	\begin{verbatim}
+		void omp_init_nest_lock (l);
+		void omp_set_nest_lock
+		void omp_set_unnest_lock
+		void omp_destroy_nest_lock (l);
+	\end{verbatim}
+
+	Пример использования: ?? честно говоря, не до конца понял
+	
+\end{enumerate}
+
+Замок защищает некую область памяти или какой-то другой участок кода.
+Замок нужно открыть (если он наш) или захватить(закрыть), если мы начинаем с ним работать.
+
+\subsection{Ещё о синхронизации}
+
+\begin{verbatim}
+#pragma omp flush [list of variables]
+\end{verbatim}
+Если есть какие-то буферы, в которых что-то ожидает, все операции завершаются и буферы сбрасываются.
+Без списка - это относится ко всем переменным.
+
+Сброс буферов происходит неявно по завершении всех параллельных секций. % Аня поняла, как пользоваться flush!
+
+\subsection{Параметры}
+
+\begin{verbatim}
+	OMP_NUM_THREADS
+	OMP_STACKSIZE // size of memory for processes declared as workers
+	OMP_WAIT_POLICY // 
+	OMP_THREAD_LIMIT // max number of threads for this program
+	OMP_NESTED // permits nested OMP sections
+\end{verbatim}
+
+Как эти параметры реально влияют на процессы -- зависит от реализации, от ОС.
+
+
+\end{document}

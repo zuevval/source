@@ -1,0 +1,95 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+
+OpenMP используется широко (даже шире, чем MPI), ибо работает в привычных компьютерах с общей памятью.
+
+Никакой пересылки в OpenMP не требуется! Есть общая память, к которой все обращаются.
+
+Синхронизация -- есть явная; иногда требуется неявная.
+
+Начинается исполнение с одной нити (которая называется master).
+При входе в параллельную область возникают дополнительные нити.
+
+Вложенные параллельные области -- общий враг для всех!
+Если используем OpenMP, и ещё библиотеку, которая использует OpenMP -- можем создать больше потоков, чем хотим.
+
+\begin{verbatim}
+#pragma omp parallel for shared(n, a, b, c)
+for (int i=0; i<n; i++)
+    c[i] = a[i] + b[i]
+\end{verbatim}
+
+Два основных класса переменных:
+
+\begin{enumerate}[noitemsep]
+	\item shared (разделяемые) -- по умолчанию (все нити видят одну и ту же переменную)
+	\item private -- своя копия для каждой нити
+\end{enumerate}
+
+В примере цикла выше $ n, a, b, c $ -- разделённые переменные (это можно было и не указывать явно), $ i $ -- локальная. 
+
+Можно в \texttt{\#pragma omp parallel} использовать \texttt{if (condition)} (будет параллелиться, если условие верно).
+
+\subsubsection{Редукция в OpenMP}
+
+\begin{verbatim}
+reduction (operator: list of common variables)
+
+operator in {-, +, *, -, &, |, ^, &&, ||}
+\end{verbatim}
+
+Пример:
+
+\begin{verbatim}
+int a[100];
+int sum = 0, k=4;
+
+#pragma omp reduction(+: sum)
+for (int i=0; i<100; i+k)
+    sum += a[i];
+\end{verbatim}
+
+\begin{verbatim}
+#pragma omp reduction(+: count)
+{
+	count++;
+	printf("Count value: %i", count);
+}
+\end{verbatim}
+
+\subsubsection{Другие функции OMP}
+
+\begin{verbatim}
+double omp_get_wtime(void); // wallclock time in seconds from some moment in the past
+double omp_get_wtick(void); // timer resolution
+\end{verbatim}
+
+Можем получать и задавать максимальное число потоков.
+Можно запрещать или разрешать вложенные области.
+
+\subsubsection{Директива master}
+
+\begin{verbatim}
+
+#pragma omp parallel private(n)
+{
+	#pragma omp master n=2
+	...TODO...
+}
+\end{verbatim}
+
+\subsubsection{ Сложные циклы }
+
+\texttt{collapse(n)} -- этот модификатор позволяет распараллелить несколько последовательных циклов.
+
+\texttt{ordered} -- исполнение итераций в том порядке, в котором они идут в цикле.
+
+Ограничения распараллеливания циклов/блоков: нельзя использовать параллельный выход (break)
+
+\texttt{scheduled} -- динамическое распрееление итераций
+
+\texttt{guided} -- ещё умнее
+
+Быстрее всего работает 
+
+\end{document}

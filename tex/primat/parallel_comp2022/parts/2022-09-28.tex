@@ -1,0 +1,62 @@
+\documentclass[main.tex]{subfiles}
+\begin{document}
+
+В MPI реализованы логические операции (И, ИЛИ и так далее).
+
+\begin{verbatim}
+
+int MPI_Allreduce(void *buf, void *result, int count, MPI_Datatype datatype, ...
+)
+
+\end{verbatim}
+
+Частичная редукция (сканирование - \texttt{MPI\_Scan}): есть буфер, который используем.
+В буфере результата операции будет содержаться результат операции, который накапливается.
+
+Векторная операция распределения данных;
+векторная операция 
+
+Синхронизация: 
+
+\begin{verbatim}
+	
+int MPI_Barrier(MPI_Comm comm)
+	
+\end{verbatim}
+
+Простейшая форма синхронизации.
+Чтобы программа двигалась дальше, нужно, чтобы все процессы из \texttt{comm} дошли до этого места (или завершились).
+
+\subsection{ Неблокирующие коммуникационные операции типа точка-точка }
+
+\begin{verbatim}
+	int MPI_Isend(void *buf, int count, MPI_Datatype datatype, 
+	...)
+\end{verbatim}
+
+Вызовы формируют запрос на выполнение операции обмена и связывают его с идентификатором операции \texttt{request}.
+
+Функции для проверок есть разные.
+
+\begin{enumerate}
+	\item Проверка завершения всех обменов (all)
+	\item Проверка завершения любого обмена из нескольких (any)
+	\item Проверка завершения заданного обмена из нескольких (some)
+\end{enumerate}
+
+Функция \texttt{ int MPI\_Wait(MPI\_Request *request, MPI\_Status *status) }:
+успешное выполнение означает, что данные, запрос на передачу которых мы дали в качестве аргумента, успешно ушли.
+
+\begin{verbatim}
+int MPI_Waitall(int count, MPI_Request requests[], MPI_Status statuses[])
+{
+}
+\end{verbatim}
+
+<TODO some> \\
+
+Иногда возникает  необходимость какой-то однотипный запрос обработать несколко раз.
+
+Создаём в среде MPI некий ярлык, 
+
+\end{document}
