@@ -34,12 +34,25 @@ for (s in unique(dat$sex)) {
 }
 
 # for different ages
-for (a in levels(dat$age)) {
+x.max <- max(dat$obs)
+a.colors <- c("red", "blue", "green", "black")
+plot(1, type = "n", xlim = c(0, x.max), ylim = c(0, 1))
+for (a in 1:4) {
+  a <- as.character(a)
   a.dat <- dat %>% filter(age == a)
   a.km <- survfit(Surv(a.dat$obs, a.dat$indi) ~ 1)
-  plot(a.km, ylab = paste("Kaplan-Meier for age ==", a))
+  a.time <- NULL
+  a.surv <- NULL
+  for (t in a.km$time) a.time <- c(a.time, t, t)
+  a.time <- a.time[1:(length(a.time) - 1)]
+  for (surv in a.km$surv) a.surv <- c(a.surv, surv, surv)
+  a.surv <- a.surv[2:length(a.surv)]
+  lines(a.time, a.surv, col = a.colors[as.integer(a)])
+  # plot(a.km, ylab = paste("Kaplan-Meier for age ==", a))
   print(paste("age:", a, "non-censored:", sum(a.dat$indi) / nrow(a.dat)))
 }
+title("Kaplan-Meier estimates for different ages")
+legend(4000, 1, legend = c("age=1", "age=2", "age=3", "age=4"), col = a.colors, lty = 1:2, cex = .8)
 
 # -----------------
 # 2. Wilcoxon test
@@ -51,14 +64,22 @@ survdiff(surv.dat ~ dat$sex, rho = 1) # rho=1 <=> Peto&Peto modification of Wilc
 # 3. Cox model
 # -------------
 
-cox.general <- coxph(surv.dat ~ dat$sex * dat$age)
-cox.gender <- coxph(surv.dat ~ dat$sex)
+cox.general <- coxph(Surv(obs, indi) ~ sex * age, data = dat)
+cox.gender <- coxph(Surv(obs, indi) ~ sex, data = dat)
 cox.age <- coxph(surv.dat ~ dat$age)
 cox.null <- coxph(surv.dat ~ 1)
 
 anova(cox.general, cox.null)
 anova(cox.gender, cox.null)
 anova(cox.age, cox.null)
+
+library(survival)
+library(survminer)
+library(ggplot2)
+
+ggsurvplot(survfit(cox.general, data = dat), conf.int = F)
+ggsurvplot(survfit(cox.null, data = dat), conf.int = F)
+ggsurvplot(survfit(cox.age, data = dat), conf.int = F)
 
 # ----------------------
 # 4. Exponential model
@@ -72,10 +93,10 @@ lines(1:2000, pexp(1:2000, overall_non_censored, lower.tail = F), col = "green")
 # TODO построить графики исходя из модели Кокса
 # TODO построить на одном полотне все графики для age
 
-for (a in levels(dat$age)) {
-  a.dat <- dat %>% filter(age == a)
-  a.km <- survfit(Surv(a.dat$obs, a.dat$indi) ~ 1)
-  a.theta <- sum(a.dat$indi) / nrow(a.dat)
-  plot(a.km, ylab = paste("Kaplan-Meier for age ==", a))
-  lines(1:2000, pexp(1:2000, a.theta, lower.tail = F), col="green")
-}
+# for (a in levels(dat$age)) {
+#   a.dat <- dat %>% filter(age == a)
+#   a.km <- survfit(Surv(a.dat$obs, a.dat$indi) ~ 1)
+#   a.theta <- sum(a.dat$indi) / nrow(a.dat)
+#   plot(a.km, ylab = paste("Kaplan-Meier for age ==", a))
+#   lines(1:2000, pexp(1:2000, a.theta, lower.tail = F), col = "green")
+# }

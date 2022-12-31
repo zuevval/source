@@ -123,24 +123,24 @@ min.callrate <- .95 # minimum fraction of observations per SNP
 min.genotypedSNP <- .98 # minimum fraction of genotyped SNPs per observation
 min.maf <- .05 # minimum MAF per SNP
 
-rowFilter <- (cr < min.callrate) & (maf > min.maf)
-genotype.colCounts <- colSums(!is.na(genotype_with_na))
-colFilter <- genotype.colCounts < min.genotypedSNP
+rowFilter <- (cr < min.callrate) & (maf > min.maf) # should be colFilter, but checkpoint is saved...
+genotype.rowCounts <- rowSums(!is.na(genotype_with_na))
+individFilter <- genotype.rowCounts < min.genotypedSNP
 
 sum(rowFilter) # 658
-sum(colFilter) # 0
+sum(individFilter) # 0
 ```
 HWE test
 ```{r}
 
 create_freq_mtx <- function(phenotype_value = ? float) {
-  gen.subset <- genotype[sample.annot$phenotype == phenotype_value, ]
+  gen.subset <- genotype[sample.annot$phenotype == phenotype_value,]
   ant.subset.df <- data.frame(AA = colSums(gen.subset == 0), AB = colSums(gen.subset == 1), BB = colSums(gen.subset == 2))
   return(as.matrix(ant.subset.df))
 } -> matrix
 
-hwe.subset.f <- function (i = ? integer, subset.mtx = ? matrix){
-  HWExact(subset.mtx[i,], verbose=F)$pval
+hwe.subset.f <- function(i = ? integer, subset.mtx = ? matrix) {
+  HWExact(subset.mtx[i,], verbose = F)$pval
 }
 
 control.freq <- create_freq_mtx(1)
@@ -149,7 +149,7 @@ case.freq <- create_freq_mtx(2)
 case.hwe <- NULL
 control.hwe <- NULL
 
-for (i in seq_along(chr)){
+for (i in seq_along(chr)) {
   case.hwe <- c(case.hwe, hwe.subset.f(i, case.freq))
   control.hwe <- c(control.hwe, hwe.subset.f(i, control.freq))
 }
@@ -159,10 +159,10 @@ for (i in seq_along(chr)){
 Putting together all filters:
 ```{r}
 # don't forget to load libraries and change path!
-load(file="5a.RData") # restoring from checkpoint
+load(file = "5a.RData") # restoring from checkpoint
 
 hweFilter <- case.hwe < 10^(-10) & control.hwe < 10^(-5)
-allFilter <- !(rowFilter & hweFilter)
+allFilter <- !(rowFilter | hweFilter)
 
 snp.id <- snp.id[allFilter]
 chr <- chr[allFilter]
@@ -174,22 +174,205 @@ genotype <- genotype[, allFilter]
 
 ## 6. Провести анализ главных компонент. При наличии в популяции нетипичных образцов отфильтровать их. Интерпретировать результат
 
+Separate GDS file for PCA:
 ```{r}
+dat.f <- createfn.gds("DATA_PCA.gds")
+add.gdsn(dat.f, "sample.id", val = sample.id, compress = "ZIP", closezip = TRUE)
+add.gdsn(dat.f, "snp.id", val = snp.id, compress = "ZIP", closezip = TRUE)
+add.gdsn(dat.f, "snp.chromosome", val = chr, compress = "ZIP", closezip = TRUE)
+add.gdsn(dat.f, "snp.position", val = pos, compress = "ZIP", closezip = TRUE)
+add.gdsn(dat.f, "snp.allele", val = allele, compress = "ZIP", closezip = TRUE)
+add.gdsn(dat.f, "genotype", val = genotype, compress = "ZIP", closezip = TRUE, storage = "bit2", replace = TRUE)
+add.gdsn(dat.f, "sample.annot", val = sample.annot, compress = "ZIP", closezip = TRUE)
+put.attr.gdsn(index.gdsn(dat.f, "genotype"), "sample.order")
+closefn.gds(dat.f)
+```
+
+```{r}
+dat.f <- snpgdsOpen("DATA_PCA.gds")
+ftr <- snpgdsLDpruning(dat.f) # filtering by LD (linkage disequilibrium)
+ftr.id <- unlist(ftr)
+q <- snpgdsPCA(dat.f, snp.id = ftr.id)
+qq <- snpgdsPCA(dat.f)
+id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
+ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
+snpgdsClose(dat.f)
+```
+Checkpoint:
+```{r}
+# save.image(file="6a_pca.RData")
+load("6a_pca.RData")
+```
+First two components (color <=> gender: blue <=> female):
+```{r}
+vec <- q$eigenvect
+x <- vec[, 1]
+y <- vec[, 2]
+
+plot(x, y, "n")
+points(x[ant$sex == "F"], y[ant$sex == "F"], col = "blue")
+points(x[ant$sex == "M"], y[ant$sex == "M"], col = "red")
+
+```
+First two components + case/control:
+```{r}
+smp <- ant$phenotype
+clr <- c("blue", "red")
+smp.l <- c("Controls", "Cases")
+pc.prt <- q$varprop * 100
+lbs <- paste0("PC", 1:2, "(", format(pc.prt[1:2], digits = 2), "%)")
+
+plot(x, y, "n", xlab = lbs[1], ylab = lbs[2])
+points(x[ant$phenotype == 1], y[ant$phenotype == 1], col = "blue")
+points(x[ant$phenotype == 2], y[ant$phenotype == 2], col = "red")
+legend("topright", legend = smp.l, col = clr, pch = 1, cex = 1)
+
+```
+Filtering:
+```{r}
+pcaFilter <- (x < .2) & (y > -.1)
+
+pht <- pht[pcaFilter,]
+
+# dat.f <- createfn.gds("DATA_PCA2.gds")
+# add.gdsn(dat.f, "sample.id", val = id[pcaFilter], compress = "ZIP", closezip = TRUE)
+# add.gdsn(dat.f, "snp.id", val = snp.id, compress = "ZIP", closezip = TRUE)
+# add.gdsn(dat.f, "snp.chromosome", val = chr, compress = "ZIP", closezip = TRUE)
+# add.gdsn(dat.f, "snp.position", val = pos, compress = "ZIP", closezip = TRUE)
+# add.gdsn(dat.f, "snp.allele", val = allele, compress = "ZIP", closezip = TRUE)
+# add.gdsn(dat.f, "genotype", val = genotype[pcaFilter,], compress = "ZIP", closezip = TRUE, storage = "bit2", replace = TRUE)
+# add.gdsn(dat.f, "sample.annot", val = ant[pcaFilter,], compress = "ZIP", closezip = TRUE)
+# put.attr.gdsn(index.gdsn(dat.f, "genotype"), "sample.order")
+# closefn.gds(dat.f)
+```
+
+PCA again:
+```{r}
+# TODO make a function? (code repetition)
+dat.f <- snpgdsOpen("DATA_PCA2.gds")
+ftr <- snpgdsLDpruning(dat.f)
+ftr.id <- unlist(ftr)
+q <- snpgdsPCA(dat.f, snp.id = ftr.id)
+qq <- snpgdsPCA(dat.f)
+id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
+ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
+snpgdsClose(dat.f)
+# pair
+vec <- q$eigenvect
+x <- vec[, 1]
+y <- vec[, 2]
+```
+```{r}
+plot(x[ant$sex == "F"], y[ant$sex == "F"], col = "blue")
+plot(x[ant$sex == "M"], y[ant$sex == "M"], col = "red")
 ```
 
 ## 7. Провести проверку родственных связей. Отфильтровать (при наличии) родственные образцы
 
 ```{r}
+# TODO check; 100 markers? kinship? etc? maybe duplicates?
+dat.f <- snpgdsOpen("DATA_PCA2.gds")
+id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
+snp <- read.gdsn(index.gdsn(dat.f, "snp.id"))
+chr <- read.gdsn(index.gdsn(dat.f, "snp.chromosome"))
+pos <- read.gdsn(index.gdsn(dat.f, "snp.position"))
+all <- read.gdsn(index.gdsn(dat.f, "snp.allele"))
+gen <- read.gdsn(index.gdsn(dat.f, "genotype"))
+ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
+
+snp.subset <- snpgdsLDpruning(dat.f)
+snpset <- as.character(sample(unlist(snp.subset), 600))
+mibd <- snpgdsIBDMLE(dat.f, snp.id = snpset, kinship = T)
+snpgdsClose(dat.f)
 ```
+Results:
+```{r}
+d1 <- snpgdsIBDSelection(mibd, kinship.cutoff = 1 / 8)
+dd1 <- d1[order(d1$kinship, decreasing = TRUE),]
+dim(dd1) # 0, 6
+
+```
+
+Checkpoint:
+```{r}
+# save.image(file="7_ibd.RData")
+load("7_ibd.RData")
+```
+
 
 ## 8. Составить отчет о проверке качества данных с указанием составов удаленных образцов или генетических маркеров на каждом из этапов, а также характеристик полученного набора данных для статистического анализа
 
-```{r}
-```
+Итак:
+
+- Изначальные данные: 733 человека (287 женщин + 51 мужчин контрольных, 395 женщин с ВИЧ), 182.558 SNP
+- по CallRate (>0.95) и MAF (>0.05) отфильтровали суммарно 658 SNP (пункт 5)
+- по проценту генотипированных SNP (<98%) не отфильтровали никого из индивидов (все качественные)
+- по HWE (< 10^{-10} в контрольной группе, < 10^{-5} в исследуемой) прошли все SNP
+- по LD для PCA отобраны 19.440 SNP, остальные считаются зависимыми
+- по результатам анализа главных компонент отфильтрованы 6 образцов (4 контрольных, 2 из исследуемой группы)
+- по результатам анализа родственных связей (kinship > 1/8) родственников не выявили
+
+Итого осталось 727 индивидов, 181.900 SNP (но это с учётом неравновесно сцепленных с фенотипом)
 
 ## 9. Провести поиск генетических ассоциаций классическими методами (критерий χ^2/Фишера) при кодоминантной, доминантной и рецессивной альтернативах, а также с использованием аллельного подхода для всех индивидов и только для женской популяции. Построить диаграммы Манхэттена
 
 ```{r}
+pth.dk <- "DATA_PCA2.gds"
+tests <- data.frame(test = NULL, snp = NULL, pv = NULL, stt = NULL)
+for (alt in c("cd", "d", "r", "a")) {
+  dat.f <- snpgdsOpen(pth.dk, readonly = TRUE)
+  pht <- read.gdsn(index.gdsn(dat.f, "sample.annot"))$phenotype
+  gen <- read.gdsn(index.gdsn(dat.f, "genotype"))
+  snpgdsClose(dat.f)
+  dg <- dim(gen)
+  num.p <- dg[1]
+  num.g <- dg[2]
+  if (alt == "d") {
+    gen <- (1 - (gen == 0)) + 2 * (gen == 3) }
+  if (alt == "r") {
+    gen <- 1 * (gen == 2) + 3 * (gen == 3) }
+  if (alt == "a") {
+    pht <- c(pht, pht)
+    num.p2 <- 2 * num.p
+    genotype2 <- matrix(nrow = num.p2, ncol = num.g)
+    genotype2[1:num.p,] <- 1 * (gen == 2 | gen == 1) + 3 * (gen == 3)
+    genotype2[(num.p + 1):num.p2,] <- 1 * (gen == 2) + 3 * (gen == 3)
+    gen <- genotype2
+    rm(genotype2) }
+  pv <- array(dim = num.g)
+  stt <- array(dim = num.g)
+  for (j in 1:num.g) {
+    gg <- gen[, j]
+    gg[gg == 3] <- NA
+    tt <- table(gg, pht)
+    if (min(dim(tt)) >= 2) {
+      if (alt == "cd") {
+        tst <- chisq.test(tt)
+        pv[j] <- tst$p.value
+        ff1 <- !is.na(gg)
+        rho <- cor(gg[ff1], pht[ff1])
+        stt[j] <- (1 + rho) / (1 - rho)
+      } else {
+        tst <- fisher.test(tt)
+        pv[j] <- tst$p.value
+        stt[j] <- tst$estimate
+      }
+    } else {
+      pv[j] <- NA
+      stt[j] <- NA
+    }
+  }
+  test.tj <- data.frame(test = alt, snp = snp, pv = pv, stt = stt)
+  tests <- rbind(tests, test.tj)
+}
+write.table(tests, file = "tests.csv", sep = ",", row.names = FALSE)
+
+```
+
+Checkpoint:
+```{r}
+# save.image(file="8_gwas_tests.RData")
+load("8_gwas_tests.RData")
 ```
 
 ## 10. Провести поиск генетических ассоциаций с использованием обобщенной линейной модели логистической регрессии при кодоминантной, доминантной и рецессивной альтернативах, а также с использованием аллельного подхода. Использовать в качестве ковариаты главную компоненту (при необходимости две главных компоненты). Построить диаграммы Манхэттена

@@ -50,7 +50,7 @@ gen3 <- !is.na(gen2)
 maf <- colSums(gen2, na.rm = TRUE) / colSums(gen3) / 2
 nn <- which(maf > 1 / 2)[1:5]
 #
-htr <- colSums(gen == 1) / colSums(gen3)
+htr <- colSums(gen2 == 1) / colSums(gen3)
 e.htr <- 2 * maf * (1 - maf)
 #
 c(max(htr / e.htr), min(htr / e.htr))
@@ -121,7 +121,7 @@ smp <- ant$phenotype
 clr <- c("blue", "red")
 smp.l <- c("Controls", "Cases")
 pc.prt <- q$varprop * 100
-lbs <- paste("PC", 1:2, "(", format(pc.prt[1:2], digits = 2), "%)", sep = "")
+lbs <- paste0("PC", 1:2, "(", format(pc.prt[1:2], digits = 2), "%)")
 pdf("PCA-2", width = 9, height = 6)
 plot(x, y, "n", xlab = lbs[1], ylab = lbs[2])
 points(x[ant$phenotype == 1], y[ant$phenotype == 1], col = "blue")
@@ -237,6 +237,8 @@ all <- read.gdsn(index.gdsn(dat.f, "snp.allele"))
 gen <- read.gdsn(index.gdsn(dat.f, "genotype"))
 ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
 snpgdsClose(dat.f)
+
+
 # IBD analysis
 dat.f <- snpgdsOpen("DATA_PCA2.gds")
 id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
