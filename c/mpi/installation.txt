@@ -1,0 +1,4 @@
+# OpenMP
+# https://medium.com/@asvetly/clang-openmp-setup-in-macos-dbb0638cc4df
+xcode-select --install
+brew install llvm
