@@ -123,11 +123,15 @@ min.callrate <- .95 # minimum fraction of observations per SNP
 min.genotypedSNP <- .98 # minimum fraction of genotyped SNPs per observation
 min.maf <- .05 # minimum MAF per SNP
 
-rowFilter <- (cr < min.callrate) & (maf > min.maf) # should be colFilter, but checkpoint is saved...
+crFilter <- cr < min.callrate
+mafFilter <- maf < min.maf
+
 genotype.rowCounts <- rowSums(!is.na(genotype_with_na))
 individFilter <- genotype.rowCounts < min.genotypedSNP
 
-sum(rowFilter) # 658
+sum(crFilter) # 815
+sum(mafFilter & !crFilter) # 34479
+sum(mafFilter & crFilter) # 157; 157/34479 [almost equals] 815 / length(cr)
 sum(individFilter) # 0
 ```
 HWE test
@@ -153,7 +157,7 @@ for (i in seq_along(chr)) {
   case.hwe <- c(case.hwe, hwe.subset.f(i, case.freq))
   control.hwe <- c(control.hwe, hwe.subset.f(i, control.freq))
 }
-# save.image(file="5a.RData") # saving checkpoint
+save.image(file="5a.RData") # saving checkpoint
 ```
 
 Putting together all filters:
@@ -161,8 +165,12 @@ Putting together all filters:
 # don't forget to load libraries and change path!
 load(file = "5a.RData") # restoring from checkpoint
 
-hweFilter <- case.hwe < 10^(-10) & control.hwe < 10^(-5)
-allFilter <- !(rowFilter | hweFilter)
+hweCaseFilter <- case.hwe < 10^(-10)
+hweControlFilter <- control.hwe < 10^(-5)
+sum(hweCaseFilter) # 0
+sum(hweControlFilter) # 1
+sum(hweControlFilter & !(mafFilter | crFilter)) # 1
+allFilter <- !(crFilter | mafFilter | hweControlFilter)
 
 snp.id <- snp.id[allFilter]
 chr <- chr[allFilter]
@@ -189,11 +197,11 @@ closefn.gds(dat.f)
 ```
 
 ```{r}
+set.seed(0) # for reproducibility
 dat.f <- snpgdsOpen("DATA_PCA.gds")
 ftr <- snpgdsLDpruning(dat.f) # filtering by LD (linkage disequilibrium)
 ftr.id <- unlist(ftr)
 q <- snpgdsPCA(dat.f, snp.id = ftr.id)
-qq <- snpgdsPCA(dat.f)
 id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
 ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
 snpgdsClose(dat.f)
@@ -208,6 +216,10 @@ First two components (color <=> gender: blue <=> female):
 vec <- q$eigenvect
 x <- vec[, 1]
 y <- vec[, 2]
+z <- vec [, 3]
+
+pairs(data.frame(x=x, y=y, z=z))
+
 
 plot(x, y, "n")
 points(x[ant$sex == "F"], y[ant$sex == "F"], col = "blue")
@@ -230,7 +242,8 @@ legend("topright", legend = smp.l, col = clr, pch = 1, cex = 1)
 ```
 Filtering:
 ```{r}
-pcaFilter <- (x < .2) & (y > -.1)
+pcaFilter <- (x > -.15) & (y < .1) & (z < .1)
+sum(!pcaFilter) # 9
 
 pht <- pht[pcaFilter,]
 
@@ -249,22 +262,26 @@ pht <- pht[pcaFilter,]
 PCA again:
 ```{r}
 # TODO make a function? (code repetition)
+set.seed(0)
 dat.f <- snpgdsOpen("DATA_PCA2.gds")
 ftr <- snpgdsLDpruning(dat.f)
 ftr.id <- unlist(ftr)
 q <- snpgdsPCA(dat.f, snp.id = ftr.id)
-qq <- snpgdsPCA(dat.f)
 id <- read.gdsn(index.gdsn(dat.f, "sample.id"))
 ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
 snpgdsClose(dat.f)
 # pair
 vec <- q$eigenvect
-x <- vec[, 1]
-y <- vec[, 2]
+x2 <- vec[, 1]
+y2 <- vec[, 2]
+z2 <- vec[, 3]
 ```
 ```{r}
-plot(x[ant$sex == "F"], y[ant$sex == "F"], col = "blue")
-plot(x[ant$sex == "M"], y[ant$sex == "M"], col = "red")
+plot(x2, y2, "new")
+points(x2[ant$sex == "F"], y2[ant$sex == "F"], col = "blue")
+points(x2[ant$sex == "M"], y2[ant$sex == "M"], col = "red")
+
+pairs(data.frame(x=x2, y=y2, z=z2))
 ```
 
 ## 7. Провести проверку родственных связей. Отфильтровать (при наличии) родственные образцы
@@ -281,7 +298,7 @@ gen <- read.gdsn(index.gdsn(dat.f, "genotype"))
 ant <- read.gdsn(index.gdsn(dat.f, "sample.annot"))
 
 snp.subset <- snpgdsLDpruning(dat.f)
-snpset <- as.character(sample(unlist(snp.subset), 600))
+snpset <- as.character(sample(unlist(snp.subset), 200)) # ? TODO try 300
 mibd <- snpgdsIBDMLE(dat.f, snp.id = snpset, kinship = T)
 snpgdsClose(dat.f)
 ```
@@ -289,7 +306,7 @@ Results:
 ```{r}
 d1 <- snpgdsIBDSelection(mibd, kinship.cutoff = 1 / 8)
 dd1 <- d1[order(d1$kinship, decreasing = TRUE),]
-dim(dd1) # 0, 6
+dim(dd1) # 220, 6 for N=200
 
 ```
 
