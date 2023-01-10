@@ -2,6 +2,10 @@
 # Created by: vzuev
 # Created on: 14.12.2022
 
+# TODOdone построить графики исходя из модели Кокса
+# TODOdone построить на одном полотне все графики для age
+
+
 library(tidyverse)
 library(survival)
 
@@ -73,13 +77,20 @@ anova(cox.general, cox.null)
 anova(cox.gender, cox.null)
 anova(cox.age, cox.null)
 
+# library(devtools)
+# install_github("kassambara/survminer", ref = "v0.3.0")
+
 library(survival)
 library(survminer)
 library(ggplot2)
 
-ggsurvplot(survfit(cox.general, data = dat), conf.int = F)
-ggsurvplot(survfit(cox.null, data = dat), conf.int = F)
-ggsurvplot(survfit(cox.age, data = dat), conf.int = F)
+cox.plot <- function (cox.fit, ...) ggcoxadjustedcurves(cox.fit, data = dat, individual.curves = T, ...=...)
+
+cox.plot(cox.general, title="Cox model: general")
+cox.plot(cox.age, title="Cox model: age")
+cox.plot(cox.gender, title="Cox model: gender")
+
+cox.general
 
 # ----------------------
 # 4. Exponential model
@@ -90,8 +101,6 @@ overall_non_censored
 plot(km)
 lines(1:2000, pexp(1:2000, overall_non_censored, lower.tail = F), col = "green")
 
-# TODO построить графики исходя из модели Кокса
-# TODO построить на одном полотне все графики для age
 
 # for (a in levels(dat$age)) {
 #   a.dat <- dat %>% filter(age == a)
