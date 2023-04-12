@@ -1,5 +1,6 @@
 #include <omp.h>
 #include <iostream>
+#include <vector>
 
 void testParallel() {
 #pragma  omp parallel default(none) shared(std::cout)
@@ -41,12 +42,28 @@ void testTasksDepend() {
 
 #pragma omp task default(none) shared(std::cout, x)  depend(in: x)
         x++;
-    };
+    }
+}
+
+void testListDependencies() {
+    std::vector v{1, 2, 2, 1};
+#pragma omp parallel default(none) shared(v, std::cout)
+#pragma omp single
+    {
+        for (int i = 0; i < v.size(); ++i) {
+#pragma omp task depend(out: v[i]) default(none) shared(v) firstprivate(i)
+            v[i] *= 5;
+        }
+
+#pragma omp task depend(iterator(j=0:v.size()), in: v[j]) default(none) shared(v, std::cout)
+        std::cout << v[v.size() - 1] << std::endl;
+    }
 }
 
 int main() {
 //    testParallel();  // just prints a mess
 //    testParallelSingle();  // a single print
 //    testTasks(); // prints "car" and "race" in arbitrary order
-    testTasksDepend();  // prints 0; without dependencies specified, prints 0 or 1
+//    testTasksDepend();  // prints 0; without dependencies specified, prints 0 or 1
+    testListDependencies();
 }
