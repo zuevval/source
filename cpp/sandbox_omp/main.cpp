@@ -60,10 +60,38 @@ void testListDependencies() {
     }
 }
 
+void testNestedLoops() {
+    std::vector<std::vector<int>> v{
+            {1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1},
+            {1, 1, 1, 1, 1}
+    };
+#pragma omp parallel default(none) shared(v, std::cout)
+#pragma omp single
+    for (auto i = 1; i < v.size(); ++i) {
+        for (auto j = 1; j < v[i].size() - 1; ++j) {
+#pragma omp task depend(out: v[i][j]) depend(in: v[i][j-1], v[i-1][j-1], v[i-1][j], v[i-1][j+1]) default(none) shared(v) firstprivate(i, j)
+            {
+                v[i][j] += (v[i][j - 1] + v[i - 1][j - 1] + v[i - 1][j] + v[i - 1][j + 1]);
+            }
+        }
+    }
+
+    for (auto &vi: v) {
+        for (auto &vij: vi)
+            std::cout << vij << ' ';
+        std::cout << std::endl;
+    }
+
+}
+
 int main() {
 //    testParallel();  // just prints a mess
 //    testParallelSingle();  // a single print
 //    testTasks(); // prints "car" and "race" in arbitrary order
 //    testTasksDepend();  // prints 0; without dependencies specified, prints 0 or 1
-    testListDependencies();
+//    testListDependencies();
+    for (int _ = 0; _ < 10; ++_)
+        testNestedLoops();
 }
