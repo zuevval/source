@@ -1,6 +1,7 @@
 #include <iostream>
 #include <mpi.h>
 #include <cstring>
+#include <climits>
 
 #define MAX_STR_SIZE (100)
 
@@ -75,10 +76,40 @@ void testMpiMemory() {
     MPI_Finalize();
 }
 
+void testMpiMemProper() {
+    const int nRow = 5, nCol = 4;
+    MPI_Init(nullptr, nullptr);
+    int commSize, myRank;
+    MPI_Comm_size(MPI_COMM_WORLD, &commSize);
+    MPI_Comm_rank(MPI_COMM_WORLD, &myRank);
+
+    MPI_Win win;
+    int **mtx = nullptr;
+    int *mtxLinear = nullptr;
+    MPI_Aint size;
+    int dispUnit;
+
+    MPI_Win_allocate_shared(nRow * nCol * sizeof(int), sizeof(int), MPI_INFO_NULL, MPI_COMM_WORLD, &mtxLinear, &win);
+    MPI_Win_shared_query(win, 0, &size, &dispUnit, &mtxLinear);
+
+    for (int iRow = 0; iRow < nRow; ++iRow) {
+        int*row = &mtxLinear[iRow * nCol];
+
+        if (myRank == 0) {
+            for (int iCol = 0; iCol < nCol; ++iCol)
+                row[iCol] = INT_MAX / 2;
+        }
+    }
+
+    MPI_Win_free(&win);
+    MPI_Finalize();
+}
+
 int main() {
 //    greetings();
 //    lockHolderImpl(); // a custom lock for a single element of a map; this would run forever
 //    testSharedMemory();
-    testMpiMemory();
+//    testMpiMemory();
+    testMpiMemProper();
     return 0;
 }
