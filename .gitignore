@@ -15,6 +15,9 @@ python/stu_labs/lab3blosum/alignments/**
 *.iml
 **/cmake*
 
+# VSCode
+.vscode
+
 
 #---MS OFFICE---
 *.docx

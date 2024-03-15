@@ -1,0 +1,7 @@
+# requirements for 'transformer.ipynb', 'keras_start.ipynb', 'keras_functional_api.ipynb'
+# conda install -c conda-forge tensorflow
+# conda install --file requirements.txt
+numpy
+keras
+scikit-learn
+ipykernel
