@@ -1,42 +1,77 @@
-\begin{verbatim}
-./kallisto index -i flax_ref.index SRR11830041.1_1.fasta
+%\subsection{newer alignments: Hisat2}
+%
+%Reference genome downloaded from \url{https://www.ncbi.nlm.nih.gov/data-hub/genome/GCA_010665275.2/}
+%
+%
+%Building index from reference genome with Hisat2:
+%
+%\begin{verbatim}
+%# Ubuntu 22.04 on WSL
+%../programs/hisat2-2.2.0/hisat2-build \
+%/mnt/y/vzuev/datasets/bioMG2022/ncbi_linum_reference_genome2021/ncbi_dataset/data/GCA_010665275.2/GCA_010665275.2_ASM1066527v2_genomic.fna \
+%linum_ncbi_ref_GCA_010665275.2.fna
+%
+%\end{verbatim}
+%
+%Alignment:
+%
+%\begin{verbatim}
+%
+%../programs/hisat2-2.2.0/hisat2 -x linum_ncbi_ref_GCA_010665275.2.fna -1 /mnt/y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq -2 /mnt/y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq -S srr8177762.sam
+%
+%\end{verbatim}
+%
+%Problem: \url{https://www.biostars.org/p/9494666/}
+%
+%\begin{leftbar}
+%    what if I can use older alignments? Say, Kallisto?
+%\end{leftbar}
 
-[build] loading fasta file SRR11830041.1_1.fasta
-[build] k-mer length: 31
-[build] warning: clipped off poly-A tail (longer than 10)
-from 997 target sequences
-[build] warning: replaced 81307 non-ACGUT characters in the input sequence
-with pseudorandom nucleotides
-[build] counting k-mers ... done.
-[build] building target de Bruijn graph ...  done
-[build] creating equivalence classes ...  done
-[build] target de Bruijn graph has 12250208 contigs and contains 106849682 k-mers
-
-\end{verbatim}
-
-\begin{verbatim}
-./kallisto quant -i flax_ref.index -o paired_reads/out/SRR8177761 paired_reads/SRR8177761_1_paired.fastq.gz  paired_reads/SRR8177761_2_paired.fastq.gz
-
-
-[quant] fragment length distribution will be estimated from the data
-[index] k-mer length: 31
-[index] number of targets: 8,078,958
-[index] number of k-mers: 106,849,682
-[index] number of equivalence classes: 16,334,370
-[quant] running in paired-end mode
-[quant] will process pair 1: paired_reads/SRR8177761_1_paired.fastq.gz
-paired_reads/SRR8177761_2_paired.fastq.gz
-[quant] finding pseudoalignments for the reads ... done
-[quant] processed 8,427,058 reads, 338,347 reads pseudoaligned
-[quant] estimated average fragment length: 125.696
-[   em] quantifying the abundances ... done
-[   em] the Expectation-Maximization algorithm ran for 652 rounds
-\end{verbatim}
+%\subsection{older alignments: TODO remove TODO verbatim: enable hyphenation}
+%
+%\begin{verbatim}
+%./kallisto index -i flax_ref.index SRR11830041.1_1.fasta
+%
+%[build] loading fasta file SRR11830041.1_1.fasta
+%[build] k-mer length: 31
+%[build] warning: clipped off poly-A tail (longer than 10)
+%from 997 target sequences
+%[build] warning: replaced 81307 non-ACGUT characters in the input sequence
+%with pseudorandom nucleotides
+%[build] counting k-mers ... done.
+%[build] building target de Bruijn graph ...  done
+%[build] creating equivalence classes ...  done
+%[build] target de Bruijn graph has 12250208 contigs and contains 106849682 k-mers
+%
+%\end{verbatim}
+%
+%\begin{verbatim}
+%./kallisto quant -i flax_ref.index -o paired_reads/out/SRR8177761 paired_reads/SRR8177761_1_paired.fastq.gz  paired_reads/SRR8177761_2_paired.fastq.gz
+%
+%
+%[quant] fragment length distribution will be estimated from the data
+%[index] k-mer length: 31
+%[index] number of targets: 8,078,958
+%[index] number of k-mers: 106,849,682
+%[index] number of equivalence classes: 16,334,370
+%[quant] running in paired-end mode
+%[quant] will process pair 1: paired_reads/SRR8177761_1_paired.fastq.gz
+%paired_reads/SRR8177761_2_paired.fastq.gz
+%[quant] finding pseudoalignments for the reads ... done
+%[quant] processed 8,427,058 reads, 338,347 reads pseudoaligned
+%[quant] estimated average fragment length: 125.696
+%[   em] quantifying the abundances ... done
+%[   em] the Expectation-Maximization algorithm ran for 652 rounds
+%\end{verbatim}
 
 \subsection{STAR}
 
+\url{https://figshare.scilifelab.se/articles/dataset/Gene_annotation_of_i_Linum_trigynum_i_/24324382}
+
 \begin{verbatim}
-/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static # ./STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles ../../../../../y/vzuev/datasets/bioMG2022/lus.final.fasta --sjdbGTFfile ../../../../../y/vzuev/ # regularly tap ENTER
+sed 's/^chr_//' Ltrigynum_v1_genes.gtf > Ltrigynum_v1_genes_renamed.gtf
+
+/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static # ./STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles ../../../../../y/vzuev/datasets/bioMG2022/lus.final.fasta --sjdbGTFfile ../../../../../y/vzuev/datasets/bioMG2022/linum_trygunum/ltrigynum_v1_genes.gtf # regularly tap ENTER
 
 ./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
 > ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
@@ -67,27 +102,27 @@ done
 
 \end{verbatim}
 
-\begin{verbatim}
-# https://data.jgi.doe.gov/refine-download/phytozome?genome_id=200&expanded=Phytozome-200
-
-root@powerhouse:/mnt/y/vzuev/datasets/bioMG2022/phytozome# /mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static/STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles Lusitatissimum_200_BGIv1.0.fa --sjdbGTFfile Lusitatissimum_200_v1.0.gene_exons.gtf --limitGenomeGenerateRAM=100000000000
-
-/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static/STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles Lusitatissimum_200_BGIv1.0.fa --sjdbGTFfile Lusitatissimum_200_v1.0.gene_exons.gtf --limitGenomeGenerateRAM=100000000000
-STAR version: 2.7.10a   compiled: 2022-01-14T18:50:00-05:00 :/home/dobin/data/STAR/STARcode/STAR.master/source
-Jul 04 23:41:07 ..... started STAR run
-Jul 04 23:41:07 ... starting to generate Genome files
-Jul 04 23:41:53 ..... processing annotations GTF
-!!!!! WARNING: --genomeSAindexNbases 14 is too large for the genome size=318250901, which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases 13
-Jul 04 23:42:40 ... starting to sort Suffix Array. This may take a long time...
-Jul 04 23:43:26 ... sorting Suffix Array chunks and saving them to disk...
-Jul 04 23:46:41 ... loading chunks from disk, packing SA...
-Jul 04 23:47:09 ... finished generating suffix array
-Jul 04 23:47:09 ... generating Suffix Array index
-Jul 04 23:48:21 ... completed Suffix Array index
-Jul 04 23:48:21 ... writing Genome to disk ...
-Jul 05 00:02:58 ... writing Suffix Array to disk ...
-Jul 05 00:04:40 ... writing SAindex to disk
-Jul 05 00:05:44 ..... finished successfully
-
-
-\end{verbatim}
+%\begin{verbatim}
+%# https://data.jgi.doe.gov/refine-download/phytozome?genome_id=200&expanded=Phytozome-200
+%
+%root@powerhouse:/mnt/y/vzuev/datasets/bioMG2022/phytozome# /mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static/STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles Lusitatissimum_200_BGIv1.0.fa --sjdbGTFfile Lusitatissimum_200_v1.0.gene_exons.gtf --limitGenomeGenerateRAM=100000000000
+%
+%/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static/STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles Lusitatissimum_200_BGIv1.0.fa --sjdbGTFfile Lusitatissimum_200_v1.0.gene_exons.gtf --limitGenomeGenerateRAM=100000000000
+%STAR version: 2.7.10a   compiled: 2022-01-14T18:50:00-05:00 :/home/dobin/data/STAR/STARcode/STAR.master/source
+%Jul 04 23:41:07 ..... started STAR run
+%Jul 04 23:41:07 ... starting to generate Genome files
+%Jul 04 23:41:53 ..... processing annotations GTF
+%!!!!! WARNING: --genomeSAindexNbases 14 is too large for the genome size=318250901, which may cause seg-fault at the mapping step. Re-run genome generation with recommended --genomeSAindexNbases 13
+%Jul 04 23:42:40 ... starting to sort Suffix Array. This may take a long time...
+%Jul 04 23:43:26 ... sorting Suffix Array chunks and saving them to disk...
+%Jul 04 23:46:41 ... loading chunks from disk, packing SA...
+%Jul 04 23:47:09 ... finished generating suffix array
+%Jul 04 23:47:09 ... generating Suffix Array index
+%Jul 04 23:48:21 ... completed Suffix Array index
+%Jul 04 23:48:21 ... writing Genome to disk ...
+%Jul 05 00:02:58 ... writing Suffix Array to disk ...
+%Jul 05 00:04:40 ... writing SAindex to disk
+%Jul 05 00:05:44 ..... finished successfully
+%
+%
+%\end{verbatim}
