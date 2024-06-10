@@ -64,43 +64,103 @@
 %[   em] the Expectation-Maximization algorithm ran for 652 rounds
 %\end{verbatim}
 
-\subsection{STAR}
+Последовательность манипуляций:
+\begin{enumerate}
+    \item Выравнивание генома \textit{Linum trigynum} на последовательность \textit{Linum usitatissimum} с помощью minimap2 \cite{li2018minimap2} (результат -- файл в PAF-формате)
+    \item Составление аннотаций генома \textit{Linum usitatissimum} с использованием аннотаций генома \textit{Linum trigynum} и выравниваний, полученных на предыдущем шаге
+    \item Составление индекса референса с помощью STAR \cite{dobin2013star}
+    \item Подготовка данных к картированию с помощью программы trimmomatic \cite{bolger2014trimmomatic}
+    \item Подсчёт генов, которые экспрессируются в данных RNA-Seq, с помощью того же STAR
+    \item Расчёт дифференциальной экспрессии с помощью пакета DESeq2 \cite{love2014differential}
+\end{enumerate}
 
-\url{https://figshare.scilifelab.se/articles/dataset/Gene_annotation_of_i_Linum_trigynum_i_/24324382}
+Ниже приведены листинги консольных команд.
+
+\textbf{minimap2:}
+
+\begin{verbatim}
+minimap2 \
+ GCA_030674075.2_EIMB_LUsi_3896_2.0_genomic.fna \
+ GCA_964030455.1_Ltrigynum_genome_genomic.fna > trigynum_to_linum.paf
+\end{verbatim}
+
+\textbf{индексирование:}
 
 \begin{verbatim}
 sed 's/^chr_//' Ltrigynum_v1_genes.gtf > Ltrigynum_v1_genes_renamed.gtf
 
-/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static # ./STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles ../../../../../y/vzuev/datasets/bioMG2022/lus.final.fasta --sjdbGTFfile ../../../../../y/vzuev/datasets/bioMG2022/linum_trygunum/ltrigynum_v1_genes.gtf # regularly tap ENTER
+./STAR --runThreadN 40 --runMode genomeGenerate \
+ --genomeFastaFiles GCA_030674075.2_EIMB_LUsi_3896_2.0_genomic.fna \
+ --sjdbGTFfile Ltrigynum_v1_genes_renamed.gtf
+\end{verbatim}
 
-./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
-> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
-> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq
+\textbf{обработка с помощью trimmomatic (пример):} генерируются две пары файлов -- прочтения с парой и без пары
 
-./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
-> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
-> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq \
-> --sjdbInsertSave All  --quantMode GeneCounts --outReadsUnmapped Fastq --outSAMstrandField intronMotif
+\begin{verbatim}
+java -jar "trimmomatic-0.39.jar" PE -threads 50 -phred33 \
+ SRR8177762_1.fastq.gz SRR8177762_2.fastq.gz \
+ SRR8177761_1_paired.fastq.gz SRR8177762_1_unpaired.fastq.gz \
+ SRR8177762_2_paired.fastq.gz SRR8177762_2_unpaired.fastq.gz
+\end{verbatim}
 
-tail -n +5 ReadsPerGene.out.tab > gene_counts.count
+\textbf{подсчёт экспресии каждого гена:}
 
-# mass production: # https://github.com/najasplus/STAR-deseq2
-
+\begin{verbatim}
 for i in 44 55 56 57 58; do
-    ./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
-        "SRR81777${i}_1_paired.fastq" \
-        "SRR81777${i}_2_paired.fastq" \
-        --sjdbInsertSave All  --quantMode GeneCounts --outReadsUnmapped Fastq --outSAMstrandField intronMotif \
-        --outFileNamePrefix "./SRR81777${i}/"
+./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+"SRR81777${i}_1_paired.fastq" \
+"SRR81777${i}_2_paired.fastq" \
+--sjdbInsertSave All  --quantMode GeneCounts \
+--outReadsUnmapped Fastq --outSAMstrandField intronMotif \
+--outFileNamePrefix "./SRR81777${i}/"
 done
 
 for i in 55 56 57 58 59 60 61 62; do
-    cd "./SRR81777${i}/"
-    tail -n +5 ReadsPerGene.out.tab > gene_counts.count
-    cd ..
+cd "./SRR81777${i}/"
+tail -n +5 ReadsPerGene.out.tab > gene_counts.count
+cd ..
 done
-
 \end{verbatim}
+
+\textbf{DESeq2}
+
+Скрипт на языке R, который выполняет анализ дифференциальной экспрессии, доступен в репозитории \href{https://github.com/zuevval/source/blob/d3726da4f9079602953aede111d3b292f257c057/r/bioinf2022_spring_project/de_analysis.R}{github.com/zuevval/source}
+
+%\url{https://figshare.scilifelab.se/articles/dataset/Gene_annotation_of_i_Linum_trigynum_i_/24324382}
+%
+%\begin{verbatim}
+%sed 's/^chr_//' Ltrigynum_v1_genes.gtf > Ltrigynum_v1_genes_renamed.gtf
+%
+%/mnt/e/opt/STAR-2.7.10a/bin/Linux_x86_64_static # ./STAR --runThreadN 40 --runMode genomeGenerate --genomeFastaFiles ../../../../../y/vzuev/datasets/bioMG2022/lus.final.fasta --sjdbGTFfile ../../../../../y/vzuev/datasets/bioMG2022/linum_trygunum/ltrigynum_v1_genes.gtf # regularly tap ENTER
+%
+%./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+%> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
+%> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq
+%
+%./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+%> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_1_paired.fastq \
+%> ../../../../../y/vzuev/datasets/bioMG2022/SRX4997855/SRR8177762_2_paired.fastq \
+%> --sjdbInsertSave All  --quantMode GeneCounts --outReadsUnmapped Fastq --outSAMstrandField intronMotif
+%
+%tail -n +5 ReadsPerGene.out.tab > gene_counts.count
+%
+%# mass production: # https://github.com/najasplus/STAR-deseq2
+%
+%for i in 44 55 56 57 58; do
+%    ./STAR --runThreadN 40 --genomeDir GenomeDir/ --readFilesIn \
+%        "SRR81777${i}_1_paired.fastq" \
+%        "SRR81777${i}_2_paired.fastq" \
+%        --sjdbInsertSave All  --quantMode GeneCounts --outReadsUnmapped Fastq --outSAMstrandField intronMotif \
+%        --outFileNamePrefix "./SRR81777${i}/"
+%done
+%
+%for i in 55 56 57 58 59 60 61 62; do
+%    cd "./SRR81777${i}/"
+%    tail -n +5 ReadsPerGene.out.tab > gene_counts.count
+%    cd ..
+%done
+%
+%\end{verbatim}
 
 %\begin{verbatim}
 %# https://data.jgi.doe.gov/refine-download/phytozome?genome_id=200&expanded=Phytozome-200
